@@ -38,5 +38,173 @@
         "Material": "P710-CMP-300",
         "SerialNumber": "SN-CMP300-0001",
         "Customer": "C710-C00"
+    },
+    {
+        "Equipment": "HKV-0815-011",
+        "EquipmentName": "Heizkostenverteiler Wohnzimmer",
+        "FunctionalLocation": "LG-0815-NE01",
+        "Material": "MD-HKV-FUNK",
+        "SerialNumber": "20815011",
+        "Customer": "MD-100010"
+    },
+    {
+        "Equipment": "HKV-0815-012",
+        "EquipmentName": "Heizkostenverteiler Küche",
+        "FunctionalLocation": "LG-0815-NE01",
+        "Material": "MD-HKV-FUNK",
+        "SerialNumber": "20815012",
+        "Customer": "MD-100010"
+    },
+    {
+        "Equipment": "RWM-0815-011",
+        "EquipmentName": "Rauchwarnmelder Schlafzimmer",
+        "FunctionalLocation": "LG-0815-NE01",
+        "Material": "MD-RWM-FUNK",
+        "SerialNumber": "40815011",
+        "Customer": "MD-100010"
+    },
+    {
+        "Equipment": "RWM-0815-012",
+        "EquipmentName": "Rauchwarnmelder Flur",
+        "FunctionalLocation": "LG-0815-NE01",
+        "Material": "MD-RWM-FUNK",
+        "SerialNumber": "40815012",
+        "Customer": "MD-100010"
+    },
+    {
+        "Equipment": "HKV-0815-021",
+        "EquipmentName": "Heizkostenverteiler Wohnzimmer",
+        "FunctionalLocation": "LG-0815-NE02",
+        "Material": "MD-HKV-FUNK",
+        "SerialNumber": "20815021",
+        "Customer": "MD-100010"
+    },
+    {
+        "Equipment": "RWM-0815-021",
+        "EquipmentName": "Rauchwarnmelder Schlafzimmer",
+        "FunctionalLocation": "LG-0815-NE02",
+        "Material": "MD-RWM-FUNK",
+        "SerialNumber": "40815021",
+        "Customer": "MD-100010"
+    },
+    {
+        "Equipment": "RWM-0815-022",
+        "EquipmentName": "Rauchwarnmelder Kinderzimmer",
+        "FunctionalLocation": "LG-0815-NE02",
+        "Material": "MD-RWM-FUNK",
+        "SerialNumber": "40815022",
+        "Customer": "MD-100010"
+    },
+    {
+        "Equipment": "HKV-0815-031",
+        "EquipmentName": "Heizkostenverteiler Wohnzimmer",
+        "FunctionalLocation": "LG-0815-NE03",
+        "Material": "MD-HKV-FUNK",
+        "SerialNumber": "20815031",
+        "Customer": "MD-100010"
+    },
+    {
+        "Equipment": "HKV-0815-032",
+        "EquipmentName": "Heizkostenverteiler Schlafzimmer",
+        "FunctionalLocation": "LG-0815-NE03",
+        "Material": "MD-HKV-FUNK",
+        "SerialNumber": "20815032",
+        "Customer": "MD-100010"
+    },
+    {
+        "Equipment": "HKV-0815-033",
+        "EquipmentName": "Heizkostenverteiler Bad",
+        "FunctionalLocation": "LG-0815-NE03",
+        "Material": "MD-HKV-FUNK",
+        "SerialNumber": "20815033",
+        "Customer": "MD-100010"
+    },
+    {
+        "Equipment": "RWM-0815-031",
+        "EquipmentName": "Rauchwarnmelder Schlafzimmer",
+        "FunctionalLocation": "LG-0815-NE03",
+        "Material": "MD-RWM-FUNK",
+        "SerialNumber": "40815031",
+        "Customer": "MD-100010"
+    },
+    {
+        "Equipment": "RWM-0815-032",
+        "EquipmentName": "Rauchwarnmelder Flur",
+        "FunctionalLocation": "LG-0815-NE03",
+        "Material": "MD-RWM-FUNK",
+        "SerialNumber": "40815032",
+        "Customer": "MD-100010"
+    },
+    {
+        "Equipment": "WZ-0815-031",
+        "EquipmentName": "Warmwasserzähler Bad",
+        "FunctionalLocation": "LG-0815-NE03",
+        "Material": "MD-WZ-FUNK",
+        "SerialNumber": "60815031",
+        "Customer": "MD-100010"
+    },
+    {
+        "Equipment": "HKV-2040-011",
+        "EquipmentName": "Heizkostenverteiler Wohnzimmer",
+        "FunctionalLocation": "LG-2040-NE01",
+        "Material": "MD-HKV-FUNK",
+        "SerialNumber": "22040011",
+        "Customer": "MD-100020"
+    },
+    {
+        "Equipment": "RWM-2040-011",
+        "EquipmentName": "Rauchwarnmelder Schlafzimmer",
+        "FunctionalLocation": "LG-2040-NE01",
+        "Material": "MD-RWM-FUNK",
+        "SerialNumber": "42040011",
+        "Customer": "MD-100020"
+    },
+    {
+        "Equipment": "HKV-2040-021",
+        "EquipmentName": "Heizkostenverteiler Wohnzimmer",
+        "FunctionalLocation": "LG-2040-NE02",
+        "Material": "MD-HKV-FUNK",
+        "SerialNumber": "22040021",
+        "Customer": "MD-100020"
+    },
+    {
+        "Equipment": "HKV-2040-022",
+        "EquipmentName": "Heizkostenverteiler Küche",
+        "FunctionalLocation": "LG-2040-NE02",
+        "Material": "MD-HKV-FUNK",
+        "SerialNumber": "22040022",
+        "Customer": "MD-100020"
+    },
+    {
+        "Equipment": "RWM-2040-021",
+        "EquipmentName": "Rauchwarnmelder Flur",
+        "FunctionalLocation": "LG-2040-NE02",
+        "Material": "MD-RWM-FUNK",
+        "SerialNumber": "42040021",
+        "Customer": "MD-100020"
+    },
+    {
+        "Equipment": "HKV-3100-011",
+        "EquipmentName": "Heizkostenverteiler Wohnzimmer",
+        "FunctionalLocation": "LG-3100-NE01",
+        "Material": "MD-HKV-FUNK",
+        "SerialNumber": "23100011",
+        "Customer": "MD-100030"
+    },
+    {
+        "Equipment": "RWM-3100-011",
+        "EquipmentName": "Rauchwarnmelder Schlafzimmer",
+        "FunctionalLocation": "LG-3100-NE01",
+        "Material": "MD-RWM-FUNK",
+        "SerialNumber": "43100011",
+        "Customer": "MD-100030"
+    },
+    {
+        "Equipment": "RWM-3100-012",
+        "EquipmentName": "Rauchwarnmelder Flur",
+        "FunctionalLocation": "LG-3100-NE01",
+        "Material": "MD-RWM-FUNK",
+        "SerialNumber": "43100012",
+        "Customer": "MD-100030"
     }
 ]

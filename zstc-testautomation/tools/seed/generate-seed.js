@@ -7,10 +7,14 @@
  * The seed runs the SAME mock backend services as the running app (validation, MockExecutionProvider,
  * VerificationService) on an in-memory repository, so the seed data is consistent with the behavior.
  *
- * Seed test cases (docs/phase-1-architektur-und-mock-vertrag.md, 3.13):
+ * Seed test cases (docs/phase-1-architektur-und-mock-vertrag.md, 3.13; docs/messdienst-szenarien.md):
  *   STC-2026-000001  H2-STC-000 reference run      executed, PASSED; documents BELOW the golden start values
  *   STC-2026-000002  H2-STC-002 wrong equipment    captured, INVALID (EL-200 is not installed at H2POWC00-PROD)
  *   STC-2026-000003  H2-STC-001 golden case        captured, NOT_VALIDATED (quick path for the demo)
+ *   STC-2026-000004  MD-HKV-000 reference run      metering service: heat cost allocator exchanged, executed, PASSED
+ *   STC-2026-000005  MD-RWM-002 wrong spare part   metering service: heat cost allocator part for a smoke alarm, INVALID (R10)
+ *   STC-2026-000006  MD-RWM-001 golden case        metering service: smoke alarm warning tone, NOT_VALIDATED (quick path)
+ * All metering-service master data is fictional (docs/messdienst-szenarien.md).
  *
  * Usage: node tools/seed/generate-seed.js
  */
@@ -76,6 +80,23 @@ const PROFILES = [
         Description: 'Like FS_TM, but the execution provider is not reachable (demo of TECHNICAL_ERROR).',
         ExecutionProvider: 'MOCK_UNAVAILABLE',
         RequiresSecondApprover: false
+    },
+    // metering service (Messdienst): fault reports from residents or property managers, technician visit with device exchange
+    {
+        ProcessProfile: 'MD_HKV_STOER',
+        ProcessProfileName: 'Messdienst – Störung Heizkostenverteiler',
+        Description:
+            'Störungsmeldung zu einem Heizkostenverteiler: Monteureinsatz nach Aufwand mit Austausch des Geräts, Rückmeldung und Faktura an die Hausverwaltung. Vorbelegung: 1 Std. Monteureinsatz, 1 Ersatzgerät.',
+        ExecutionProvider: 'MOCK',
+        RequiresSecondApprover: false
+    },
+    {
+        ProcessProfile: 'MD_RWM_STOER',
+        ProcessProfileName: 'Messdienst – Störung Rauchwarnmelder',
+        Description:
+            'Störungsmeldung zu einem Rauchwarnmelder (Warnton, Fehlalarm, Demontage, verschmutzte Rauchkammer): Einsatz vor Ort, Austausch des Melders, Rückmeldung und Faktura an die Hausverwaltung. Priorität hoch (Betriebsbereitschaft).',
+        ExecutionProvider: 'MOCK',
+        RequiresSecondApprover: false
     }
 ];
 
@@ -107,6 +128,13 @@ const REQUIREMENTS_TM = [
     ['BILLING_DOCUMENT', 'TransactionCurrency', true, 'R2_EXISTS', 'EUR', 'CONSTANT']
 ];
 
+/** metering service: sales organization, one hour technician visit and one replacement device as defaults */
+const METERING_DEFAULTS = {
+    SalesOrganization: { DefaultValue: '2010' },
+    ServiceDuration: { DefaultValue: '1', SourceType: 'DEFAULT' },
+    ServicePartQuantity: { DefaultValue: '1', SourceType: 'DEFAULT' }
+};
+
 /** profile-specific deviations: FieldName → partial row */
 const REQUIREMENT_OVERRIDES = {
     FS_FIXPRICE: {
@@ -114,6 +142,17 @@ const REQUIREMENT_OVERRIDES = {
         ServicePart: { Required: false },
         ServicePartQuantity: { Required: false },
         ServicePartQuantityUnit: { Required: false }
+    },
+    MD_HKV_STOER: {
+        ...METERING_DEFAULTS,
+        ServiceProduct: { DefaultValue: 'MD-SRV-STOER', SourceType: 'DEFAULT' },
+        ServicePart: { DefaultValue: 'MD-ERS-HKV', SourceType: 'DEFAULT' }
+    },
+    MD_RWM_STOER: {
+        ...METERING_DEFAULTS,
+        ServiceDocumentPriority: { DefaultValue: '3' },
+        ServiceProduct: { DefaultValue: 'MD-SRV-RWM', SourceType: 'DEFAULT' },
+        ServicePart: { DefaultValue: 'MD-ERS-RWM', SourceType: 'DEFAULT' }
     }
 };
 
@@ -146,6 +185,47 @@ const GOLDEN_DATA = {
     ExpectedNetAmount: 3693,
     NetAmountTolerance: 0,
     TransactionCurrency: 'EUR'
+};
+
+const METERING_TEXT_HKV =
+    'Frau Müller aus der Musterstraße 12 in München (1. OG links) meldet über Petra Wagner von der Hausverwaltung, dass der Heizkostenverteiler im Wohnzimmer nichts mehr anzeigt – das Display ist komplett dunkel.';
+const METERING_TEXT_RWM =
+    'Im Kinderzimmer der Wohnung Yilmaz (Musterstraße 12, EG rechts) piept der Rauchmelder alle paar Sekunden, obwohl kein Rauch da ist. Bitte dringend jemanden schicken. Gemeldet von Hausmeister Stefan Brandl.';
+
+const METERING_HKV_DATA = {
+    ServiceRequestType: 'SRVR',
+    ServiceRequestDescription: 'HKV Wohnzimmer: Display ohne Anzeige',
+    SoldToParty: 'MD-100010',
+    ServiceRequestReporter: 'MD-CP-1001',
+    ServiceDocumentPriority: '5',
+    SalesOrganization: '2010',
+    ServiceOrganization: 'SO-MD-SUED',
+    RespyMgmtServiceTeam: 'MD-TEAM-MUC',
+    ServiceRefFunctionalLocation: 'LG-0815-NE03',
+    ServiceReferenceEquipment: 'HKV-0815-031',
+    ReferenceProduct: 'MD-HKV-FUNK',
+    ServiceProduct: 'MD-SRV-STOER',
+    ServiceDuration: 1,
+    ServiceDurationUnit: 'HR',
+    ServicePart: 'MD-ERS-HKV',
+    ServicePartQuantity: 1,
+    ServicePartQuantityUnit: 'PC',
+    ExpectedNetAmount: 108,
+    NetAmountTolerance: 0,
+    TransactionCurrency: 'EUR'
+};
+
+const METERING_RWM_DATA = {
+    ...METERING_HKV_DATA,
+    ServiceRequestDescription: 'RWM Kinderzimmer: Warnton, Fehlalarm',
+    ServiceRequestReporter: 'MD-CP-1002',
+    ServiceDocumentPriority: '3',
+    ServiceRefFunctionalLocation: 'LG-0815-NE02',
+    ServiceReferenceEquipment: 'RWM-0815-022',
+    ReferenceProduct: 'MD-RWM-FUNK',
+    ServiceProduct: 'MD-SRV-RWM',
+    ServicePart: 'MD-ERS-RWM',
+    ExpectedNetAmount: 94
 };
 
 const CASES = [
@@ -183,6 +263,61 @@ const CASES = [
         ProcessProfile: 'FS_TM',
         data: { ...GOLDEN_DATA },
         createdAt: '2026-09-28T10:30:00Z',
+        run: 'none'
+    },
+    {
+        uuid: '6f1c2a10-0004-4c3e-9a51-000000000004',
+        CaseID: 'STC-2026-000004',
+        ScenarioID: 'MD-HKV-000',
+        Title: 'Referenzlauf: Heizkostenverteiler mit Fehleranzeige getauscht',
+        Description:
+            'Ausgeführter Referenzlauf Messdienst (Köln): Heizkostenverteiler im Wohnzimmer zeigt eine Fehlermeldung, Monteureinsatz 1 Std. und Ersatzgerät, Faktura an die Hausverwaltung. Alle Belege erzeugt und verifiziert.',
+        NaturalLanguageInput: '',
+        ProcessProfile: 'MD_HKV_STOER',
+        data: { ...METERING_HKV_DATA, ServiceRefFunctionalLocation: 'LG-2040-NE01', ServiceReferenceEquipment: 'HKV-2040-011', SoldToParty: 'MD-100020', ServiceRequestReporter: 'MD-CP-2001', ServiceOrganization: 'SO-MD-WEST', RespyMgmtServiceTeam: 'MD-TEAM-CGN', ServiceRequestDescription: 'HKV Wohnzimmer: Fehleranzeige' },
+        createdAt: '2026-09-28T11:00:00Z',
+        run: 'execute',
+        numbers: {
+            EXECUTION: 2,
+            SERVICE_REQUEST: 8000000008,
+            QUOTATION_ORDER: 8000000026,
+            SERVICE_CONFIRMATION: 8999999998,
+            BILLING_DOC_REQUEST: 10000010,
+            BILLING_DOCUMENT: 90000113
+        }
+    },
+    {
+        uuid: '6f1c2a10-0005-4c3e-9a51-000000000005',
+        CaseID: 'STC-2026-000005',
+        ScenarioID: 'MD-RWM-002',
+        Title: 'Falsches Ersatzteil für den Rauchwarnmelder',
+        Description:
+            'Negativszenario Messdienst: Für den Rauchwarnmelder im Flur ist ein Ersatz-Heizkostenverteiler geplant. Die Validierung muss das Ersatzteil ablehnen (R10) und MD-ERS-RWM vorschlagen.',
+        NaturalLanguageInput: '',
+        ProcessProfile: 'MD_RWM_STOER',
+        data: {
+            ...METERING_RWM_DATA,
+            ServiceRequestDescription: 'RWM Flur: Gerät demontiert',
+            ServiceRequestReporter: 'MD-CP-1001',
+            ServiceRefFunctionalLocation: 'LG-0815-NE03',
+            ServiceReferenceEquipment: 'RWM-0815-032',
+            ServicePart: 'MD-ERS-HKV',
+            ExpectedNetAmount: 98
+        },
+        createdAt: '2026-09-28T11:30:00Z',
+        run: 'validate'
+    },
+    {
+        uuid: '6f1c2a10-0006-4c3e-9a51-000000000006',
+        CaseID: 'STC-2026-000006',
+        ScenarioID: 'MD-RWM-001',
+        Title: 'Golden Case Messdienst: Rauchwarnmelder piept',
+        Description:
+            'Golden Case Messdienst: Rauchwarnmelder im Kinderzimmer gibt Warntöne ohne Rauch ab. Einsatz vor Ort, Austausch des Melders, Faktura an die Hausverwaltung (Service Request → Angebot → Auftrag → Rückmeldung → Faktura).',
+        NaturalLanguageInput: METERING_TEXT_RWM,
+        ProcessProfile: 'MD_RWM_STOER',
+        data: { ...METERING_RWM_DATA },
+        createdAt: '2026-09-28T12:00:00Z',
         run: 'none'
     }
 ];
@@ -247,15 +382,15 @@ async function main() {
         uuidCounter++;
         return `9e3f4c30-${String(uuidCounter).padStart(4, '0')}-4a5b-9c6d-${String(uuidCounter).padStart(12, '0')}`;
     };
-    // seed documents lie BELOW the golden start values (SIM-2), the seed execution is MOCK-<date>-0001
-    numberRanges.setNext(TENANT, {
+    // seed documents lie BELOW the golden start values (SIM-2), the seed executions are MOCK-<date>-0001 and -0002
+    const DEFAULT_SEED_NUMBERS = {
         EXECUTION: 1,
         SERVICE_REQUEST: 8000000009,
         QUOTATION_ORDER: 8000000028,
         SERVICE_CONFIRMATION: 8999999999,
         BILLING_DOC_REQUEST: 10000011,
         BILLING_DOCUMENT: 90000114
-    });
+    };
 
     try {
         for (const seed of CASES) {
@@ -293,6 +428,7 @@ async function main() {
                 await service.validateTestCase(repo, keys, { asStateMessages: false });
             }
             if (seed.run === 'execute') {
+                numberRanges.setNext(TENANT, seed.numbers || DEFAULT_SEED_NUMBERS);
                 time += 10 * 60 * 1000;
                 await service.approve(repo, keys);
                 // the seed approval is recorded for a second person (QA_LEAD); DEMO_USER approves new FS_TM test cases itself
@@ -318,6 +454,8 @@ async function main() {
         console.log(`${set}.json: ${rows.length} rows`);
     }
     const summary = dataBySet.TestCase.map((t) => `${t.CaseID} ${t.ValidationStatus}/${t.ApprovalStatus}/${t.ExecutionStatus}/${t.FinalResult || '-'}`);
+    const documents = dataBySet.DocumentReference.map((d) => d.DocumentID).join(' ');
+    console.log(`documents: ${documents}`);
     console.log(summary.join('\n'));
 }
 

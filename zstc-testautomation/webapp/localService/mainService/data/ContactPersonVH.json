@@ -33,5 +33,40 @@
         "FirstName": "Lukas",
         "LastName": "Hoffmann",
         "Customer": "C720-C00"
+    },
+    {
+        "BusinessPartner": "MD-CP-1001",
+        "BusinessPartnerFullName": "Petra Wagner",
+        "FirstName": "Petra",
+        "LastName": "Wagner",
+        "Customer": "MD-100010"
+    },
+    {
+        "BusinessPartner": "MD-CP-1002",
+        "BusinessPartnerFullName": "Stefan Brandl",
+        "FirstName": "Stefan",
+        "LastName": "Brandl",
+        "Customer": "MD-100010"
+    },
+    {
+        "BusinessPartner": "MD-CP-2001",
+        "BusinessPartnerFullName": "Aylin Demir",
+        "FirstName": "Aylin",
+        "LastName": "Demir",
+        "Customer": "MD-100020"
+    },
+    {
+        "BusinessPartner": "MD-CP-2002",
+        "BusinessPartnerFullName": "Thomas Wagner",
+        "FirstName": "Thomas",
+        "LastName": "Wagner",
+        "Customer": "MD-100020"
+    },
+    {
+        "BusinessPartner": "MD-CP-3001",
+        "BusinessPartnerFullName": "Jens Richter",
+        "FirstName": "Jens",
+        "LastName": "Richter",
+        "Customer": "MD-100030"
     }
 ]

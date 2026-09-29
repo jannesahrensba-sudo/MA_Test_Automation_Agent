@@ -66,5 +66,39 @@
             "Updatable": true,
             "Deletable": true
         }
+    },
+    {
+        "ProcessProfile": "MD_HKV_STOER",
+        "ProcessProfileName": "Messdienst – Störung Heizkostenverteiler",
+        "Description": "Störungsmeldung zu einem Heizkostenverteiler: Monteureinsatz nach Aufwand mit Austausch des Geräts, Rückmeldung und Faktura an die Hausverwaltung. Vorbelegung: 1 Std. Monteureinsatz, 1 Ersatzgerät.",
+        "ExecutionProvider": "MOCK",
+        "RequiresSecondApprover": false,
+        "IsActive": true,
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "SAP__Messages": [],
+        "__EntityControl": {
+            "Updatable": true,
+            "Deletable": true
+        }
+    },
+    {
+        "ProcessProfile": "MD_RWM_STOER",
+        "ProcessProfileName": "Messdienst – Störung Rauchwarnmelder",
+        "Description": "Störungsmeldung zu einem Rauchwarnmelder (Warnton, Fehlalarm, Demontage, verschmutzte Rauchkammer): Einsatz vor Ort, Austausch des Melders, Rückmeldung und Faktura an die Hausverwaltung. Priorität hoch (Betriebsbereitschaft).",
+        "ExecutionProvider": "MOCK",
+        "RequiresSecondApprover": false,
+        "IsActive": true,
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "SAP__Messages": [],
+        "__EntityControl": {
+            "Updatable": true,
+            "Deletable": true
+        }
     }
 ]

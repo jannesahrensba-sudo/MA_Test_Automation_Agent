@@ -5,6 +5,8 @@
  * - Completeness is checked against the customizing table FieldRequirement (per process profile), never hard-coded.
  * - Existence and relationships (customer → functional location → equipment → reference product) are checked
  *   on the value help pools; every finding carries concrete suggestions.
+ * - R10: service product and spare part must fit the device type (product group of the equipment's reference product),
+ *   e.g. no smoke alarm spare part for a heat cost allocator.
  * - Result per field: SUCCESS (validated) · WARNING (several plausible values) · ERROR (missing or invalid).
  *   Deliberately no "AI confidence".
  *
@@ -12,6 +14,7 @@
  * BO, the pools become lookups on released CDS views (see docs/mock-to-real-mapping.md).
  */
 const { ITEM_STATUS, VALIDATION, BO, BO_LABEL, criticalityOf } = require('../common/codes');
+const { fitsGroup, specificity } = require('../common/productGroups');
 
 const MAX_SUGGESTIONS = 5;
 
@@ -118,6 +121,19 @@ function describe(field, entry) {
     return text && text !== key ? `${key} (${text})` : String(key);
 }
 
+/** Device type of the test case: the reference product of the equipment, otherwise the maintained reference product */
+function deviceProduct(ctx) {
+    const equipment = ctx.entry('ServiceReferenceEquipment');
+    const product = equipment ? ctx.pool('products').find((p) => p.Product === equipment.Material) : ctx.entry('ReferenceProduct');
+    return product && product.ProductGroup ? product : undefined;
+}
+
+/** R10: a service product or spare part with a product group must belong to the device type (or its parent group) */
+function fitsDevice(ctx, product) {
+    const device = deviceProduct(ctx);
+    return !device || !product || fitsGroup(product.ProductGroup, device.ProductGroup);
+}
+
 /** Context specific candidate values for a field (used for missing and invalid values) */
 function contextualCandidates(ctx, field) {
     const customer = ctx.value('SoldToParty');
@@ -135,9 +151,15 @@ function contextualCandidates(ctx, field) {
                 ? ctx.pool('products').filter((p) => p.Product === equipment.Material)
                 : ctx.pool('products').filter((p) => p.ProductType === 'FERT');
         case 'ServiceProduct':
-            return ctx.pool('products').filter((p) => p.ProductType === 'SERV');
-        case 'ServicePart':
-            return ctx.pool('products').filter((p) => p.ProductType === 'ERSA');
+        case 'ServicePart': {
+            // products made for the device type first, then those of the domain, then generic ones
+            const type = field.name === 'ServiceProduct' ? 'SERV' : 'ERSA';
+            const deviceGroup = deviceProduct(ctx)?.ProductGroup;
+            return ctx
+                .pool('products')
+                .filter((p) => p.ProductType === type && fitsDevice(ctx, p))
+                .sort((a, b) => specificity(b.ProductGroup, deviceGroup) - specificity(a.ProductGroup, deviceGroup));
+        }
         case 'ServiceDurationUnit':
             return ctx.pool('units').filter((u) => u.UnitOfMeasureDimension === 'TIME');
         case 'ServicePartQuantityUnit': {
@@ -160,7 +182,9 @@ function contextualCandidates(ctx, field) {
 function suggestionsFor(ctx, field, { invalidValue } = {}) {
     const req = ctx.requirements.get(field.name);
     const result = [];
-    if (req && !isEmpty(req.DefaultValue)) {
+    const productField = field.name === 'ServiceProduct' || field.name === 'ServicePart';
+    const fits = (key) => !productField || fitsDevice(ctx, ctx.pool('products').find((p) => p.Product === key));
+    if (req && !isEmpty(req.DefaultValue) && fits(String(req.DefaultValue))) {
         result.push(String(req.DefaultValue));
     }
     let candidates = contextualCandidates(ctx, field);
@@ -184,7 +208,7 @@ function suggestionsFor(ctx, field, { invalidValue } = {}) {
     }
     for (const entry of candidates) {
         const key = String(entry[field.key]);
-        if (!result.includes(key)) {
+        if (!result.includes(key) && fits(key)) {
             result.push(key);
         }
     }
@@ -399,6 +423,17 @@ function checkRelationships(ctx, field, entry, label) {
                     category: 'CONSISTENCY',
                     ruleId: 'R6_PRODUCT_TYPE',
                     message: `${label} ${entry.Product} has product type ${entry.ProductType}; expected ${expectedType === 'SERV' ? 'a service product (SERV)' : 'a spare part (ERSA)'}.`,
+                    suggestions: suggestionsFor(ctx, field)
+                };
+            }
+            if (!fitsDevice(ctx, entry)) {
+                const device = deviceProduct(ctx);
+                const equipment = ctx.entry('ServiceReferenceEquipment');
+                return {
+                    status: ITEM_STATUS.ERROR,
+                    category: 'CONSISTENCY',
+                    ruleId: 'R10_DEVICE_TYPE',
+                    message: `${label} ${entry.Product} (${entry.ProductDescription}) does not fit ${equipment ? `equipment ${equipment.Equipment}` : 'the reference product'} of device type ${device.Product} (${device.ProductDescription}).`,
                     suggestions: suggestionsFor(ctx, field)
                 };
             }

@@ -470,6 +470,7 @@
                 <Property Name="FunctionalLocationName" Type="Edm.String" MaxLength="40"/>
                 <Property Name="Customer" Type="Edm.String" MaxLength="10"/>
                 <Property Name="MaintenancePlant" Type="Edm.String" MaxLength="4"/>
+                <Property Name="SuperiorFunctionalLocation" Type="Edm.String" MaxLength="40"/>
             </EntityType>
             <EntityType Name="EquipmentVHType">
                 <Key>
@@ -490,6 +491,7 @@
                 <Property Name="ProductDescription" Type="Edm.String" MaxLength="40"/>
                 <Property Name="ProductType" Type="Edm.String" MaxLength="4"/>
                 <Property Name="BaseUnit" Type="Edm.String" MaxLength="3"/>
+                <Property Name="ProductGroup" Type="Edm.String" MaxLength="9"/>
             </EntityType>
             <EntityType Name="SalesOrganizationVHType">
                 <Key>
@@ -1328,6 +1330,9 @@
                                     <PropertyValue Property="ValueListProperty" String="FunctionalLocationName"/>
                                 </Record>
                                 <Record Type="SAP__common.ValueListParameterDisplayOnly">
+                                    <PropertyValue Property="ValueListProperty" String="SuperiorFunctionalLocation"/>
+                                </Record>
+                                <Record Type="SAP__common.ValueListParameterDisplayOnly">
                                     <PropertyValue Property="ValueListProperty" String="MaintenancePlant"/>
                                 </Record>
                             </Collection>
@@ -1395,6 +1400,9 @@
                                 <Record Type="SAP__common.ValueListParameterDisplayOnly">
                                     <PropertyValue Property="ValueListProperty" String="ProductDescription"/>
                                 </Record>
+                                <Record Type="SAP__common.ValueListParameterDisplayOnly">
+                                    <PropertyValue Property="ValueListProperty" String="ProductGroup"/>
+                                </Record>
                             </Collection>
                         </PropertyValue>
                     </Record>
@@ -1427,6 +1435,9 @@
                                 </Record>
                                 <Record Type="SAP__common.ValueListParameterDisplayOnly">
                                     <PropertyValue Property="ValueListProperty" String="ProductDescription"/>
+                                </Record>
+                                <Record Type="SAP__common.ValueListParameterDisplayOnly">
+                                    <PropertyValue Property="ValueListProperty" String="ProductGroup"/>
                                 </Record>
                                 <Record Type="SAP__common.ValueListParameterDisplayOnly">
                                     <PropertyValue Property="ValueListProperty" String="BaseUnit"/>
@@ -1494,6 +1505,9 @@
                                 </Record>
                                 <Record Type="SAP__common.ValueListParameterDisplayOnly">
                                     <PropertyValue Property="ValueListProperty" String="ProductDescription"/>
+                                </Record>
+                                <Record Type="SAP__common.ValueListParameterDisplayOnly">
+                                    <PropertyValue Property="ValueListProperty" String="ProductGroup"/>
                                 </Record>
                                 <Record Type="SAP__common.ValueListParameterDisplayOnly">
                                     <PropertyValue Property="ValueListProperty" String="BaseUnit"/>
@@ -2234,6 +2248,9 @@
             <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.FunctionalLocationVHType/MaintenancePlant">
                 <Annotation Term="SAP__common.Label" String="Plant"/>
             </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.FunctionalLocationVHType/SuperiorFunctionalLocation">
+                <Annotation Term="SAP__common.Label" String="Superior Functional Location"/>
+            </Annotations>
             <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.EquipmentVHType/Equipment">
                 <Annotation Term="SAP__common.Label" String="Equipment"/>
                 <Annotation Term="SAP__common.Text" Path="EquipmentName">
@@ -2269,6 +2286,9 @@
             </Annotations>
             <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.ProductVHType/BaseUnit">
                 <Annotation Term="SAP__common.Label" String="Base Unit"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.ProductVHType/ProductGroup">
+                <Annotation Term="SAP__common.Label" String="Product Group"/>
             </Annotations>
             <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.SalesOrganizationVHType/SalesOrganization">
                 <Annotation Term="SAP__common.Label" String="Sales Organization"/>

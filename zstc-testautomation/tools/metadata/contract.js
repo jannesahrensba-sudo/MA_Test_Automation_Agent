@@ -72,7 +72,9 @@ const valueHelps = [
             str('FunctionalLocation', 40, 'Functional Location', { text: 'FunctionalLocationName', textArrangement: 'TextFirst' }),
             str('FunctionalLocationName', 40, 'Description'),
             str('Customer', 10, 'Customer'),
-            str('MaintenancePlant', 4, 'Plant')
+            str('MaintenancePlant', 4, 'Plant'),
+            // hierarchy (structure indicator), e.g. property (Liegenschaft) → usage unit (Nutzeinheit)
+            str('SuperiorFunctionalLocation', 40, 'Superior Functional Location')
         ]
     },
     {
@@ -96,7 +98,9 @@ const valueHelps = [
             str('Product', 40, 'Product', { text: 'ProductDescription', textArrangement: 'TextFirst' }),
             str('ProductDescription', 40, 'Description'),
             str('ProductType', 4, 'Product Type'),
-            str('BaseUnit', 3, 'Base Unit')
+            str('BaseUnit', 3, 'Base Unit'),
+            // product group (material group): device type of reference products, spare parts and device-specific services
+            str('ProductGroup', 9, 'Product Group')
         ]
     },
     {
@@ -384,7 +388,7 @@ const entities = [
                 valueList: {
                     collection: 'FunctionalLocationVH',
                     key: 'FunctionalLocation',
-                    display: ['FunctionalLocationName', 'MaintenancePlant'],
+                    display: ['FunctionalLocationName', 'SuperiorFunctionalLocation', 'MaintenancePlant'],
                     in: [['SoldToParty', 'Customer']]
                 }
             }),
@@ -402,7 +406,7 @@ const entities = [
             str('ReferenceProduct', 40, 'Reference Product', {
                 text: '_ReferenceProduct/ProductDescription',
                 textArrangement: 'TextFirst',
-                valueList: { collection: 'ProductVH', key: 'Product', display: ['ProductDescription'], constants: [['ProductType', 'FERT']] }
+                valueList: { collection: 'ProductVH', key: 'Product', display: ['ProductDescription', 'ProductGroup'], constants: [['ProductType', 'FERT']] }
             }),
             // Service order items (A_ServiceOrderItem)
             str('ServiceProduct', 40, 'Service Product', {
@@ -411,7 +415,7 @@ const entities = [
                 valueList: {
                     collection: 'ProductVH',
                     key: 'Product',
-                    display: ['ProductDescription', 'BaseUnit'],
+                    display: ['ProductDescription', 'ProductGroup', 'BaseUnit'],
                     constants: [['ProductType', 'SERV']],
                     out: [['ServiceDurationUnit', 'BaseUnit']]
                 }
@@ -426,7 +430,7 @@ const entities = [
                 valueList: {
                     collection: 'ProductVH',
                     key: 'Product',
-                    display: ['ProductDescription', 'BaseUnit'],
+                    display: ['ProductDescription', 'ProductGroup', 'BaseUnit'],
                     constants: [['ProductType', 'ERSA']],
                     out: [['ServicePartQuantityUnit', 'BaseUnit']]
                 }

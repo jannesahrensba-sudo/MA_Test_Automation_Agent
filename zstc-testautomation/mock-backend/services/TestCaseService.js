@@ -12,6 +12,7 @@ const { MockTestCaseExtractionService } = require('../extraction/MockTestCaseExt
 const { getProvider } = require('../execution/MockExecutionProvider');
 const { verify } = require('../verification/VerificationService');
 const numberRanges = require('../common/numberRanges');
+const pricing = require('../common/pricing');
 const clock = require('../common/clock');
 const { VALIDATION, APPROVAL, EXECUTION, RESULT, LIFECYCLE, ITEM_STATUS, STEP_STATUS, criticalityOf } = require('../common/codes');
 const { CATEGORY, SEVERITY, sapMessage, MockServiceError } = require('../common/messages');
@@ -257,8 +258,11 @@ async function createTestData(repo, tc) {
 
 /**
  * Determinations on the test data (RAP: determination on modify).
- * The reference product is derived from the equipment (source DERIVED): it is set when empty and re-derived whenever
- * the equipment changes; a reference product the user maintains afterwards is kept and checked by rule R5.
+ * - The reference product is derived from the equipment (source DERIVED): it is set when empty and re-derived whenever
+ *   the equipment changes; a reference product the user maintains afterwards is kept and checked by rule R5.
+ * - Functional location and customer follow the equipment when empty; the service organization follows the service team when empty.
+ * - The expected net value is proposed from the mock price list when empty (stand-in for a pricing simulation, SIM-3);
+ *   a value the user maintains is kept. Clearing it recalculates it.
  *
  * @param {object} repo repository
  * @param {object} data TestCaseData entry
@@ -274,6 +278,21 @@ async function determineTestData(repo, data, pools, changedFields = []) {
     }
     if (equipment && isEmpty(data.ServiceRefFunctionalLocation)) {
         patch.ServiceRefFunctionalLocation = equipment.FunctionalLocation;
+    }
+    const location = pools.functionalLocations.find((f) => f.FunctionalLocation === (patch.ServiceRefFunctionalLocation || data.ServiceRefFunctionalLocation));
+    const owner = equipment?.Customer || location?.Customer;
+    if (owner && isEmpty(data.SoldToParty)) {
+        patch.SoldToParty = owner;
+    }
+    const team = pools.serviceTeams.find((t) => t.RespyMgmtServiceTeam === data.RespyMgmtServiceTeam);
+    if (team?.ServiceOrganization && isEmpty(data.ServiceOrganization)) {
+        patch.ServiceOrganization = team.ServiceOrganization;
+    }
+    if (isEmpty(data.ExpectedNetAmount)) {
+        const expected = pricing.expectedNetAmount({ ...data, ...patch });
+        if (expected !== undefined) {
+            patch.ExpectedNetAmount = expected;
+        }
     }
     const salesOrgUnit = data.SalesOrganization ? `O ${String(50000000 + Number(String(data.SalesOrganization).replace(/\D/g, '') || 0))}` : '';
     if ((data.SalesOrganizationOrgUnitID || '') !== salesOrgUnit) {

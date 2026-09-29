@@ -19,5 +19,26 @@
         "FunctionalResult": "PASSED",
         "FunctionalResultCriticality": 3,
         "TechnicalLog": "2026-09-28T08:16:00.000Z MOCK start: external execution MOCK-20260928-0001 for STC-2026-000001 (provider MockExecutionProvider, no SAP test automation called)\n2026-09-28T08:16:00.000Z MOCK test data handover: 20 fields, process profile FS_TM\n2026-09-28T08:16:02.000Z step 1 SERVICE_REQUEST: 8000000009 created.\n2026-09-28T08:16:04.000Z step 2 SERVICE_QUOTATION: 8000000028 created.\n2026-09-28T08:16:06.000Z step 3 SERVICE_ORDER: 8000000029 created.\n2026-09-28T08:16:08.000Z step 4 SERVICE_CONFIRMATION: 8999999999 created.\n2026-09-28T08:16:10.000Z step 5 BILLING_DOC_REQUEST: 10000011 created.\n2026-09-28T08:16:12.000Z step 6 BILLING_DOCUMENT: 90000114 created.\n2026-09-28T08:16:12.000Z MOCK run finished"
+    },
+    {
+        "ExecutionUUID": "9e3f4c30-0096-4a5b-9c6d-000000000096",
+        "TestCaseUUID": "6f1c2a10-0004-4c3e-9a51-000000000004",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "ExecutionProvider": "MOCK",
+        "ExternalExecutionID": "MOCK-20260928-0002",
+        "CorrelationReference": "STC-2026-000004",
+        "Status": "FINISHED",
+        "StatusCriticality": 3,
+        "ProgressPercent": 100,
+        "StartedAt": "2026-09-28T11:16:00.000Z",
+        "FinishedAt": "2026-09-28T11:16:12.000Z",
+        "DurationInSeconds": 12,
+        "TechnicalResult": "OK",
+        "FunctionalResult": "PASSED",
+        "FunctionalResultCriticality": 3,
+        "TechnicalLog": "2026-09-28T11:16:00.000Z MOCK start: external execution MOCK-20260928-0002 for STC-2026-000004 (provider MockExecutionProvider, no SAP test automation called)\n2026-09-28T11:16:00.000Z MOCK test data handover: 20 fields, process profile MD_HKV_STOER\n2026-09-28T11:16:02.000Z step 1 SERVICE_REQUEST: 8000000008 created.\n2026-09-28T11:16:04.000Z step 2 SERVICE_QUOTATION: 8000000026 created.\n2026-09-28T11:16:06.000Z step 3 SERVICE_ORDER: 8000000027 created.\n2026-09-28T11:16:08.000Z step 4 SERVICE_CONFIRMATION: 8999999998 created.\n2026-09-28T11:16:10.000Z step 5 BILLING_DOC_REQUEST: 10000010 created.\n2026-09-28T11:16:12.000Z step 6 BILLING_DOCUMENT: 90000113 created.\n2026-09-28T11:16:12.000Z MOCK run finished"
     }
 ]

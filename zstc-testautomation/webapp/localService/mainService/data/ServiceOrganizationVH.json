@@ -13,5 +13,20 @@
         "ServiceOrganization": "SO-DE-BALTIC",
         "ServiceOrganizationName": "Service Organization Baltic Coast",
         "SalesOrganization": "1020"
+    },
+    {
+        "ServiceOrganization": "SO-MD-SUED",
+        "ServiceOrganizationName": "Serviceorganisation Messdienst Süd",
+        "SalesOrganization": "2010"
+    },
+    {
+        "ServiceOrganization": "SO-MD-WEST",
+        "ServiceOrganizationName": "Serviceorganisation Messdienst West",
+        "SalesOrganization": "2010"
+    },
+    {
+        "ServiceOrganization": "SO-MD-OST",
+        "ServiceOrganizationName": "Serviceorganisation Messdienst Ost",
+        "SalesOrganization": "2010"
     }
 ]

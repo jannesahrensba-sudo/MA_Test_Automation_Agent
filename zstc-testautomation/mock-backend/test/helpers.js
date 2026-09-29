@@ -89,4 +89,34 @@ const GOLDEN = Object.freeze({
 
 const GOLDEN_DOCUMENTS = ['8000000010', '8000000030', '8000000031', '9000000000', '10000012', '90000115'];
 
-module.exports = { setup, teardown, pools, GOLDEN, GOLDEN_DOCUMENTS, loadAllData };
+let uuidCounter = 0;
+const newUuid = () => `00000000-0000-4000-8000-${String(++uuidCounter).padStart(12, '0')}`;
+
+/** Simulates Create (draft) as the FE mock server does it: initial values, 1:1 test data with the profile defaults */
+async function createDraft(repo, processProfile = 'FS_TM', text = '') {
+    const service = require('../services/TestCaseService');
+    const tc = { TestCaseUUID: newUuid(), IsActiveEntity: false, HasActiveEntity: false, HasDraftEntity: false, NaturalLanguageInput: text };
+    Object.assign(tc, service.initialTestCase({ ProcessProfile: processProfile }));
+    await repo.add('TestCase', tc);
+    await service.createTestData(repo, tc);
+    await service.syncDerived(repo, tc.TestCaseUUID);
+    return { TestCaseUUID: tc.TestCaseUUID, IsActiveEntity: false };
+}
+
+/** Simulates Activate as the FE mock server does it: draft rows are copied to active rows */
+async function activate(repo, draftKeys) {
+    const service = require('../services/TestCaseService');
+    for (const set of ['TestCase', 'TestCaseData', 'ValidationResult']) {
+        for (const row of await repo.find(set, { TestCaseUUID: draftKeys.TestCaseUUID, IsActiveEntity: false })) {
+            const keyName = set === 'ValidationResult' ? 'ValidationUUID' : 'TestCaseUUID';
+            await repo.remove(set, { [keyName]: row[keyName], IsActiveEntity: false });
+            await repo.add(set, { ...row, IsActiveEntity: true, HasDraftEntity: false, DraftAdministrativeData: null });
+        }
+    }
+    const keys = { TestCaseUUID: draftKeys.TestCaseUUID, IsActiveEntity: true };
+    await service.onActivated(repo, keys);
+    await service.syncDerived(repo, keys.TestCaseUUID);
+    return keys;
+}
+
+module.exports = { setup, teardown, pools, GOLDEN, GOLDEN_DOCUMENTS, loadAllData, createDraft, activate };

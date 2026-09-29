@@ -14,5 +14,13 @@
     {
         "ProcessProfile": "FS_TM_OUTAGE",
         "ProcessProfileName": "Field Service – T&M, Provider Outage (Demo)"
+    },
+    {
+        "ProcessProfile": "MD_HKV_STOER",
+        "ProcessProfileName": "Messdienst – Störung Heizkostenverteiler"
+    },
+    {
+        "ProcessProfile": "MD_RWM_STOER",
+        "ProcessProfileName": "Messdienst – Störung Rauchwarnmelder"
     }
 ]

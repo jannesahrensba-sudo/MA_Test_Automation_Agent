@@ -3,24 +3,91 @@
         "FunctionalLocation": "H2POWC00-PROD",
         "FunctionalLocationName": "H2 Power Plant 00 – Production",
         "Customer": "C700-C00",
-        "MaintenancePlant": "1010"
+        "MaintenancePlant": "1010",
+        "SuperiorFunctionalLocation": ""
     },
     {
         "FunctionalLocation": "H2POWC00-UTIL",
         "FunctionalLocationName": "H2 Power Plant 00 – Utilities",
         "Customer": "C700-C00",
-        "MaintenancePlant": "1010"
+        "MaintenancePlant": "1010",
+        "SuperiorFunctionalLocation": ""
     },
     {
         "FunctionalLocation": "H2POWC01-PROD",
         "FunctionalLocationName": "H2 Power Plant 01 – Production",
         "Customer": "C700-C01",
-        "MaintenancePlant": "1010"
+        "MaintenancePlant": "1010",
+        "SuperiorFunctionalLocation": ""
     },
     {
         "FunctionalLocation": "BHG-RST-01",
         "FunctionalLocationName": "Rostock Hub – Compressor Station",
         "Customer": "C710-C00",
-        "MaintenancePlant": "1020"
+        "MaintenancePlant": "1020",
+        "SuperiorFunctionalLocation": ""
+    },
+    {
+        "FunctionalLocation": "LG-0815",
+        "FunctionalLocationName": "Musterstraße 12, 80331 München",
+        "Customer": "MD-100010",
+        "MaintenancePlant": "2110",
+        "SuperiorFunctionalLocation": ""
+    },
+    {
+        "FunctionalLocation": "LG-0815-NE01",
+        "FunctionalLocationName": "NE 01 · EG links · Nutzer Schneider",
+        "Customer": "MD-100010",
+        "MaintenancePlant": "2110",
+        "SuperiorFunctionalLocation": "LG-0815"
+    },
+    {
+        "FunctionalLocation": "LG-0815-NE02",
+        "FunctionalLocationName": "NE 02 · EG rechts · Nutzer Yilmaz",
+        "Customer": "MD-100010",
+        "MaintenancePlant": "2110",
+        "SuperiorFunctionalLocation": "LG-0815"
+    },
+    {
+        "FunctionalLocation": "LG-0815-NE03",
+        "FunctionalLocationName": "NE 03 · 1. OG links · Nutzer Müller",
+        "Customer": "MD-100010",
+        "MaintenancePlant": "2110",
+        "SuperiorFunctionalLocation": "LG-0815"
+    },
+    {
+        "FunctionalLocation": "LG-2040",
+        "FunctionalLocationName": "Lindenallee 5, 50667 Köln",
+        "Customer": "MD-100020",
+        "MaintenancePlant": "2120",
+        "SuperiorFunctionalLocation": ""
+    },
+    {
+        "FunctionalLocation": "LG-2040-NE01",
+        "FunctionalLocationName": "NE 01 · EG · Nutzer Becker",
+        "Customer": "MD-100020",
+        "MaintenancePlant": "2120",
+        "SuperiorFunctionalLocation": "LG-2040"
+    },
+    {
+        "FunctionalLocation": "LG-2040-NE02",
+        "FunctionalLocationName": "NE 02 · 1. OG · Nutzer Nowak",
+        "Customer": "MD-100020",
+        "MaintenancePlant": "2120",
+        "SuperiorFunctionalLocation": "LG-2040"
+    },
+    {
+        "FunctionalLocation": "LG-3100",
+        "FunctionalLocationName": "Parkweg 7, 04109 Leipzig",
+        "Customer": "MD-100030",
+        "MaintenancePlant": "2130",
+        "SuperiorFunctionalLocation": ""
+    },
+    {
+        "FunctionalLocation": "LG-3100-NE01",
+        "FunctionalLocationName": "NE 01 · 2. OG rechts · Nutzer Hansen",
+        "Customer": "MD-100030",
+        "MaintenancePlant": "2130",
+        "SuperiorFunctionalLocation": "LG-3100"
     }
 ]

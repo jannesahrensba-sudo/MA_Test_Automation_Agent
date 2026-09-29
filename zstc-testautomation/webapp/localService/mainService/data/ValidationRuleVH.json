@@ -38,5 +38,9 @@
     {
         "Code": "R9_DATE_RANGE",
         "Text": "R9 · Requested period is consistent"
+    },
+    {
+        "Code": "R10_DEVICE_TYPE",
+        "Text": "R10 · Service and part fit the device type"
     }
 ]

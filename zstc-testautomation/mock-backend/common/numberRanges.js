@@ -12,8 +12,8 @@
 const clock = require('./clock');
 
 const START = Object.freeze({
-    CASE: 4, // STC-<year>-000001..000003 are seed test cases
-    EXECUTION: 2, // MOCK-<date>-0001 is used by the seed execution
+    CASE: 7, // STC-<year>-000001..000006 are seed test cases
+    EXECUTION: 3, // MOCK-<date>-0001 and -0002 are used by the seed executions
     SERVICE_REQUEST: 8000000010,
     QUOTATION_ORDER: 8000000030,
     SERVICE_CONFIRMATION: 9000000000,
@@ -47,13 +47,13 @@ function next(tenantId, interval) {
     return value;
 }
 
-/** @returns {string} next Case ID, e.g. STC-2026-000004 (≠ SAP document number; brackets all documents of a run) */
+/** @returns {string} next Case ID, e.g. STC-2026-000007 (≠ SAP document number; brackets all documents of a run) */
 function nextCaseId(tenantId) {
     const year = new Date(clock.now()).getUTCFullYear();
     return `STC-${year}-${String(next(tenantId, 'CASE')).padStart(6, '0')}`;
 }
 
-/** @returns {string} next external execution ID of the MockExecutionProvider, e.g. MOCK-20260929-0002 */
+/** @returns {string} next external execution ID of the MockExecutionProvider, e.g. MOCK-20260929-0003 */
 function nextExecutionId(tenantId) {
     const d = new Date(clock.now());
     const ymd = `${d.getUTCFullYear()}${String(d.getUTCMonth() + 1).padStart(2, '0')}${String(d.getUTCDate()).padStart(2, '0')}`;

@@ -18,5 +18,20 @@
         "RespyMgmtServiceTeam": "FS-TEAM-RST",
         "RespyMgmtServiceTeamName": "Field Service Team Rostock",
         "ServiceOrganization": "SO-DE-BALTIC"
+    },
+    {
+        "RespyMgmtServiceTeam": "MD-TEAM-MUC",
+        "RespyMgmtServiceTeamName": "Monteurteam München",
+        "ServiceOrganization": "SO-MD-SUED"
+    },
+    {
+        "RespyMgmtServiceTeam": "MD-TEAM-CGN",
+        "RespyMgmtServiceTeamName": "Monteurteam Köln",
+        "ServiceOrganization": "SO-MD-WEST"
+    },
+    {
+        "RespyMgmtServiceTeam": "MD-TEAM-LEJ",
+        "RespyMgmtServiceTeamName": "Monteurteam Leipzig",
+        "ServiceOrganization": "SO-MD-OST"
     }
 ]

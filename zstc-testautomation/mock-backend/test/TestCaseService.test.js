@@ -2,39 +2,12 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const service = require('../services/TestCaseService');
-const { setup, teardown, GOLDEN, GOLDEN_DOCUMENTS } = require('./helpers');
+const { setup, teardown, GOLDEN, GOLDEN_DOCUMENTS, createDraft, activate } = require('./helpers');
 
 const GOLDEN_TEXT =
     'Customer C700-C00 reports "System cooling partially failed" on equipment EL-100 at functional location H2POWC00-PROD. ' +
     'Reporter Michael Fischer, service team ICNT_1SUP-DE, priority medium. Plan on-site service P700_SERV_ONS 3 HR and spare part P700-SC-100 1 PC. ' +
     'Expected net value 3.693 EUR.';
-
-let uuidCounter = 0;
-const newUuid = () => `00000000-0000-4000-8000-${String(++uuidCounter).padStart(12, '0')}`;
-
-/** Simulates Create (draft) + Activate as the FE mock server does it: draft rows are copied to active rows */
-async function createDraft(repo, processProfile = 'FS_TM', text = '') {
-    const tc = { TestCaseUUID: newUuid(), IsActiveEntity: false, HasActiveEntity: false, HasDraftEntity: false, NaturalLanguageInput: text };
-    Object.assign(tc, service.initialTestCase({ ProcessProfile: processProfile }));
-    await repo.add('TestCase', tc);
-    await service.createTestData(repo, tc);
-    await service.syncDerived(repo, tc.TestCaseUUID);
-    return { TestCaseUUID: tc.TestCaseUUID, IsActiveEntity: false };
-}
-
-async function activate(repo, draftKeys) {
-    for (const set of ['TestCase', 'TestCaseData', 'ValidationResult']) {
-        for (const row of await repo.find(set, { TestCaseUUID: draftKeys.TestCaseUUID, IsActiveEntity: false })) {
-            const keyName = set === 'ValidationResult' ? 'ValidationUUID' : 'TestCaseUUID';
-            await repo.remove(set, { [keyName]: row[keyName], IsActiveEntity: false });
-            await repo.add(set, { ...row, IsActiveEntity: true, HasDraftEntity: false, DraftAdministrativeData: null });
-        }
-    }
-    const keys = { TestCaseUUID: draftKeys.TestCaseUUID, IsActiveEntity: true };
-    await service.onActivated(repo, keys);
-    await service.syncDerived(repo, keys.TestCaseUUID);
-    return keys;
-}
 
 test('golden path: describe → analyze → validate → save → approve → execute → verify (DoD-2)', async (t) => {
     const { repo, tenantId, tick } = setup();
@@ -63,14 +36,14 @@ test('golden path: describe → analyze → validate → save → approve → ex
 
     const active = await activate(repo, draft);
     const saved = await repo.findOne('TestCase', active);
-    assert.equal(saved.CaseID, 'STC-2026-000004');
+    assert.equal(saved.CaseID, 'STC-2026-000007');
     assert.equal(saved.__OperationControl.approve, true);
     assert.equal(saved.__OperationControl.startExecution, false);
 
     await service.approve(repo, active);
     const started = await service.startExecution(repo, active);
     assert.equal(started.testCase.ExecutionStatus, 'RUNNING');
-    assert.equal(started.testCase.ExternalExecutionID, 'MOCK-20260929-0002');
+    assert.equal(started.testCase.ExternalExecutionID, 'MOCK-20260929-0003');
     assert.equal((await repo.find('ExecutionStep', { ExecutionUUID: started.testCase.LatestExecutionUUID })).length, 6);
     assert.equal((await repo.find('DocumentReference', { ExecutionUUID: started.testCase.LatestExecutionUUID })).length, 0);
 

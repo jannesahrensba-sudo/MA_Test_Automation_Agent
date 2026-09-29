@@ -6,5 +6,9 @@
     {
         "SalesOrganization": "1020",
         "SalesOrganizationName": "Service Sales North"
+    },
+    {
+        "SalesOrganization": "2010",
+        "SalesOrganizationName": "Vertrieb Messdienst Deutschland"
     }
 ]

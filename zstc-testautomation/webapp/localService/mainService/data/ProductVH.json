@@ -3,54 +3,126 @@
         "Product": "P700-EL-100",
         "ProductDescription": "Electrolyzer Stack 100 kW",
         "ProductType": "FERT",
-        "BaseUnit": "PC"
+        "BaseUnit": "PC",
+        "ProductGroup": "H2"
     },
     {
         "Product": "P700-EL-200",
         "ProductDescription": "Electrolyzer Stack 200 kW",
         "ProductType": "FERT",
-        "BaseUnit": "PC"
+        "BaseUnit": "PC",
+        "ProductGroup": "H2"
     },
     {
         "Product": "P700-CW-150",
         "ProductDescription": "Cooling Water Unit 150 l/min",
         "ProductType": "FERT",
-        "BaseUnit": "PC"
+        "BaseUnit": "PC",
+        "ProductGroup": "H2"
     },
     {
         "Product": "P710-CMP-300",
         "ProductDescription": "Hydrogen Compressor 300 bar",
         "ProductType": "FERT",
-        "BaseUnit": "PC"
+        "BaseUnit": "PC",
+        "ProductGroup": "H2"
     },
     {
         "Product": "P700_SERV_ONS",
         "ProductDescription": "On-Site Service Technician",
         "ProductType": "SERV",
-        "BaseUnit": "HR"
+        "BaseUnit": "HR",
+        "ProductGroup": "H2"
     },
     {
         "Product": "P700_SERV_REM",
         "ProductDescription": "Remote Service Diagnosis",
         "ProductType": "SERV",
-        "BaseUnit": "HR"
+        "BaseUnit": "HR",
+        "ProductGroup": "H2"
     },
     {
         "Product": "P700-SC-100",
         "ProductDescription": "Cooling Module SC-100",
         "ProductType": "ERSA",
-        "BaseUnit": "PC"
+        "BaseUnit": "PC",
+        "ProductGroup": "H2"
     },
     {
         "Product": "P700-SC-110",
         "ProductDescription": "Coolant Pump SC-110",
         "ProductType": "ERSA",
-        "BaseUnit": "PC"
+        "BaseUnit": "PC",
+        "ProductGroup": "H2"
     },
     {
         "Product": "P700-SC-999",
         "ProductDescription": "Cooling Module SC-999 (Mock: blocked in plant)",
         "ProductType": "ERSA",
-        "BaseUnit": "PC"
+        "BaseUnit": "PC",
+        "ProductGroup": "H2"
+    },
+    {
+        "Product": "MD-HKV-FUNK",
+        "ProductDescription": "Heizkostenverteiler elektronisch (Funk)",
+        "ProductType": "FERT",
+        "BaseUnit": "PC",
+        "ProductGroup": "MD-HKV"
+    },
+    {
+        "Product": "MD-RWM-FUNK",
+        "ProductDescription": "Rauchwarnmelder (Funk, ferninspizierbar)",
+        "ProductType": "FERT",
+        "BaseUnit": "PC",
+        "ProductGroup": "MD-RWM"
+    },
+    {
+        "Product": "MD-WZ-FUNK",
+        "ProductDescription": "Wasserzähler Warmwasser (Funk)",
+        "ProductType": "FERT",
+        "BaseUnit": "PC",
+        "ProductGroup": "MD-WZ"
+    },
+    {
+        "Product": "MD-SRV-STOER",
+        "ProductDescription": "Monteureinsatz Störungsbehebung",
+        "ProductType": "SERV",
+        "BaseUnit": "HR",
+        "ProductGroup": "MD"
+    },
+    {
+        "Product": "MD-SRV-RWM",
+        "ProductDescription": "Rauchwarnmelder-Service vor Ort",
+        "ProductType": "SERV",
+        "BaseUnit": "HR",
+        "ProductGroup": "MD-RWM"
+    },
+    {
+        "Product": "MD-ERS-HKV",
+        "ProductDescription": "Ersatzgerät Heizkostenverteiler (Funk)",
+        "ProductType": "ERSA",
+        "BaseUnit": "PC",
+        "ProductGroup": "MD-HKV"
+    },
+    {
+        "Product": "MD-ERS-RWM",
+        "ProductDescription": "Ersatzgerät Rauchwarnmelder (Funk)",
+        "ProductType": "ERSA",
+        "BaseUnit": "PC",
+        "ProductGroup": "MD-RWM"
+    },
+    {
+        "Product": "MD-ERS-WZ",
+        "ProductDescription": "Ersatzgerät Wasserzähler (Funk)",
+        "ProductType": "ERSA",
+        "BaseUnit": "PC",
+        "ProductGroup": "MD-WZ"
+    },
+    {
+        "Product": "MD-ERS-HKV-ALT",
+        "ProductDescription": "HKV Vorgängermodell (Mock: gesperrt)",
+        "ProductType": "ERSA",
+        "BaseUnit": "PC",
+        "ProductGroup": "MD-HKV"
     }
 ]
