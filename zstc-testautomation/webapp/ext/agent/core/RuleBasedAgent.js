@@ -168,7 +168,7 @@ sap.ui.define(["./prompts", "./textMatching"], function (prompts, textMatching) 
         validationStep(state) {
             return {
                 icon: "sap-icon://validate",
-                text: "Validierung: " + (prompts.STATUS[state.validation.status] || state.validation.status) + " – " + state.validation.errors + " Fehler, " + state.validation.warnings + " Warnungen",
+                text: "Validierung: " + (prompts.STATUS[state.validation.status] || state.validation.status) + " – " + prompts.counts(state.validation),
                 state: state.validation.status === "VALID" ? "Success" : state.validation.errors ? "Error" : "Warning"
             };
         }
@@ -177,20 +177,14 @@ sap.ui.define(["./prompts", "./textMatching"], function (prompts, textMatching) 
         report(state, masterData, corrections) {
             const v = state.values;
             const d = function (field) {
-                return masterData.describe(field, v[field]);
+                return prompts.display(field, v[field], v, masterData.describe);
             };
             const lines = [];
             if (state.validation.status === "VALID") {
                 lines.push("Ich habe die Störungsmeldung als Testfall erfasst und validiert: **" + prompts.STATUS.VALID + "**.");
             } else {
                 lines.push(
-                    "Ich habe einen Testfall-Entwurf angelegt. Validierung: **" +
-                        (prompts.STATUS[state.validation.status] || state.validation.status) +
-                        "** – " +
-                        state.validation.errors +
-                        " Fehler, " +
-                        state.validation.warnings +
-                        " Warnungen."
+                    "Ich habe einen Testfall-Entwurf angelegt. Validierung: **" + (prompts.STATUS[state.validation.status] || state.validation.status) + "** – " + prompts.counts(state.validation) + "."
                 );
             }
             if (!isEmpty(v.ServiceReferenceEquipment) || !isEmpty(v.ServiceRefFunctionalLocation)) {
@@ -211,9 +205,8 @@ sap.ui.define(["./prompts", "./textMatching"], function (prompts, textMatching) 
                     "- Leistung: " +
                         v.ServiceProduct +
                         " " +
-                        prompts.formatValue("ServiceDuration", v.ServiceDuration) +
-                        " Std." +
-                        (isEmpty(v.ServicePart) ? "" : " + Ersatzteil " + v.ServicePart + " " + prompts.formatValue("ServicePartQuantity", v.ServicePartQuantity) + " Stk.") +
+                        prompts.formatValue("ServiceDuration", v.ServiceDuration, v) +
+                        (isEmpty(v.ServicePart) ? "" : " + Ersatzteil " + v.ServicePart + " " + prompts.formatValue("ServicePartQuantity", v.ServicePartQuantity, v)) +
                         (isEmpty(v.ExpectedNetAmount) ? "" : " → erwarteter Nettowert " + prompts.formatValue("ExpectedNetAmount", v.ExpectedNetAmount) + " (Mock-Preisliste)")
                 );
             }

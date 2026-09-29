@@ -17,6 +17,7 @@
     "metadata": "node tools/metadata/generate.js"
   },
   "devDependencies": {
+    "@anthropic-ai/sdk": "^0.129.0",
     "@sap-ux/preview-middleware": "1.2.19",
     "@sap-ux/ui5-middleware-fe-mockserver": "2.4.17",
     "@ui5/cli": "4.0.70",

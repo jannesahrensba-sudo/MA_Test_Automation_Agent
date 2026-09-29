@@ -10,7 +10,8 @@
         <VBox id="overviewIntro">
             <MessageStrip id="mockBanner" text="{i18n>overviewMockBanner}" type="Information" showIcon="true" class="sapUiSmallMarginBottom" />
             <OverflowToolbar id="overviewActions" style="Clear">
-                <Button id="newTestCase" text="{i18n>newTestCase}" icon="sap-icon://add" type="Emphasized" press=".onCreateTestCase" />
+                <Button id="serviceAssistant" text="{i18n>agentName}" icon="sap-icon://ai" type="Emphasized" press=".onShowAssistant" />
+                <Button id="newTestCase" text="{i18n>newTestCase}" icon="sap-icon://add" press=".onCreateTestCase" />
                 <Button id="allTestCases" text="{i18n>allTestCases}" icon="sap-icon://list" press=".onShowTestCases" />
                 <Button id="configuration" text="{i18n>configuration}" icon="sap-icon://action-settings" press=".onShowConfiguration" />
             </OverflowToolbar>

@@ -51,8 +51,9 @@ Beim Wechsel auf das reale System passiert Folgendes:
 
 | Verantwortung | Mock (Datei) | Real | Belegstufe |
 |---|---|---|---|
-| AI/Extraction | `MockTestCaseExtractionService` (`mock-backend/extraction/`): reines Keyword-/Token-Matching gegen die Pools, **kein Sprachmodell** | eigene Implementierung hinter `ITestCaseExtractionService`, z. B. über SAP AI Core oder einen anderen LLM-Dienst; kein SAP-Standard | 🧪 / ⚠ |
-| OData/Validation | `ValidationEngine` (`mock-backend/validation/`), Regeln R1–R9, deterministisch | RAP-Validations und -Actions im Facade-BO, Lookups über released CDS (Abschnitt 4) | 🧪 · CDS ⚠ |
+| AI/Extraction | `MockTestCaseExtractionService` (`mock-backend/extraction/`): reines Keyword-/Token-Matching gegen die Pools (IDs und deutsches Messdienst-Vokabular, `germanMetering.js`), **kein Sprachmodell** | eigene Implementierung hinter `ITestCaseExtractionService`, z. B. über SAP AI Core oder einen anderen LLM-Dienst; kein SAP-Standard | 🧪 / ⚠ |
+| Agent vor der App | Service-Assistent (`webapp/ext/agent/`): Tools auf dem OData-Vertrag, Sprachmodell über die claude.ai-Capability `sample` (Hosted) bzw. lokalen Proxy zur Claude API; Mock-Agent (regelbasiert) als Rückfall | Joule-Agent (Joule Studio, SAP Build) mit Skills/Actions auf dem Web-API-Binding des Service; Details in [agent-konzept.md](agent-konzept.md) | ⚠ (F-14) |
+| OData/Validation | `ValidationEngine` (`mock-backend/validation/`), Regeln R1–R10 (R10: Leistung und Ersatzteil passen zum Gerätetyp), deterministisch | RAP-Validations und -Actions im Facade-BO, Lookups über released CDS (Abschnitt 4) | 🧪 · CDS ⚠ |
 | SAP Test Automation | `MockExecutionProvider` + `MockS4ServiceChain` (`mock-backend/execution/`) | Adapter hinter `ITestExecutionProvider`: Cloud ALM (`CALM_TEST_AUTOMATION`) mit Provider (TAT, Tricentis) oder ein API-Ketten-Provider nur für Testsysteme | ✅S / ⚠ (F-8) |
 | Verification | `VerificationService` (`mock-backend/verification/`) | dieselbe Logik; liest die realen Belege über released APIs (Abschnitt 5) | 🧪 · APIs ✅P |
 
@@ -74,9 +75,9 @@ Das UI kennt nur die Facade-Namen. Die reale Basis wird im Backend verdrahtet. D
 |---|---|---|
 | `CustomerVH` | `I_Customer`, VH-View `I_Customer_VH` | Felder ✅P · View 🟡 |
 | `ContactPersonVH` | `I_BusinessPartner` plus Kontaktbeziehung | Felder ✅P · CDS ⚠ |
-| `FunctionalLocationVH` | `I_FunctionalLocation`, Kundenbezug über Partnerrolle | Felder ✅P · Kundenbezug ⚠ |
+| `FunctionalLocationVH` (inkl. `SuperiorFunctionalLocation`: Liegenschaft → Nutzeinheit) | `I_FunctionalLocation`, Kundenbezug über Partnerrolle; Hierarchie über übergeordneten Technischen Platz | Felder ✅P · Kundenbezug ⚠ · Hierarchiefeld 🟡 |
 | `EquipmentVH` | `I_Equipment`, VH-View `I_EquipmentStdVH` | Felder ✅P · View 🟡 |
-| `ProductVH` (Referenzprodukt, Leistung, Teil) | `I_Product` plus Beschreibung, Produkttyp als Konstante | 🟡 |
+| `ProductVH` (Referenzprodukt, Leistung, Teil; `ProductGroup` für R10) | `I_Product` plus Beschreibung, Produkttyp als Konstante; Produktgruppe = Warengruppe | 🟡 · Gerätetyp-Zuordnung ⚠ |
 | `SalesOrganizationVH` | `I_SalesOrganization` | 🟡 |
 | `ServiceOrganizationVH`, `ServiceTeamVH` | Organisationsmodell, Responsibility Management | ⚠ (F-4) |
 | `ServiceDocumentPriorityVH`, `ServiceRequestTypeVH` | Code-List-CDS bzw. Vorgangsarten-Customizing | ⚠ |
@@ -97,7 +98,8 @@ Das UI kennt nur die Facade-Namen. Die reale Basis wird im Backend verdrahtet. D
 | `PredecessorDocumentID` / `SuccessorDocumentID` | `to_Order`, `ReferenceServiceRequest`, `ServiceQtanSuccessorOrder`, `to_Confirmation`, `ReferenceServiceOrder`, `ReferenceDocument`, `ReferenceSDDocument` | ✅P |
 | BDR-Vorgänger je Profil (`FS_TM`: Confirmation, `FS_FIXPRICE`: Order) | abrechnungsartabhängig | ⚠ (F-7) |
 | Belegstatus (vereinfacht, SIM-4) | reale Statusfelder, z. B. `ServiceOrderIsCompleted`, `OverallBillingStatus` (Phase 1, 5.3) | ✅P (V2) |
-| Mock-Preisliste (SIM-3: 1.000 EUR/HR, 693 EUR/PC) | Preisfindung (Konditionen) im S/4HANA-System | 🧪 (F-12) |
+| Mock-Preisliste (SIM-3: 1.000 EUR/HR, 693 EUR/PC; Messdienst 69/59 EUR/HR, Ersatzgeräte 35–45 EUR) | Preisfindung (Konditionen) im S/4HANA-System | 🧪 (F-12) |
+| Determination „erwarteter Nettowert aus der Mock-Preisliste, wenn leer“ | Preissimulation im S/4HANA-System (API offen) | ⚠ |
 | Mock-Nummernkreise (SIM-2) | Nummernkreis-Customizing je Belegart | 🧪 |
 | SIM-6 (gesperrtes Teil `P700-SC-999`) | echte Fehler aus Warenausgang oder Rückmeldung | 🧪 |
 | `ExternalURL` (im Mock leer) | Fiori-Absprung, z. B. Manage Service Orders F3571A, Create Billing Documents F0798 | ✅S / ⚠ |
@@ -112,7 +114,8 @@ Das UI kennt nur die Facade-Namen. Die reale Basis wird im Backend verdrahtet. D
 
 | Baustein | Technik | Belegstufe |
 |---|---|---|
-| Overview | FPM Custom Page `sap.fe.core.fpm` mit `macros:Page` und `macros:Table` | ✅P |
+| Service-Assistent (Startseite) | FPM Custom Page `sap.fe.core.fpm` mit `macros:Page`, Chat (`FeedListItem`), Entwurfskarte; Zugriff nur über das OData-V4-Modell; Übergabe per `routing.navigateToRoute` auf die Object Page | ✅P (Bausteine) · Agent ⚠ |
+| Overview | FPM Custom Page `sap.fe.core.fpm` mit `macros:Page` und `macros:Table` (Route `Overview`, `contextPattern: ""`) | ✅P |
 | Test Cases, Configuration | List Report + Object Page (`sap.fe.templates`) | ✅P |
 | „Test Case in Words“ | FPM Custom Subsection (Fragment + Formatter, reine Anzeige) | ✅P |
 | Document Flow | FPM Custom Section mit `sap.suite.ui.commons.ProcessFlow` | ✅P |

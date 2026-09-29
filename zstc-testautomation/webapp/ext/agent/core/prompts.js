@@ -17,7 +17,7 @@ sap.ui.define([], function () {
         SalesOrganization: "Verkaufsorganisation",
         ServiceOrganization: "Serviceorganisation",
         RespyMgmtServiceTeam: "Serviceteam",
-        ServiceRefFunctionalLocation: "Nutzeinheit / Technischer Platz",
+        ServiceRefFunctionalLocation: "Nutzeinheit",
         ServiceReferenceEquipment: "Gerät",
         ReferenceProduct: "Gerätetyp",
         ServiceProduct: "Leistung",
@@ -45,6 +45,26 @@ sap.ui.define([], function () {
     };
 
     const STATUS = { VALID: "Gültig", AMBIGUOUS: "Mehrdeutig", INVALID: "Ungültig", NOT_VALIDATED: "Nicht validiert" };
+    const PRIORITY = { 1: "sehr hoch", 3: "hoch", 5: "mittel", 9: "niedrig" };
+
+    /** "0 Fehler, 1 Warnung" */
+    function counts(validation) {
+        return validation.errors + " Fehler, " + validation.warnings + (validation.warnings === 1 ? " Warnung" : " Warnungen");
+    }
+
+    /** readable German value of a field: numbers with unit, priority in words, IDs with their master data text */
+    function display(field, value, values, describe) {
+        if (value === null || value === undefined || value === "") {
+            return "";
+        }
+        if (NUMERIC_FIELDS.indexOf(field) > -1) {
+            return formatValue(field, value, values);
+        }
+        if (field === "ServiceDocumentPriority" && PRIORITY[value]) {
+            return value + " · " + PRIORITY[value];
+        }
+        return describe(field, value);
+    }
 
     /** fields the agent may set (writable, controlled test data) */
     const AGENT_FIELDS = [
@@ -125,8 +145,13 @@ sap.ui.define([], function () {
         ].join("\n");
     }
 
-    /** "1" → "1", 3 → "3", "3.000" → "3", 108 → "108,00 EUR" for amounts */
-    function formatValue(field, value) {
+    const UNIT_TEXT = { HR: "Std.", MIN: "Min.", PC: "Stk.", EA: "Stk." };
+
+    /**
+     * German display value: 108 → "108,00 EUR"; "1.500" → "1,5"; with values (the whole test data) quantities get their
+     * unit, e.g. ServiceDuration 1 + ServiceDurationUnit HR → "1 Std."
+     */
+    function formatValue(field, value, values) {
         if (value === null || value === undefined || value === "") {
             return "";
         }
@@ -134,7 +159,9 @@ sap.ui.define([], function () {
             return Number(value).toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " EUR";
         }
         if (NUMERIC_FIELDS.indexOf(field) > -1) {
-            return String(Number(value)).replace(".", ",");
+            const number = String(Number(value)).replace(".", ",");
+            const unit = values && values[field + "Unit"];
+            return unit ? number + " " + (UNIT_TEXT[unit] || unit) : number;
         }
         return String(value);
     }
@@ -153,12 +180,12 @@ sap.ui.define([], function () {
         const lines = [
             "[Kontext der App]",
             "Testfall-Entwurf " + draft.uuid + (draft.caseId ? " (" + draft.caseId + ")" : "") + ", Prozessprofil " + draft.processProfile,
-            "Validierung: " + (STATUS[draft.validation.status] || draft.validation.status) + " – " + draft.validation.errors + " Fehler, " + draft.validation.warnings + " Warnungen"
+            "Validierung: " + (STATUS[draft.validation.status] || draft.validation.status) + " – " + counts(draft.validation)
         ];
         const values = SUMMARY_FIELDS.filter(function (f) {
             return draft.values[f] !== null && draft.values[f] !== undefined && draft.values[f] !== "";
         }).map(function (f) {
-            return f + " = " + (NUMERIC_FIELDS.indexOf(f) > -1 ? formatValue(f, draft.values[f]) : describe(f, draft.values[f]));
+            return f + " = " + display(f, draft.values[f], draft.values, describe);
         });
         lines.push("Werte: " + (values.join("; ") || "keine"));
         (draft.validation.findings || []).forEach(function (finding) {
@@ -179,8 +206,11 @@ sap.ui.define([], function () {
         NUMERIC_FIELDS: NUMERIC_FIELDS,
         PRICING_FIELDS: PRICING_FIELDS,
         SUMMARY_FIELDS: SUMMARY_FIELDS,
+        PRIORITY: PRIORITY,
         instructions: instructions,
         contextBlock: contextBlock,
-        formatValue: formatValue
+        formatValue: formatValue,
+        display: display,
+        counts: counts
     };
 });

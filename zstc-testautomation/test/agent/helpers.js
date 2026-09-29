@@ -82,8 +82,8 @@ function createMemoryGateway(repo) {
             calls.push(['validate']);
             await service.validateTestCase(repo, draftKeys(uuid));
         },
-        async readDraft(uuid) {
-            const keys = (await repo.findOne('TestCase', draftKeys(uuid))) ? draftKeys(uuid) : activeKeys(uuid);
+        async readDraft(uuid, active) {
+            const keys = active ? activeKeys(uuid) : draftKeys(uuid);
             return {
                 testCase: await repo.findOne('TestCase', keys),
                 values: await repo.findOne('TestCaseData', keys),

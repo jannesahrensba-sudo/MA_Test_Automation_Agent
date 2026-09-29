@@ -56,7 +56,7 @@ sap.ui.define(["./prompts"], function (prompts) {
         prompts.SUMMARY_FIELDS.forEach(function (field) {
             const value = draft.values[field];
             if (value !== null && value !== undefined && value !== "") {
-                values[field] = prompts.NUMERIC_FIELDS.indexOf(field) > -1 ? prompts.formatValue(field, value) : describe(field, value);
+                values[field] = prompts.display(field, value, draft.values, describe);
             }
         });
         return {
@@ -211,13 +211,7 @@ sap.ui.define(["./prompts"], function (prompts) {
                     session.step({
                         icon: "sap-icon://validate",
                         text:
-                            "Entwurf erfasst und validiert: " +
-                            (prompts.STATUS[state.validation.status] || state.validation.status) +
-                            " – " +
-                            state.validation.errors +
-                            " Fehler, " +
-                            state.validation.warnings +
-                            " Warnungen",
+                            "Entwurf erfasst und validiert: " + (prompts.STATUS[state.validation.status] || state.validation.status) + " – " + prompts.counts(state.validation),
                         state: state.validation.status === "VALID" ? "Success" : state.validation.errors ? "Error" : "Warning"
                     });
                     const masterData = await gateway.masterData();

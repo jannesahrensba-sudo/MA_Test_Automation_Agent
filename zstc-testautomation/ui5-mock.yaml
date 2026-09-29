@@ -16,6 +16,10 @@ framework:
     - name: themelib_sap_horizon
 server:
   customMiddleware:
+    # local development proxy of the service assistant to the Claude API (tools/agent-proxy, key only on the server)
+    - name: zstc-agent-proxy
+      beforeMiddleware: csp
+      mountPath: /agent-api
     - name: sap-fe-mockserver
       beforeMiddleware: csp
       configuration:
@@ -34,3 +38,12 @@ server:
           intent:
             object: ServiceTestCase
             action: manage
+---
+# yaml-language-server: $schema=https://sap.github.io/ui5-tooling/schema/ui5.yaml.json
+specVersion: "4.0"
+kind: extension
+type: server-middleware
+metadata:
+  name: zstc-agent-proxy
+middleware:
+  path: tools/agent-proxy/middleware.js

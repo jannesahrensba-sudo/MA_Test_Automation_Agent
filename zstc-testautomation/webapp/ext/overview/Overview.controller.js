@@ -101,6 +101,10 @@ sap.ui.define(["sap/fe/core/PageController", "sap/ui/model/json/JSONModel"], fun
 
         onShowConfiguration: function () {
             return this.routing.navigateToRoute("ProcessProfileList");
+        },
+
+        onShowAssistant: function () {
+            return this.routing.navigateToRoute("AgentPage");
         }
     });
 });

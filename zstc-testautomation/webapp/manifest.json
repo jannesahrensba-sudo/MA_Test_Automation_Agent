@@ -103,6 +103,11 @@
             "routes": [
                 {
                     "pattern": ":?query:",
+                    "name": "AgentPage",
+                    "target": "AgentPage"
+                },
+                {
+                    "pattern": "Overview:?query:",
                     "name": "Overview",
                     "target": "Overview"
                 },
@@ -128,10 +133,30 @@
                 }
             ],
             "targets": {
+                "AgentPage": {
+                    "type": "Component",
+                    "id": "AgentPage",
+                    "name": "sap.fe.core.fpm",
+                    "contextPattern": "",
+                    "options": {
+                        "settings": {
+                            "viewName": "zstc.testautomation.ext.agent.AgentPage",
+                            "contextPath": "/TestCase",
+                            "navigation": {
+                                "TestCase": {
+                                    "detail": {
+                                        "route": "TestCaseObjectPage"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
                 "Overview": {
                     "type": "Component",
                     "id": "Overview",
                     "name": "sap.fe.core.fpm",
+                    "contextPattern": "",
                     "options": {
                         "settings": {
                             "viewName": "zstc.testautomation.ext.overview.Overview",

@@ -1,0 +1,113 @@
+<mvc:View
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:l="sap.ui.layout"
+    xmlns:macros="sap.fe.macros"
+    controllerName="zstc.testautomation.ext.agent.AgentPage">
+    <!-- Service assistant (FPM custom page, start page of the app): German fault report → validated test case → start in the app -->
+    <!-- the Page building block evaluates title/description once when it is created: literal texts, not i18n bindings -->
+    <macros:Page id="agentPage" title="Service-Assistent" description="Störungsmeldung auf Deutsch → validierter Testfall → Übergabe und Start in der App">
+        <VBox id="agentIntro">
+            <MessageStrip id="agentModeStrip" text="{agent>/modeText}" type="{agent>/modeType}" showIcon="true" class="sapUiTinyMarginBottom" />
+            <OverflowToolbar id="agentToolbar" style="Clear">
+                <Label id="agentModeLabel" text="{i18n>agentMode}" labelFor="agentModeSelect" />
+                <SegmentedButton id="agentModeSelect" selectedKey="{agent>/mode}" selectionChange=".onModeChange" enabled="{= !${agent>/busy} }" items="{agent>/modes}">
+                    <items>
+                        <SegmentedButtonItem key="{agent>key}" text="{agent>text}" />
+                    </items>
+                </SegmentedButton>
+                <ToolbarSpacer id="agentToolbarSpacer" />
+                <Button id="agentReset" text="{i18n>agentReset}" icon="sap-icon://restart" press=".onReset" enabled="{= !${agent>/busy} }" />
+                <Button id="agentOverview" text="{i18n>agentToOverview}" icon="sap-icon://overview-chart" press=".onShowOverview" />
+            </OverflowToolbar>
+        </VBox>
+        <l:Grid id="agentGrid" defaultSpan="XL7 L7 M12 S12" hSpacing="1" vSpacing="0" containerQuery="true">
+            <!-- conversation -->
+            <VBox id="agentChatColumn">
+                <List id="agentChat" items="{agent>/messages}" showSeparators="Inner" noDataText="{i18n>agentChatEmpty}" growing="false" class="sapUiSmallMarginBottom">
+                    <FeedListItem
+                        sender="{agent>author}"
+                        icon="{agent>icon}"
+                        iconDisplayShape="Circle"
+                        text="{agent>html}"
+                        timestamp="{agent>time}"
+                        info="{agent>info}"
+                        maxCharacters="100000"
+                        showIcon="true"
+                        convertLinksToAnchorTags="None" />
+                </List>
+                <HBox id="agentBusyBox" alignItems="Center" visible="{agent>/busy}" class="sapUiTinyMarginBottom">
+                    <BusyIndicator id="agentBusy" size="1rem" />
+                    <Text id="agentBusyText" text="{agent>/busyText}" class="sapUiTinyMarginBegin" />
+                </HBox>
+                <TextArea
+                    id="agentInput"
+                    value="{agent>/input}"
+                    valueLiveUpdate="true"
+                    rows="4"
+                    width="100%"
+                    growing="true"
+                    growingMaxLines="10"
+                    enabled="{= !${agent>/busy} }"
+                    placeholder="{i18n>agentInputPlaceholder}" />
+                <OverflowToolbar id="agentInputToolbar" style="Clear">
+                    <Button id="agentSend" text="{i18n>agentSend}" icon="sap-icon://paper-plane" type="Emphasized" press=".onSend" enabled="{= !${agent>/busy} &amp;&amp; ${agent>/input}.trim().length > 0 }" />
+                    <Button id="agentStop" text="{i18n>agentStop}" icon="sap-icon://stop" press=".onStop" visible="{agent>/busy}" />
+                    <ToolbarSpacer id="agentInputSpacer" />
+                    <MenuButton id="agentExamples" text="{i18n>agentExamples}" icon="sap-icon://example" enabled="{= !${agent>/busy} }">
+                        <menu>
+                            <Menu id="agentExampleMenu" itemSelected=".onExample">
+                                <MenuItem id="exampleHkv" key="hkv" text="{i18n>agentExampleHkv}" icon="sap-icon://temperature" />
+                                <MenuItem id="exampleRwm" key="rwm" text="{i18n>agentExampleRwm}" icon="sap-icon://alert" />
+                                <MenuItem id="exampleAmbiguous" key="ambiguous" text="{i18n>agentExampleAmbiguous}" icon="sap-icon://question-mark" />
+                                <MenuItem id="exampleCologne" key="cologne" text="{i18n>agentExampleCologne}" icon="sap-icon://alert" />
+                            </Menu>
+                        </menu>
+                    </MenuButton>
+                </OverflowToolbar>
+            </VBox>
+            <!-- draft of the test case and the steps of the agent -->
+            <VBox id="agentDraftColumn">
+                <layoutData>
+                    <l:GridData id="agentDraftSpan" span="XL5 L5 M12 S12" />
+                </layoutData>
+                <Panel id="agentDraftPanel" headerText="{i18n>agentDraftTitle}" class="sapUiNoContentPadding">
+                    <VBox id="agentDraftBox" class="sapUiSmallMargin">
+                        <Title id="agentDraftHeading" text="{= ${agent>/draft/title} || ${i18n>agentNoDraft} }" wrapping="true" />
+                        <HBox id="agentDraftStatus" wrap="Wrap" alignItems="Center" visible="{= !!${agent>/draft} }" class="sapUiTinyMarginTop">
+                            <ObjectStatus id="agentValidation" title="{i18n>agentValidation}" text="{agent>/draft/statusText}" state="{agent>/draft/statusState}" inverted="true" class="sapUiSmallMarginEnd" />
+                            <ObjectStatus id="agentCaseId" title="{i18n>agentCaseId}" text="{= ${agent>/draft/caseId} || ${i18n>agentCaseIdPending} }" class="sapUiSmallMarginEnd" />
+                            <ObjectStatus id="agentProfile" title="{i18n>agentProfile}" text="{agent>/draft/processProfile}" />
+                        </HBox>
+                        <List id="agentDraftValues" items="{agent>/draftRows}" visible="{= !!${agent>/draft} }" showSeparators="Inner" class="sapUiTinyMarginTop">
+                            <DisplayListItem label="{agent>label}" value="{agent>value}" />
+                        </List>
+                        <List id="agentFindings" items="{agent>/findings}" visible="{= ${agent>/findings}.length > 0 }" headerText="{i18n>agentFindings}" class="sapUiTinyMarginTop">
+                            <StandardListItem title="{agent>title}" description="{agent>description}" icon="{agent>icon}" highlight="{agent>state}" wrapping="true" />
+                        </List>
+                        <MessageStrip id="agentSubmitted" visible="{= !!${agent>/draft/submitted} }" text="{agent>/draft/submittedText}" type="Success" showIcon="true" class="sapUiTinyMarginTop" />
+                        <FlexBox id="agentDraftActions" wrap="Wrap" alignItems="Center" visible="{= !!${agent>/draft} }" class="sapUiSmallMarginTop">
+                            <Button
+                                id="agentSubmit" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
+                                text="{i18n>agentSubmit}"
+                                icon="sap-icon://process"
+                                type="Emphasized"
+                                press=".onSubmit"
+                                visible="{= !${agent>/draft/submitted} }"
+                                enabled="{= !${agent>/busy} &amp;&amp; ${agent>/draft/validation/status} === 'VALID' }" />
+                            <Button id="agentFollow" class="sapUiTinyMarginEnd sapUiTinyMarginBottom" text="{i18n>agentFollow}" icon="sap-icon://navigation-right-arrow" type="Emphasized" press=".onOpenTestCase" visible="{= !!${agent>/draft/submitted} }" />
+                            <Button id="agentSaveOnly" class="sapUiTinyMarginEnd sapUiTinyMarginBottom" text="{i18n>agentSaveOnly}" icon="sap-icon://save" press=".onSaveOnly" visible="{= !${agent>/draft/submitted} }" enabled="{= !${agent>/busy} }" />
+                            <Button id="agentOpenDraft" class="sapUiTinyMarginBottom" text="{i18n>agentOpenDraft}" icon="sap-icon://edit" press=".onOpenTestCase" visible="{= !${agent>/draft/submitted} }" enabled="{= !${agent>/busy} }" />
+                        </FlexBox>
+                    </VBox>
+                </Panel>
+                <Panel id="agentStepsPanel" headerText="{i18n>agentSteps}" expandable="true" expanded="true" class="sapUiSmallMarginTop sapUiNoContentPadding">
+                    <List id="agentSteps" items="{agent>/steps}" noDataText="{i18n>agentStepsEmpty}" showSeparators="Inner">
+                        <StandardListItem title="{agent>text}" icon="{agent>icon}" highlight="{agent>state}" info="{agent>time}" wrapping="true" />
+                    </List>
+                </Panel>
+            </VBox>
+        </l:Grid>
+    </macros:Page>
+</mvc:View>

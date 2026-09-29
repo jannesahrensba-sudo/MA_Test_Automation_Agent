@@ -45,7 +45,7 @@ sap.ui.define(["./prompts", "./agentTools", "./RuleBasedAgent", "./messagesLoop"
          * @returns {Promise<object>} draft state
          */
         async refreshDraft(uuid) {
-            const read = await this.gateway.readDraft(uuid);
+            const read = await this.gateway.readDraft(uuid, !!(this.draft && this.draft.uuid === uuid && this.draft.isActive));
             const masterData = await this.gateway.masterData();
             const findings = read.findings
                 .filter(function (f) {
