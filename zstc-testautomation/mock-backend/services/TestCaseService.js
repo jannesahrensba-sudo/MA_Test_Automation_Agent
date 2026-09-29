@@ -49,7 +49,7 @@ const CONTROLLED_FIELDS = [
 const NUMERIC_FIELDS = new Set(['ServiceDuration', 'ServicePartQuantity', 'ExpectedNetAmount', 'NetAmountTolerance']);
 
 const extractionService = new MockTestCaseExtractionService();
-const uuid = () => globalThis.crypto.randomUUID();
+const { newUUID: uuid } = require('../common/uuid');
 const tcKeys = (tc) => ({ TestCaseUUID: tc.TestCaseUUID, IsActiveEntity: tc.IsActiveEntity });
 
 /* ------------------------------------------------------------------------------------------------ */

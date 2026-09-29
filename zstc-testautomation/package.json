@@ -11,11 +11,15 @@
     "start": "ui5 serve --config ui5-mock.yaml --open \"test/flp.html#ServiceTestCase-manage\"",
     "start:noopen": "ui5 serve --config ui5-mock.yaml",
     "build": "ui5 build --config ui5.yaml --clean-dest",
-    "test": "node --test \"mock-backend/test/*.test.js\""
+    "test": "node --test \"mock-backend/test/*.test.js\"",
+    "build:hosted": "ui5 build --config ui5-hosted.yaml --dest dist-hosted/build --clean-dest --include-dependency sap.ui.core sap.m sap.f sap.fe.base sap.fe.controls sap.fe.core sap.fe.macros sap.fe.navigation sap.fe.placeholder sap.fe.templates sap.suite.ui.commons sap.suite.ui.microchart sap.ui.fl sap.ui.layout sap.ui.mdc sap.ui.table sap.ui.unified sap.uxap sap.ui.export themelib_sap_horizon && node tools/hosted/build-hosted.js",
+    "seed": "node tools/seed/generate-seed.js",
+    "metadata": "node tools/metadata/generate.js"
   },
   "devDependencies": {
     "@sap-ux/preview-middleware": "1.2.19",
     "@sap-ux/ui5-middleware-fe-mockserver": "2.4.17",
-    "@ui5/cli": "4.0.70"
+    "@ui5/cli": "4.0.70",
+    "esbuild": "^0.25.10"
   }
 }
