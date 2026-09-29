@@ -1,0 +1,42 @@
+[
+    {
+        "Code": "NONE",
+        "Text": "No additional rule"
+    },
+    {
+        "Code": "R1_REQUIRED",
+        "Text": "R1 · Required field is filled"
+    },
+    {
+        "Code": "R2_EXISTS",
+        "Text": "R2 · Value exists in master data"
+    },
+    {
+        "Code": "R3_CUSTOMER_FL",
+        "Text": "R3 · Functional location belongs to customer"
+    },
+    {
+        "Code": "R4_FL_EQUIPMENT",
+        "Text": "R4 · Equipment is installed at functional location"
+    },
+    {
+        "Code": "R5_EQUIPMENT_PRODUCT",
+        "Text": "R5 · Reference product matches equipment"
+    },
+    {
+        "Code": "R6_PRODUCT_TYPE",
+        "Text": "R6 · Product type and unit fit the item"
+    },
+    {
+        "Code": "R7_AMBIGUOUS",
+        "Text": "R7 · Value is unambiguous"
+    },
+    {
+        "Code": "R8_CONTACT_CUSTOMER",
+        "Text": "R8 · Reporter is a contact of the customer"
+    },
+    {
+        "Code": "R9_DATE_RANGE",
+        "Text": "R9 · Requested period is consistent"
+    }
+]

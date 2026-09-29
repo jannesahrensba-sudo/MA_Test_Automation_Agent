@@ -1,0 +1,70 @@
+[
+    {
+        "ProcessProfile": "FS_TM",
+        "ProcessProfileName": "Field Service – Time & Material",
+        "Description": "On-site service billed by time and material. The billing document request follows the service confirmation.",
+        "ExecutionProvider": "MOCK",
+        "RequiresSecondApprover": false,
+        "IsActive": true,
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "SAP__Messages": [],
+        "__EntityControl": {
+            "Updatable": true,
+            "Deletable": true
+        }
+    },
+    {
+        "ProcessProfile": "FS_FIXPRICE",
+        "ProcessProfileName": "Field Service – Fixed Price",
+        "Description": "On-site service at a fixed price. The billing document request follows the service order; the service part is optional.",
+        "ExecutionProvider": "MOCK",
+        "RequiresSecondApprover": false,
+        "IsActive": true,
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "SAP__Messages": [],
+        "__EntityControl": {
+            "Updatable": true,
+            "Deletable": true
+        }
+    },
+    {
+        "ProcessProfile": "FS_TM_4EYES",
+        "ProcessProfileName": "Field Service – T&M, Four-Eyes Approval",
+        "Description": "Like FS_TM, but the approval needs a second person (demo of AUTHORIZATION_ERROR).",
+        "ExecutionProvider": "MOCK",
+        "RequiresSecondApprover": true,
+        "IsActive": true,
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "SAP__Messages": [],
+        "__EntityControl": {
+            "Updatable": true,
+            "Deletable": true
+        }
+    },
+    {
+        "ProcessProfile": "FS_TM_OUTAGE",
+        "ProcessProfileName": "Field Service – T&M, Provider Outage (Demo)",
+        "Description": "Like FS_TM, but the execution provider is not reachable (demo of TECHNICAL_ERROR).",
+        "ExecutionProvider": "MOCK_UNAVAILABLE",
+        "RequiresSecondApprover": false,
+        "IsActive": true,
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "SAP__Messages": [],
+        "__EntityControl": {
+            "Updatable": true,
+            "Deletable": true
+        }
+    }
+]

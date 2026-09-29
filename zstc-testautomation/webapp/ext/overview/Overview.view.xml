@@ -1,0 +1,36 @@
+<mvc:View
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:macros="sap.fe.macros"
+    controllerName="zstc.testautomation.ext.overview.Overview">
+    <!-- Overview: FPM custom page (sap.fe.core.fpm) with the Page and Table building blocks -->
+    <!-- the Page building block evaluates title/description once when it is created: literal texts, not i18n bindings -->
+    <macros:Page id="overviewPage" title="Overview" description="Describe → Validate → Approve → Execute → Verify → Document">
+        <VBox id="overviewIntro">
+            <MessageStrip id="mockBanner" text="{i18n>overviewMockBanner}" type="Information" showIcon="true" class="sapUiSmallMarginBottom" />
+            <OverflowToolbar id="overviewActions" style="Clear">
+                <Button id="newTestCase" text="{i18n>newTestCase}" icon="sap-icon://add" type="Emphasized" press=".onCreateTestCase" />
+                <Button id="allTestCases" text="{i18n>allTestCases}" icon="sap-icon://list" press=".onShowTestCases" />
+                <Button id="configuration" text="{i18n>configuration}" icon="sap-icon://action-settings" press=".onShowConfiguration" />
+            </OverflowToolbar>
+        </VBox>
+        <FlexBox id="kpiTiles" wrap="Wrap" items="{kpi>/tiles}">
+            <GenericTile header="{kpi>header}" subheader="{kpi>subheader}" frameType="OneByOne" sizeBehavior="Small" press=".onShowTestCases" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                <TileContent footer="{kpi>footer}">
+                    <NumericContent value="{kpi>value}" valueColor="{kpi>color}" icon="{kpi>icon}" withMargin="false" />
+                </TileContent>
+            </GenericTile>
+        </FlexBox>
+        <macros:Table id="testCaseTable" metaPath="@com.sap.vocabularies.UI.v1.LineItem" readOnly="true" header="{i18n>recentTestCases}" enableExport="false" />
+        <Panel id="processPanel" headerText="{i18n>processTitle}" expandable="true" expanded="false">
+            <List id="processSteps" showSeparators="Inner">
+                <StandardListItem id="stepDescribe" title="{i18n>processDescribe}" description="{i18n>processDescribeText}" icon="sap-icon://edit" wrapping="true" />
+                <StandardListItem id="stepValidate" title="{i18n>processValidate}" description="{i18n>processValidateText}" icon="sap-icon://validate" wrapping="true" />
+                <StandardListItem id="stepApprove" title="{i18n>processApprove}" description="{i18n>processApproveText}" icon="sap-icon://approvals" wrapping="true" />
+                <StandardListItem id="stepExecute" title="{i18n>processExecute}" description="{i18n>processExecuteText}" icon="sap-icon://process" wrapping="true" />
+                <StandardListItem id="stepVerify" title="{i18n>processVerify}" description="{i18n>processVerifyText}" icon="sap-icon://inspection" wrapping="true" />
+            </List>
+        </Panel>
+    </macros:Page>
+</mvc:View>

@@ -1,0 +1,26 @@
+[
+    {
+        "Customer": "C700-C00",
+        "CustomerName": "North Sea Energy – H2 Power – 00",
+        "CityName": "Hamburg",
+        "Country": "DE"
+    },
+    {
+        "Customer": "C700-C01",
+        "CustomerName": "North Sea Energy – H2 Power – 01",
+        "CityName": "Bremerhaven",
+        "Country": "DE"
+    },
+    {
+        "Customer": "C710-C00",
+        "CustomerName": "Baltic Hydrogen Grid – 00",
+        "CityName": "Rostock",
+        "Country": "DE"
+    },
+    {
+        "Customer": "C720-C00",
+        "CustomerName": "Rhine Electrolysis Park – 00",
+        "CityName": "Duisburg",
+        "Country": "DE"
+    }
+]

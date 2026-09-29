@@ -1,0 +1,26 @@
+[
+    {
+        "FunctionalLocation": "H2POWC00-PROD",
+        "FunctionalLocationName": "H2 Power Plant 00 – Production",
+        "Customer": "C700-C00",
+        "MaintenancePlant": "1010"
+    },
+    {
+        "FunctionalLocation": "H2POWC00-UTIL",
+        "FunctionalLocationName": "H2 Power Plant 00 – Utilities",
+        "Customer": "C700-C00",
+        "MaintenancePlant": "1010"
+    },
+    {
+        "FunctionalLocation": "H2POWC01-PROD",
+        "FunctionalLocationName": "H2 Power Plant 01 – Production",
+        "Customer": "C700-C01",
+        "MaintenancePlant": "1010"
+    },
+    {
+        "FunctionalLocation": "BHG-RST-01",
+        "FunctionalLocationName": "Rostock Hub – Compressor Station",
+        "Customer": "C710-C00",
+        "MaintenancePlant": "1020"
+    }
+]

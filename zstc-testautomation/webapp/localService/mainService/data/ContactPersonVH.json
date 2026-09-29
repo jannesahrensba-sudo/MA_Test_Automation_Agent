@@ -1,0 +1,37 @@
+[
+    {
+        "BusinessPartner": "CP-700001",
+        "BusinessPartnerFullName": "Michael Fischer",
+        "FirstName": "Michael",
+        "LastName": "Fischer",
+        "Customer": "C700-C00"
+    },
+    {
+        "BusinessPartner": "CP-700003",
+        "BusinessPartnerFullName": "Jonas Weber",
+        "FirstName": "Jonas",
+        "LastName": "Weber",
+        "Customer": "C700-C00"
+    },
+    {
+        "BusinessPartner": "CP-700102",
+        "BusinessPartnerFullName": "Michaela Fischer",
+        "FirstName": "Michaela",
+        "LastName": "Fischer",
+        "Customer": "C700-C01"
+    },
+    {
+        "BusinessPartner": "CP-710001",
+        "BusinessPartnerFullName": "Anna Berg",
+        "FirstName": "Anna",
+        "LastName": "Berg",
+        "Customer": "C710-C00"
+    },
+    {
+        "BusinessPartner": "CP-720001",
+        "BusinessPartnerFullName": "Lukas Hoffmann",
+        "FirstName": "Lukas",
+        "LastName": "Hoffmann",
+        "Customer": "C720-C00"
+    }
+]

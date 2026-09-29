@@ -1,0 +1,17 @@
+[
+    {
+        "ServiceOrganization": "SO-DE-NORTH",
+        "ServiceOrganizationName": "Service Organization North Germany",
+        "SalesOrganization": "1010"
+    },
+    {
+        "ServiceOrganization": "SO-DE-SOUTH",
+        "ServiceOrganizationName": "Service Organization South Germany",
+        "SalesOrganization": "1010"
+    },
+    {
+        "ServiceOrganization": "SO-DE-BALTIC",
+        "ServiceOrganizationName": "Service Organization Baltic Coast",
+        "SalesOrganization": "1020"
+    }
+]

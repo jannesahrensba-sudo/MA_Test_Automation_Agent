@@ -1,0 +1,14 @@
+[
+    {
+        "Code": "NOT_APPROVED",
+        "Text": "Not Approved"
+    },
+    {
+        "Code": "APPROVED",
+        "Text": "Approved"
+    },
+    {
+        "Code": "REVOKED",
+        "Text": "Revoked"
+    }
+]

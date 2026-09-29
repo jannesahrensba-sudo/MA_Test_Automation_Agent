@@ -1,0 +1,22 @@
+[
+    {
+        "Code": "MOCK",
+        "Text": "MockExecutionProvider (Mock)"
+    },
+    {
+        "Code": "MOCK_UNAVAILABLE",
+        "Text": "MockExecutionProvider – simulated outage (Mock)"
+    },
+    {
+        "Code": "CALM_TAT",
+        "Text": "SAP Cloud ALM + Test Automation Tool (not connected)"
+    },
+    {
+        "Code": "TRICENTIS",
+        "Text": "Tricentis Test Automation for SAP (not connected)"
+    },
+    {
+        "Code": "API_CHAIN",
+        "Text": "Direct API chain, test systems only (not connected)"
+    }
+]

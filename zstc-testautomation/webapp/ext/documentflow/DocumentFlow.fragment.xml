@@ -1,0 +1,32 @@
+<core:FragmentDefinition xmlns:core="sap.ui.core" xmlns="sap.m" xmlns:commons="sap.suite.ui.commons">
+    <!-- Custom section "Document Flow": documents of the latest execution as sap.suite.ui.commons.ProcessFlow -->
+    <VBox id="documentFlowBox" core:require="{flow: 'zstc/testautomation/ext/documentflow/DocumentFlow'}">
+        <MessageStrip id="documentFlowHint" text="{i18n>documentFlowHint}" type="Information" showIcon="true" class="sapUiSmallMarginBottom" />
+        <commons:ProcessFlow
+            id="documentFlow"
+            scrollable="true"
+            foldedCorners="true"
+            wheelZoomable="false"
+            nodes="{path: '_LatestDocumentReference', parameters: {$orderby: 'Sequence'}, templateShareable: false}">
+            <commons:lanes>
+                <commons:ProcessFlowLaneHeader laneId="SERVICE_REQUEST" position="0" iconSrc="sap-icon://request" text="{i18n>boSERVICE_REQUEST}" />
+                <commons:ProcessFlowLaneHeader laneId="SERVICE_QUOTATION" position="1" iconSrc="sap-icon://sales-quote" text="{i18n>boSERVICE_QUOTATION}" />
+                <commons:ProcessFlowLaneHeader laneId="SERVICE_ORDER" position="2" iconSrc="sap-icon://sales-order" text="{i18n>boSERVICE_ORDER}" />
+                <commons:ProcessFlowLaneHeader laneId="SERVICE_CONFIRMATION" position="3" iconSrc="sap-icon://complete" text="{i18n>boSERVICE_CONFIRMATION}" />
+                <commons:ProcessFlowLaneHeader laneId="BILLING_DOC_REQUEST" position="4" iconSrc="sap-icon://request" text="{i18n>boBILLING_DOC_REQUEST}" />
+                <commons:ProcessFlowLaneHeader laneId="BILLING_DOCUMENT" position="5" iconSrc="sap-icon://receipt" text="{i18n>boBILLING_DOCUMENT}" />
+            </commons:lanes>
+            <commons:nodes>
+                <commons:ProcessFlowNode
+                    nodeId="{DocumentID}"
+                    laneId="{BusinessObjectType}"
+                    title="{parts: [{path: '_BusinessObjectType/Text', targetType: 'any'}, {path: 'DocumentID', targetType: 'any'}], formatter: 'flow.title'}"
+                    titleAbbreviation="{DocumentID}"
+                    state="{path: 'Criticality', targetType: 'any', formatter: 'flow.state'}"
+                    stateText="{LifecycleStatus}"
+                    texts="{parts: [{path: 'NetAmount', targetType: 'any'}, {path: 'TransactionCurrency', targetType: 'any'}], formatter: 'flow.texts'}"
+                    children="{path: 'SuccessorDocumentID', targetType: 'any', formatter: 'flow.children'}" />
+            </commons:nodes>
+        </commons:ProcessFlow>
+    </VBox>
+</core:FragmentDefinition>

@@ -1,0 +1,310 @@
+{
+    "_version": "1.65.0",
+    "sap.app": {
+        "id": "zstc.testautomation",
+        "type": "application",
+        "i18n": {
+            "bundleName": "zstc.testautomation.i18n.i18n",
+            "supportedLocales": [
+                "",
+                "de"
+            ],
+            "fallbackLocale": ""
+        },
+        "applicationVersion": {
+            "version": "0.1.0"
+        },
+        "title": "{{appTitle}}",
+        "description": "{{appDescription}}",
+        "dataSources": {
+            "mainService": {
+                "uri": "/sap/opu/odata4/sap/zui_stc_test_case_o4/srvd/sap/zui_stc_test_case/0001/",
+                "type": "OData",
+                "settings": {
+                    "annotations": [],
+                    "localUri": "localService/mainService/metadata.xml",
+                    "odataVersion": "4.0"
+                }
+            }
+        },
+        "crossNavigation": {
+            "inbounds": {
+                "ServiceTestCase-manage": {
+                    "semanticObject": "ServiceTestCase",
+                    "action": "manage",
+                    "title": "{{appTitle}}",
+                    "subTitle": "{{appSubTitle}}",
+                    "icon": "sap-icon://checklist",
+                    "signature": {
+                        "parameters": {},
+                        "additionalParameters": "allowed"
+                    }
+                }
+            }
+        }
+    },
+    "sap.ui": {
+        "technology": "UI5",
+        "icons": {
+            "icon": "sap-icon://checklist"
+        },
+        "deviceTypes": {
+            "desktop": true,
+            "tablet": true,
+            "phone": true
+        }
+    },
+    "sap.ui5": {
+        "flexEnabled": true,
+        "dependencies": {
+            "minUI5Version": "1.136.0",
+            "libs": {
+                "sap.m": {},
+                "sap.ui.core": {},
+                "sap.fe.templates": {},
+                "sap.suite.ui.commons": {
+                    "lazy": true
+                }
+            }
+        },
+        "contentDensities": {
+            "compact": true,
+            "cozy": true
+        },
+        "models": {
+            "i18n": {
+                "type": "sap.ui.model.resource.ResourceModel",
+                "settings": {
+                    "bundleName": "zstc.testautomation.i18n.i18n",
+                    "supportedLocales": [
+                        "",
+                        "de"
+                    ],
+                    "fallbackLocale": ""
+                }
+            },
+            "": {
+                "dataSource": "mainService",
+                "preload": true,
+                "settings": {
+                    "operationMode": "Server",
+                    "autoExpandSelect": true,
+                    "earlyRequests": true
+                }
+            }
+        },
+        "resources": {
+            "css": []
+        },
+        "routing": {
+            "config": {
+                "flexibleColumnLayout": false
+            },
+            "routes": [
+                {
+                    "pattern": ":?query:",
+                    "name": "Overview",
+                    "target": "Overview"
+                },
+                {
+                    "pattern": "TestCase:?query:",
+                    "name": "TestCaseList",
+                    "target": "TestCaseList"
+                },
+                {
+                    "pattern": "TestCase({key}):?query:",
+                    "name": "TestCaseObjectPage",
+                    "target": "TestCaseObjectPage"
+                },
+                {
+                    "pattern": "ProcessProfile:?query:",
+                    "name": "ProcessProfileList",
+                    "target": "ProcessProfileList"
+                },
+                {
+                    "pattern": "ProcessProfile({key}):?query:",
+                    "name": "ProcessProfileObjectPage",
+                    "target": "ProcessProfileObjectPage"
+                }
+            ],
+            "targets": {
+                "Overview": {
+                    "type": "Component",
+                    "id": "Overview",
+                    "name": "sap.fe.core.fpm",
+                    "options": {
+                        "settings": {
+                            "viewName": "zstc.testautomation.ext.overview.Overview",
+                            "contextPath": "/TestCase",
+                            "navigation": {
+                                "TestCase": {
+                                    "detail": {
+                                        "route": "TestCaseObjectPage"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "TestCaseList": {
+                    "type": "Component",
+                    "id": "TestCaseList",
+                    "name": "sap.fe.templates.ListReport",
+                    "options": {
+                        "settings": {
+                            "contextPath": "/TestCase",
+                            "variantManagement": "Page",
+                            "initialLoad": "Enabled",
+                            "navigation": {
+                                "TestCase": {
+                                    "detail": {
+                                        "route": "TestCaseObjectPage"
+                                    }
+                                }
+                            },
+                            "controlConfiguration": {
+                                "@com.sap.vocabularies.UI.v1.LineItem": {
+                                    "tableSettings": {
+                                        "type": "ResponsiveTable",
+                                        "selectionMode": "Multi"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "TestCaseObjectPage": {
+                    "type": "Component",
+                    "id": "TestCaseObjectPage",
+                    "name": "sap.fe.templates.ObjectPage",
+                    "options": {
+                        "settings": {
+                            "contextPath": "/TestCase",
+                            "editableHeaderContent": false,
+                            "sectionLayout": "Page",
+                            "controlConfiguration": {
+                                "_ValidationResult/@com.sap.vocabularies.UI.v1.LineItem": {
+                                    "tableSettings": {
+                                        "type": "ResponsiveTable",
+                                        "enableFullScreen": true
+                                    }
+                                },
+                                "_LatestDocumentReference/@com.sap.vocabularies.UI.v1.LineItem": {
+                                    "tableSettings": {
+                                        "type": "ResponsiveTable"
+                                    }
+                                },
+                                "_LatestExecutionStep/@com.sap.vocabularies.UI.v1.LineItem": {
+                                    "tableSettings": {
+                                        "type": "ResponsiveTable"
+                                    }
+                                },
+                                "_LatestTestAssertion/@com.sap.vocabularies.UI.v1.LineItem": {
+                                    "tableSettings": {
+                                        "type": "ResponsiveTable",
+                                        "enableFullScreen": true
+                                    }
+                                },
+                                "_Execution/@com.sap.vocabularies.UI.v1.LineItem#History": {
+                                    "tableSettings": {
+                                        "type": "ResponsiveTable"
+                                    }
+                                }
+                            },
+                            "content": {
+                                "body": {
+                                    "sections": {
+                                        "TestData": {
+                                            "subSections": {
+                                                "CaseNarrative": {
+                                                    "type": "XMLFragment",
+                                                    "template": "zstc.testautomation.ext.capture.CaseNarrative",
+                                                    "title": "{i18n>caseNarrativeTitle}",
+                                                    "position": {
+                                                        "placement": "Before",
+                                                        "anchor": "TestData"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "DocumentFlow": {
+                                            "template": "zstc.testautomation.ext.documentflow.DocumentFlow",
+                                            "title": "{i18n>documentFlowTitle}",
+                                            "position": {
+                                                "placement": "After",
+                                                "anchor": "SAPObjects"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "ProcessProfileList": {
+                    "type": "Component",
+                    "id": "ProcessProfileList",
+                    "name": "sap.fe.templates.ListReport",
+                    "options": {
+                        "settings": {
+                            "contextPath": "/ProcessProfile",
+                            "variantManagement": "Page",
+                            "initialLoad": "Enabled",
+                            "navigation": {
+                                "ProcessProfile": {
+                                    "detail": {
+                                        "route": "ProcessProfileObjectPage"
+                                    }
+                                }
+                            },
+                            "controlConfiguration": {
+                                "@com.sap.vocabularies.UI.v1.LineItem": {
+                                    "tableSettings": {
+                                        "type": "ResponsiveTable"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "ProcessProfileObjectPage": {
+                    "type": "Component",
+                    "id": "ProcessProfileObjectPage",
+                    "name": "sap.fe.templates.ObjectPage",
+                    "options": {
+                        "settings": {
+                            "contextPath": "/ProcessProfile",
+                            "editableHeaderContent": false,
+                            "controlConfiguration": {
+                                "_FieldRequirement/@com.sap.vocabularies.UI.v1.LineItem": {
+                                    "tableSettings": {
+                                        "type": "GridTable",
+                                        "creationMode": {
+                                            "name": "Inline",
+                                            "createAtEnd": true
+                                        },
+                                        "enableFullScreen": true,
+                                        "rowCountMode": "Auto"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "extends": {
+            "extensions": {
+                "sap.ui.controllerExtensions": {
+                    "sap.fe.templates.ObjectPage.ObjectPageController#zstc.testautomation::TestCaseObjectPage": {
+                        "controllerName": "zstc.testautomation.ext.controller.TestCaseObjectPageExt"
+                    }
+                }
+            }
+        }
+    },
+    "sap.fiori": {
+        "registrationIds": [],
+        "archeType": "transactional"
+    }
+}

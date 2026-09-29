@@ -1,0 +1,36 @@
+# yaml-language-server: $schema=https://sap.github.io/ui5-tooling/schema/ui5.yaml.json
+# Local mock setup: SAP Fiori launchpad sandbox + FE mock server for ZUI_STC_TEST_CASE_O4 (no SAP system needed).
+specVersion: "4.0"
+metadata:
+  name: zstc.testautomation
+type: application
+framework:
+  name: SAPUI5
+  version: "1.136.22"
+  libraries:
+    - name: sap.m
+    - name: sap.ui.core
+    - name: sap.fe.templates
+    - name: sap.suite.ui.commons
+    - name: sap.ushell
+    - name: themelib_sap_horizon
+server:
+  customMiddleware:
+    - name: sap-fe-mockserver
+      beforeMiddleware: csp
+      configuration:
+        mountPath: /
+        services:
+          - urlPath: /sap/opu/odata4/sap/zui_stc_test_case_o4/srvd/sap/zui_stc_test_case/0001
+            metadataPath: ./webapp/localService/mainService/metadata.xml
+            mockdataPath: ./webapp/localService/mainService/data
+            generateMockData: false
+    - name: preview-middleware
+      afterMiddleware: compression
+      configuration:
+        flp:
+          path: /test/flp.html
+          theme: sap_horizon
+          intent:
+            object: ServiceTestCase
+            action: manage

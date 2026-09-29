@@ -1,0 +1,22 @@
+[
+    {
+        "Code": "NOT_STARTED",
+        "Text": "Not Started"
+    },
+    {
+        "Code": "RUNNING",
+        "Text": "Running"
+    },
+    {
+        "Code": "FINISHED",
+        "Text": "Finished"
+    },
+    {
+        "Code": "FAILED",
+        "Text": "Failed"
+    },
+    {
+        "Code": "CANCELLED",
+        "Text": "Cancelled"
+    }
+]

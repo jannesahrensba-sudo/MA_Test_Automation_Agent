@@ -1,0 +1,26 @@
+[
+    {
+        "Code": "CAPTURED",
+        "Text": "Captured"
+    },
+    {
+        "Code": "VALIDATED",
+        "Text": "Validated"
+    },
+    {
+        "Code": "APPROVED",
+        "Text": "Approved"
+    },
+    {
+        "Code": "IN_EXECUTION",
+        "Text": "In Execution"
+    },
+    {
+        "Code": "COMPLETED",
+        "Text": "Completed"
+    },
+    {
+        "Code": "CANCELLED",
+        "Text": "Cancelled"
+    }
+]

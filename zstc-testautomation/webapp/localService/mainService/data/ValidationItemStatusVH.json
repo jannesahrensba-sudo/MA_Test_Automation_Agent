@@ -1,0 +1,18 @@
+[
+    {
+        "Code": "SUCCESS",
+        "Text": "Success"
+    },
+    {
+        "Code": "WARNING",
+        "Text": "Warning"
+    },
+    {
+        "Code": "ERROR",
+        "Text": "Error"
+    },
+    {
+        "Code": "INFO",
+        "Text": "Information"
+    }
+]

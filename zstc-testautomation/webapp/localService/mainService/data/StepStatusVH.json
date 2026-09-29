@@ -1,0 +1,22 @@
+[
+    {
+        "Code": "PLANNED",
+        "Text": "Planned"
+    },
+    {
+        "Code": "RUNNING",
+        "Text": "Running"
+    },
+    {
+        "Code": "DONE",
+        "Text": "Done"
+    },
+    {
+        "Code": "FAILED",
+        "Text": "Failed"
+    },
+    {
+        "Code": "SKIPPED",
+        "Text": "Skipped"
+    }
+]

@@ -1,0 +1,22 @@
+[
+    {
+        "Code": "COMPLETENESS",
+        "Text": "Completeness"
+    },
+    {
+        "Code": "EXISTENCE",
+        "Text": "Existence"
+    },
+    {
+        "Code": "RELATIONSHIP",
+        "Text": "Relationship"
+    },
+    {
+        "Code": "CONSISTENCY",
+        "Text": "Consistency"
+    },
+    {
+        "Code": "EXTRACTION",
+        "Text": "Extraction"
+    }
+]

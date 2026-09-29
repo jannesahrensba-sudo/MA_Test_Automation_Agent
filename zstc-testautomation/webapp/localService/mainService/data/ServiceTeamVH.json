@@ -1,0 +1,22 @@
+[
+    {
+        "RespyMgmtServiceTeam": "ICNT_1SUP-DE",
+        "RespyMgmtServiceTeamName": "1st Level Support Germany",
+        "ServiceOrganization": "SO-DE-NORTH"
+    },
+    {
+        "RespyMgmtServiceTeam": "ICNT_2SUP-DE",
+        "RespyMgmtServiceTeamName": "2nd Level Support Germany",
+        "ServiceOrganization": "SO-DE-NORTH"
+    },
+    {
+        "RespyMgmtServiceTeam": "FS-TEAM-HH",
+        "RespyMgmtServiceTeamName": "Field Service Team Hamburg",
+        "ServiceOrganization": "SO-DE-NORTH"
+    },
+    {
+        "RespyMgmtServiceTeam": "FS-TEAM-RST",
+        "RespyMgmtServiceTeamName": "Field Service Team Rostock",
+        "ServiceOrganization": "SO-DE-BALTIC"
+    }
+]

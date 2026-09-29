@@ -1,0 +1,18 @@
+[
+    {
+        "Code": "NOT_VALIDATED",
+        "Text": "Not Validated"
+    },
+    {
+        "Code": "VALID",
+        "Text": "Valid"
+    },
+    {
+        "Code": "AMBIGUOUS",
+        "Text": "Ambiguous"
+    },
+    {
+        "Code": "INVALID",
+        "Text": "Invalid"
+    }
+]

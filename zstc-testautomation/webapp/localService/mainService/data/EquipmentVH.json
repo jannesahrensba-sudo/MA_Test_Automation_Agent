@@ -1,0 +1,42 @@
+[
+    {
+        "Equipment": "EL-100",
+        "EquipmentName": "Electrolyzer Stack EL-100",
+        "FunctionalLocation": "H2POWC00-PROD",
+        "Material": "P700-EL-100",
+        "SerialNumber": "SN-EL100-0001",
+        "Customer": "C700-C00"
+    },
+    {
+        "Equipment": "EL-101",
+        "EquipmentName": "Electrolyzer Stack EL-101",
+        "FunctionalLocation": "H2POWC00-PROD",
+        "Material": "P700-EL-100",
+        "SerialNumber": "SN-EL100-0002",
+        "Customer": "C700-C00"
+    },
+    {
+        "Equipment": "EL-150",
+        "EquipmentName": "Cooling Water Unit EL-150",
+        "FunctionalLocation": "H2POWC00-UTIL",
+        "Material": "P700-CW-150",
+        "SerialNumber": "SN-CW150-0001",
+        "Customer": "C700-C00"
+    },
+    {
+        "Equipment": "EL-200",
+        "EquipmentName": "Electrolyzer Stack EL-200",
+        "FunctionalLocation": "H2POWC01-PROD",
+        "Material": "P700-EL-200",
+        "SerialNumber": "SN-EL200-0001",
+        "Customer": "C700-C01"
+    },
+    {
+        "Equipment": "CMP-300",
+        "EquipmentName": "Hydrogen Compressor CMP-300",
+        "FunctionalLocation": "BHG-RST-01",
+        "Material": "P710-CMP-300",
+        "SerialNumber": "SN-CMP300-0001",
+        "Customer": "C710-C00"
+    }
+]

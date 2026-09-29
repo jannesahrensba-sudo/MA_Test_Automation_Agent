@@ -1,0 +1,18 @@
+[
+    {
+        "ServiceDocumentPriority": "1",
+        "ServiceDocumentPriorityName": "Very High"
+    },
+    {
+        "ServiceDocumentPriority": "3",
+        "ServiceDocumentPriorityName": "High"
+    },
+    {
+        "ServiceDocumentPriority": "5",
+        "ServiceDocumentPriorityName": "Medium"
+    },
+    {
+        "ServiceDocumentPriority": "9",
+        "ServiceDocumentPriorityName": "Low"
+    }
+]

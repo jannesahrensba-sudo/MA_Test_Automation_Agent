@@ -1,0 +1,30 @@
+[
+    {
+        "Code": "VALUE_HELP",
+        "Text": "Value Help"
+    },
+    {
+        "Code": "FREE_TEXT",
+        "Text": "Free Text"
+    },
+    {
+        "Code": "DERIVED",
+        "Text": "Derived"
+    },
+    {
+        "Code": "CONSTANT",
+        "Text": "Constant"
+    },
+    {
+        "Code": "USER",
+        "Text": "User Input"
+    },
+    {
+        "Code": "EXTRACTION_MOCK",
+        "Text": "Extraction (Mock)"
+    },
+    {
+        "Code": "DEFAULT",
+        "Text": "Default Value"
+    }
+]

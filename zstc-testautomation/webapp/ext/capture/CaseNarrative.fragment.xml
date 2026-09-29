@@ -1,0 +1,30 @@
+<core:FragmentDefinition xmlns:core="sap.ui.core" xmlns="sap.m">
+    <!-- Custom subsection "Test Case in Words": display only, grows with the input (no business logic) -->
+    <VBox id="caseNarrative" core:require="{narrative: 'zstc/testautomation/ext/capture/CaseNarrative'}" class="sapUiSmallMarginBottom">
+        <MessageStrip id="caseNarrativeHint" text="{i18n>caseNarrativeHint}" type="Information" showIcon="true" class="sapUiSmallMarginBottom" />
+        <FormattedText
+            id="caseNarrativeText"
+            htmlText="{parts: [
+                {path: 'ProcessProfile', targetType: 'any'},
+                {path: '_TestCaseData/SoldToParty', targetType: 'any'},
+                {path: '_TestCaseData/_Customer/CustomerName', targetType: 'any'},
+                {path: '_TestCaseData/ServiceRequestDescription', targetType: 'any'},
+                {path: '_TestCaseData/ServiceRequestReporter', targetType: 'any'},
+                {path: '_TestCaseData/_Reporter/BusinessPartnerFullName', targetType: 'any'},
+                {path: '_TestCaseData/ServiceDocumentPriority', targetType: 'any'},
+                {path: '_TestCaseData/RespyMgmtServiceTeam', targetType: 'any'},
+                {path: '_TestCaseData/ServiceRefFunctionalLocation', targetType: 'any'},
+                {path: '_TestCaseData/ServiceReferenceEquipment', targetType: 'any'},
+                {path: '_TestCaseData/ReferenceProduct', targetType: 'any'},
+                {path: '_TestCaseData/ServiceProduct', targetType: 'any'},
+                {path: '_TestCaseData/ServiceDuration', targetType: 'any'},
+                {path: '_TestCaseData/ServiceDurationUnit', targetType: 'any'},
+                {path: '_TestCaseData/ServicePart', targetType: 'any'},
+                {path: '_TestCaseData/ServicePartQuantity', targetType: 'any'},
+                {path: '_TestCaseData/ServicePartQuantityUnit', targetType: 'any'},
+                {path: '_TestCaseData/ExpectedNetAmount', targetType: 'any'},
+                {path: '_TestCaseData/NetAmountTolerance', targetType: 'any'},
+                {path: '_TestCaseData/TransactionCurrency', targetType: 'any'}
+            ], formatter: 'narrative.format'}" />
+    </VBox>
+</core:FragmentDefinition>

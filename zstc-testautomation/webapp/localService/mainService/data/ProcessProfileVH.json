@@ -1,0 +1,18 @@
+[
+    {
+        "ProcessProfile": "FS_TM",
+        "ProcessProfileName": "Field Service – Time & Material"
+    },
+    {
+        "ProcessProfile": "FS_FIXPRICE",
+        "ProcessProfileName": "Field Service – Fixed Price"
+    },
+    {
+        "ProcessProfile": "FS_TM_4EYES",
+        "ProcessProfileName": "Field Service – T&M, Four-Eyes Approval"
+    },
+    {
+        "ProcessProfile": "FS_TM_OUTAGE",
+        "ProcessProfileName": "Field Service – T&M, Provider Outage (Demo)"
+    }
+]

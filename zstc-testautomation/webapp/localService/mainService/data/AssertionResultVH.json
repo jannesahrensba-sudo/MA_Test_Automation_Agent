@@ -1,0 +1,18 @@
+[
+    {
+        "Code": "PASSED",
+        "Text": "Passed"
+    },
+    {
+        "Code": "WARNING",
+        "Text": "Warning"
+    },
+    {
+        "Code": "FAILED",
+        "Text": "Failed"
+    },
+    {
+        "Code": "NOT_EVALUATED",
+        "Text": "Not Evaluated"
+    }
+]

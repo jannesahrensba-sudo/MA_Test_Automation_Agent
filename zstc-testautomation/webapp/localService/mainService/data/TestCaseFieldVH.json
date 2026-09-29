@@ -1,0 +1,127 @@
+[
+    {
+        "FieldName": "ServiceRequestType",
+        "FieldLabel": "Service Request Type",
+        "BusinessObject": "SERVICE_REQUEST"
+    },
+    {
+        "FieldName": "ServiceRequestDescription",
+        "FieldLabel": "Problem Description",
+        "BusinessObject": "SERVICE_REQUEST"
+    },
+    {
+        "FieldName": "SoldToParty",
+        "FieldLabel": "Sold-to Party",
+        "BusinessObject": "SERVICE_REQUEST"
+    },
+    {
+        "FieldName": "ServiceRequestReporter",
+        "FieldLabel": "Reporter",
+        "BusinessObject": "SERVICE_REQUEST"
+    },
+    {
+        "FieldName": "ServiceDocumentPriority",
+        "FieldLabel": "Priority",
+        "BusinessObject": "SERVICE_REQUEST"
+    },
+    {
+        "FieldName": "SalesOrganization",
+        "FieldLabel": "Sales Organization",
+        "BusinessObject": "SERVICE_REQUEST"
+    },
+    {
+        "FieldName": "ServiceOrganization",
+        "FieldLabel": "Service Organization",
+        "BusinessObject": "SERVICE_REQUEST"
+    },
+    {
+        "FieldName": "RespyMgmtServiceTeam",
+        "FieldLabel": "Service Team",
+        "BusinessObject": "SERVICE_REQUEST"
+    },
+    {
+        "FieldName": "ServiceProfile",
+        "FieldLabel": "Service Profile",
+        "BusinessObject": "SERVICE_REQUEST"
+    },
+    {
+        "FieldName": "ResponseProfile",
+        "FieldLabel": "Response Profile",
+        "BusinessObject": "SERVICE_REQUEST"
+    },
+    {
+        "FieldName": "RequestedServiceStartDateTime",
+        "FieldLabel": "Requested Start",
+        "BusinessObject": "SERVICE_REQUEST"
+    },
+    {
+        "FieldName": "RequestedServiceEndDateTime",
+        "FieldLabel": "Requested End",
+        "BusinessObject": "SERVICE_REQUEST"
+    },
+    {
+        "FieldName": "ServiceRefFunctionalLocation",
+        "FieldLabel": "Functional Location",
+        "BusinessObject": "SERVICE_REQUEST"
+    },
+    {
+        "FieldName": "ServiceReferenceEquipment",
+        "FieldLabel": "Equipment",
+        "BusinessObject": "SERVICE_REQUEST"
+    },
+    {
+        "FieldName": "ReferenceProduct",
+        "FieldLabel": "Reference Product",
+        "BusinessObject": "SERVICE_REQUEST"
+    },
+    {
+        "FieldName": "ServiceProduct",
+        "FieldLabel": "Service Product",
+        "BusinessObject": "SERVICE_ORDER"
+    },
+    {
+        "FieldName": "ServiceDuration",
+        "FieldLabel": "Service Duration",
+        "BusinessObject": "SERVICE_ORDER"
+    },
+    {
+        "FieldName": "ServiceDurationUnit",
+        "FieldLabel": "Duration Unit",
+        "BusinessObject": "SERVICE_ORDER"
+    },
+    {
+        "FieldName": "ServicePart",
+        "FieldLabel": "Service Part",
+        "BusinessObject": "SERVICE_ORDER"
+    },
+    {
+        "FieldName": "ServicePartQuantity",
+        "FieldLabel": "Part Quantity",
+        "BusinessObject": "SERVICE_ORDER"
+    },
+    {
+        "FieldName": "ServicePartQuantityUnit",
+        "FieldLabel": "Quantity Unit",
+        "BusinessObject": "SERVICE_ORDER"
+    },
+    {
+        "FieldName": "ExpectedNetAmount",
+        "FieldLabel": "Expected Net Value",
+        "BusinessObject": "BILLING_DOCUMENT"
+    },
+    {
+        "FieldName": "NetAmountTolerance",
+        "FieldLabel": "Net Value Tolerance",
+        "BusinessObject": "BILLING_DOCUMENT"
+    },
+    {
+        "FieldName": "TransactionCurrency",
+        "FieldLabel": "Currency",
+        "BusinessObject": "BILLING_DOCUMENT"
+    },
+    {
+        "FieldName": "ProcessProfile",
+        "FieldLabel": "Process Profile",
+        "BusinessObject": "TEST_CASE"
+    }
+]

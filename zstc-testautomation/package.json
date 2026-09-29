@@ -1,0 +1,21 @@
+{
+  "name": "zstc-testautomation",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Service-to-Cash Test Automation Assistant - SAP Fiori elements for OData V4 (FPM) mockup on a local OData V4 mock server",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=20.11.0"
+  },
+  "scripts": {
+    "start": "ui5 serve --config ui5-mock.yaml --open \"test/flp.html#ServiceTestCase-manage\"",
+    "start:noopen": "ui5 serve --config ui5-mock.yaml",
+    "build": "ui5 build --config ui5.yaml --clean-dest",
+    "test": "node --test \"mock-backend/test/*.test.js\""
+  },
+  "devDependencies": {
+    "@sap-ux/preview-middleware": "1.2.19",
+    "@sap-ux/ui5-middleware-fe-mockserver": "2.4.17",
+    "@ui5/cli": "4.0.70"
+  }
+}

@@ -1,0 +1,22 @@
+[
+    {
+        "Code": "PASSED",
+        "Text": "Passed"
+    },
+    {
+        "Code": "PASSED_WITH_WARNING",
+        "Text": "Passed with Warning"
+    },
+    {
+        "Code": "FAILED_FUNCTIONAL",
+        "Text": "Failed (Functional)"
+    },
+    {
+        "Code": "FAILED_TECHNICAL",
+        "Text": "Failed (Technical)"
+    },
+    {
+        "Code": "BLOCKED",
+        "Text": "Blocked"
+    }
+]

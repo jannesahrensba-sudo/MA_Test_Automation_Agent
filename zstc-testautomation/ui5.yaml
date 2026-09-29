@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://sap.github.io/ui5-tooling/schema/ui5.yaml.json
+# Build / real-backend configuration. The local mock setup lives in ui5-mock.yaml.
+specVersion: "4.0"
+metadata:
+  name: zstc.testautomation
+type: application
+framework:
+  name: SAPUI5
+  version: "1.136.22"
+  libraries:
+    - name: sap.m
+    - name: sap.ui.core
+    - name: sap.fe.templates
+    - name: sap.suite.ui.commons
+    - name: sap.ushell
+    - name: themelib_sap_horizon

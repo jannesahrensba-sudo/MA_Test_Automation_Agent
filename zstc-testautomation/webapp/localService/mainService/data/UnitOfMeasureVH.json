@@ -1,0 +1,22 @@
+[
+    {
+        "UnitOfMeasure": "HR",
+        "UnitOfMeasureName": "Hour",
+        "UnitOfMeasureDimension": "TIME"
+    },
+    {
+        "UnitOfMeasure": "MIN",
+        "UnitOfMeasureName": "Minute",
+        "UnitOfMeasureDimension": "TIME"
+    },
+    {
+        "UnitOfMeasure": "PC",
+        "UnitOfMeasureName": "Piece",
+        "UnitOfMeasureDimension": "NONE"
+    },
+    {
+        "UnitOfMeasure": "EA",
+        "UnitOfMeasureName": "Each",
+        "UnitOfMeasureDimension": "NONE"
+    }
+]
