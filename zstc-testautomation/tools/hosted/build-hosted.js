@@ -203,6 +203,20 @@ async function main() {
     fs.writeFileSync(path.join(SITE, 'resources/zstc-i18n-preload.js'), i18nBundle);
     copied.push('resources/zstc-i18n-preload.js');
 
+    // the hosting rejects files with a literal U+FFFD (replacement character): minified code keeps it in string
+    // literals (e.g. jQuery's CSS escape in sap-ui-core.js) — the \\uFFFD escape sequence is equivalent there
+    for (const file of copied.filter((f) => /\.(js|json)$/.test(f))) {
+        const target = path.join(SITE, file);
+        const text = fs.readFileSync(target, 'utf8');
+        if (text.includes('\uFFFD')) {
+            if (/\\\uFFFD/.test(text)) {
+                throw new Error(`${file}: escaped U+FFFD found, check manually`);
+            }
+            fs.writeFileSync(target, text.replace(/\uFFFD/g, '\\uFFFD'));
+            console.log(`  ${file}: U+FFFD written as escape sequence`);
+        }
+    }
+
     // report
     let bytes = 0;
     for (const file of copied) {

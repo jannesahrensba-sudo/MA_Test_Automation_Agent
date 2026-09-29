@@ -7,7 +7,7 @@
 | Projekt | `zstc.testautomation` (App-Verzeichnis `zstc-testautomation/` ab Phase 2) |
 | Phase | 1 von 6 — Architektur- & Mock-Contract-Validation |
 | Stand | 28.09.2026 |
-| Status | **Zur Freigabe vorgelegt — Arbeit nach Phase 1 gestoppt** (bewusst noch keine App-Dateien) |
+| Status | Geliefert. Auf Wunsch nach einem nutzbaren Mockup wurden die Phasen 2–6 anschließend umgesetzt: [`zstc-testautomation/README.md`](../zstc-testautomation/README.md), [`mock-to-real-mapping.md`](mock-to-real-mapping.md) |
 | Auftrag | [`prompt.md`](../prompt.md) (inkl. Anhänge A–E) |
 
 ## Inhalt

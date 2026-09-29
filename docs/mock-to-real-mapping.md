@@ -1,0 +1,120 @@
+# Mock → Real-Mapping
+
+**Service-to-Cash Test Automation Assistant · `zstc.testautomation`**
+
+Diese Tabelle ordnet jeden Mock-Baustein des Mockups seinem realen Andockziel zu. Sie vervollständigt die Vorab-Zuordnung aus [Phase 1, Abschnitt 5](phase-1-architektur-und-mock-vertrag.md#5-reale-andock-ziele-vorab-mapping-mock--real).
+
+Belegstufen wie in Phase 1 (Abschnitt 1.2):
+
+- ✅P: Primärquelle
+- ✅S: SAP-Suchauszug
+- 🟡: teilbestätigt
+- ⚠: **NOCH ZU VERIFIZIEREN**
+- 🧪: Mock bzw. Projektvorschlag
+
+## 1. Grundsatz des Swaps
+
+Das UI bleibt unverändert. Es bindet nur an den Vertrag `ZUI_STC_TEST_CASE_O4`, also an Entitäten, Actions, Value-Help-Mengen und Annotationen.
+
+Beim Wechsel auf das reale System passiert Folgendes:
+
+- `ui5-mock.yaml` wird durch eine Konfiguration **ohne** `sap-fe-mockserver` ersetzt.
+- `fiori-tools-proxy` leitet auf das Backend weiter, oder die App wird embedded deployt.
+- Die Logik der Mock-Handler (`webapp/localService/mainService/data/*.js` → `mock-backend/`) wandert in RAP-Behavior-Implementierungen und Adapter.
+
+| Mock-Baustein | Reales Ziel | Belegstufe | Aufwand beim Swap |
+|---|---|---|---|
+| `ui5-mock.yaml` mit `sap-fe-mockserver` | `ui5.yaml` mit `fiori-tools-proxy` (`@sap/ux-ui5-tooling`) oder Embedded Deployment in S/4HANA | ✅P (Tooling) | gering |
+| Service-URL `/sap/opu/odata4/sap/zui_stc_test_case_o4/srvd/sap/zui_stc_test_case/0001/` | RAP Service Binding `ZUI_STC_TEST_CASE_O4` (OData V4 – UI) unter derselben URL | 🧪 (Name) · URL-Schema ✅P | gering |
+| `metadata.xml` (generiert aus `tools/metadata/contract.js`) | CDS-Projektion, Metadata Extensions, Service Definition `ZUI_STC_TEST_CASE` | 🧪 | mittel (Modellierung) |
+| Hosted-Variante (`tools/hosted/`, Browser-Mockserver) | entfällt; nur Demo-Hülle ohne Backend | 🧪 | – |
+
+## 2. Business Objects und Verhalten
+
+| Mock | Real | Belegstufe |
+|---|---|---|
+| Entität `TestCase` (Draft Root, UUID + `IsActiveEntity`) | RAP BO Root, managed, mit Draft (`with draft`), UUID-Schlüssel | 🧪 · Draft-Muster ✅P |
+| `TestCaseData` (1:1-Komposition), `ValidationResult`, `Execution`, `ExecutionStep`, `DocumentReference`, `TestAssertion` | Kompositionen des BO; `Execution`-Teilbaum read-only | 🧪 |
+| `ProcessProfile` / `FieldRequirement` | eigenes Konfigurations-BO (Customizing-Charakter) | 🧪 |
+| Draft-Aktionen `Edit`, `Prepare`, `Activate`, `Discard` (Mockserver-Standard) | RAP-Draft-Aktionen gleichen Namens | ✅P |
+| `onDraftPrepare` → `TestCaseService.prepare` (Validierung beim Sichern, blockiert nicht) | `draft determine action Prepare` mit Validations als Hinweise | 🟡 (Konzept, F-10) |
+| Case ID beim Aktivieren (`onActivated`, Nummernkreis `STC-<Jahr>-######`) | Determination bzw. Late Numbering, eigener Nummernkreis | 🧪 |
+| `__OperationControl` (Instance Feature Control, z. B. `approve` nur bei `VALID`) | `features: instance` in der Behavior Definition, `get_instance_features` | ✅P (Muster) |
+| `__FieldControl` aus `FieldRequirement` (7 = Pflicht, 3 = optional, 0 = ausgeblendet) | dynamisches Feature Control bzw. virtuelle Elemente mit `Common.FieldControl` | ✅P (Annotation) · Umsetzung 🧪 |
+| `__EntityControl` (Updatable/Deletable) | `UpdateRestrictions`/`DeleteRestrictions` über Feature Control | ✅P (Muster) |
+| Actions `analyze`, `validate`, `approve`, `startExecution`, `refreshExecution`, `cancelExecution`, `revalidate`, `applySuggestion` | gebundene RAP-Actions gleichen Namens | 🧪 |
+| Side Effects (Annotationen im Vertrag) | `side effects` in der Behavior Definition bzw. `@Common.SideEffects` | ✅P |
+| State-Messages `SAP__Messages`, Transition-Messages über `sap-messages` | RAP-Messages (`reported`) mit `%element`-Targets | ✅P |
+| Message-Klasse `ZSTC_TA` (100–999, fünf Kategorien) | ABAP-Nachrichtenklasse `ZSTC_TA` | 🧪 |
+
+## 3. Die vier Verantwortlichkeiten
+
+| Verantwortung | Mock (Datei) | Real | Belegstufe |
+|---|---|---|---|
+| AI/Extraction | `MockTestCaseExtractionService` (`mock-backend/extraction/`): reines Keyword-/Token-Matching gegen die Pools, **kein Sprachmodell** | eigene Implementierung hinter `ITestCaseExtractionService`, z. B. über SAP AI Core oder einen anderen LLM-Dienst; kein SAP-Standard | 🧪 / ⚠ |
+| OData/Validation | `ValidationEngine` (`mock-backend/validation/`), Regeln R1–R9, deterministisch | RAP-Validations und -Actions im Facade-BO, Lookups über released CDS (Abschnitt 4) | 🧪 · CDS ⚠ |
+| SAP Test Automation | `MockExecutionProvider` + `MockS4ServiceChain` (`mock-backend/execution/`) | Adapter hinter `ITestExecutionProvider`: Cloud ALM (`CALM_TEST_AUTOMATION`) mit Provider (TAT, Tricentis) oder ein API-Ketten-Provider nur für Testsysteme | ✅S / ⚠ (F-8) |
+| Verification | `VerificationService` (`mock-backend/verification/`) | dieselbe Logik; liest die realen Belege über released APIs (Abschnitt 5) | 🧪 · APIs ✅P |
+
+**Die fünf offenen Punkte der Standard-Testautomatisierung.** Im Mock sind sie als Methoden von `ITestExecutionProvider` gekapselt:
+
+| # | Methode | Mock | Real |
+|---|---|---|---|
+| 1 | `start` | liefert `MOCK-<Datum>-<Nr>` | externer Start in Cloud ALM/TAT ⚠ |
+| 2 | Testdaten-Übergabe | validierter Datensatz (20 Felder) als Parameter von `start` | Datenvarianten im Testplan ✅S; externe Übergabe ⚠ |
+| 3 | `getStatus` | zeitbasierte Simulation, 6 Schritte à 2 s (SIM-1) | Status-Synchronisation Cloud ALM ↔ Provider ✅S; Abruf durch Dritte ⚠ |
+| 4 | `getResult` | technisches Ergebnis + Log | wie 3 ⚠ |
+| 5 | `getCreatedDocuments` | Belegnummern aus Mock-Nummernkreisen (SIM-2) | nicht belegt ⚠ → Fallback Document Correlation (Abschnitt 5) |
+
+## 4. Value Helps → CDS
+
+Das UI kennt nur die Facade-Namen. Die reale Basis wird im Backend verdrahtet. Details stehen in Phase 1, Abschnitt 3.7.
+
+| Facade (Mock-Pool) | Reale Basis | Belegstufe |
+|---|---|---|
+| `CustomerVH` | `I_Customer`, VH-View `I_Customer_VH` | Felder ✅P · View 🟡 |
+| `ContactPersonVH` | `I_BusinessPartner` plus Kontaktbeziehung | Felder ✅P · CDS ⚠ |
+| `FunctionalLocationVH` | `I_FunctionalLocation`, Kundenbezug über Partnerrolle | Felder ✅P · Kundenbezug ⚠ |
+| `EquipmentVH` | `I_Equipment`, VH-View `I_EquipmentStdVH` | Felder ✅P · View 🟡 |
+| `ProductVH` (Referenzprodukt, Leistung, Teil) | `I_Product` plus Beschreibung, Produkttyp als Konstante | 🟡 |
+| `SalesOrganizationVH` | `I_SalesOrganization` | 🟡 |
+| `ServiceOrganizationVH`, `ServiceTeamVH` | Organisationsmodell, Responsibility Management | ⚠ (F-4) |
+| `ServiceDocumentPriorityVH`, `ServiceRequestTypeVH` | Code-List-CDS bzw. Vorgangsarten-Customizing | ⚠ |
+| `UnitOfMeasureVH`, `CurrencyVH` | `I_UnitOfMeasure`, `I_Currency` | 🟡 |
+| `ProcessProfileVH`, `TestCaseFieldVH`, Code-Listen (`*StatusVH`, `ValidationRuleVH` …) | eigene CDS-Views auf dem Projekt-Customizing | 🧪 |
+
+## 5. Belege, Korrelation und Verification
+
+| Mock (`MockS4ServiceChain`) | Reale API und Felder | Belegstufe |
+|---|---|---|
+| Service Request (Nummernkreis ab 8000000010) | `API_SERVICE_REQUEST_SRV`, `A_ServiceRequest` | ✅P |
+| Service Quotation (ab 8000000030) | `API_SERVICE_QUOTATION_SRV;v=0002`, `A_ServiceQuotation` | ✅P |
+| Service Order (gemeinsamer Kreis mit Quotation) | `API_SERVICE_ORDER_SRV` (V2, abgekündigt) bzw. V4-Nachfolger `OP_SERVICEORDER_0001` ab 2025 | ✅P / ✅S |
+| Service Confirmation (ab 9000000000) | Service-Confirmation-API (V4 ab 2025, Hinweis 3625686) | ✅S · V2-Namen ✅P |
+| Billing Document Request (ab 10000012) | `API_BILLING_DOCUMENT_REQUEST_SRV` | ✅P |
+| Billing Document (ab 90000115) | `API_BILLING_DOCUMENT_SRV`, `A_BillingDocument.TotalNetAmount` | ✅P |
+| Korrelation Case ID (`CorrelationReference`) | `PurchaseOrderByCustomer` (SR, Order, Confirmation, BDR, Billing), bei der Quotation `ServiceQtanExtReference` | ✅P · Kopiersteuerung ⚠ |
+| `PredecessorDocumentID` / `SuccessorDocumentID` | `to_Order`, `ReferenceServiceRequest`, `ServiceQtanSuccessorOrder`, `to_Confirmation`, `ReferenceServiceOrder`, `ReferenceDocument`, `ReferenceSDDocument` | ✅P |
+| BDR-Vorgänger je Profil (`FS_TM`: Confirmation, `FS_FIXPRICE`: Order) | abrechnungsartabhängig | ⚠ (F-7) |
+| Belegstatus (vereinfacht, SIM-4) | reale Statusfelder, z. B. `ServiceOrderIsCompleted`, `OverallBillingStatus` (Phase 1, 5.3) | ✅P (V2) |
+| Mock-Preisliste (SIM-3: 1.000 EUR/HR, 693 EUR/PC) | Preisfindung (Konditionen) im S/4HANA-System | 🧪 (F-12) |
+| Mock-Nummernkreise (SIM-2) | Nummernkreis-Customizing je Belegart | 🧪 |
+| SIM-6 (gesperrtes Teil `P700-SC-999`) | echte Fehler aus Warenausgang oder Rückmeldung | 🧪 |
+| `ExternalURL` (im Mock leer) | Fiori-Absprung, z. B. Manage Service Orders F3571A, Create Billing Documents F0798 | ✅S / ⚠ |
+
+**Fallback Document Correlation.** Liefert der Provider keine Belegnummern, gilt:
+
+1. Die Eingaben sind `ExternalExecutionID`, Case ID (als `PurchaseOrderByCustomer`), `SoldToParty` und ein Zeitfenster.
+2. `$filter` auf `A_ServiceRequest` liefert den Einstiegsbeleg.
+3. Die Verweisfelder oben rekonstruieren den Document Flow.
+
+## 6. UI-Bausteine (bleiben beim Swap unverändert)
+
+| Baustein | Technik | Belegstufe |
+|---|---|---|
+| Overview | FPM Custom Page `sap.fe.core.fpm` mit `macros:Page` und `macros:Table` | ✅P |
+| Test Cases, Configuration | List Report + Object Page (`sap.fe.templates`) | ✅P |
+| „Test Case in Words“ | FPM Custom Subsection (Fragment + Formatter, reine Anzeige) | ✅P |
+| Document Flow | FPM Custom Section mit `sap.suite.ui.commons.ProcessFlow` | ✅P |
+| Status-Polling | Controller Extension der Object Page, `EditFlow.invokeAction` für `refreshExecution` | ✅P |
+| FLP-Sandbox (lokal) | `@sap-ux/preview-middleware`; real: SAP Fiori launchpad mit Semantic Object `ServiceTestCase`, Action `manage` | ✅P · Intent 🧪 |

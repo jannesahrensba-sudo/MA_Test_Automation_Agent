@@ -14,3 +14,8 @@ framework:
     - name: sap.suite.ui.commons
     - name: sap.ushell
     - name: themelib_sap_horizon
+builder:
+  resources:
+    excludes:
+      # mock service (metadata, mock data, Node.js data contributors) is not part of the app build
+      - "/localService/**"
