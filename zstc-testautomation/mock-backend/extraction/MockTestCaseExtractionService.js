@@ -142,19 +142,23 @@ class MockTestCaseExtractionService extends ITestCaseExtractionService {
             propose('ServiceRequestDescription', [quoted[1].trim()], quoted[0]);
         }
 
-        // Derivations along the master data relationships (source DERIVED)
+        // Derivations along the master data relationships (source DERIVED). An ambiguous equipment still yields a
+        // derivation when all candidates agree (e.g. EL-100 and EL-101 are both installed at H2POWC00-PROD).
         const has = (field) => proposals.some((p) => p.field === field);
-        const equipmentProposal = proposals.find((p) => p.field === 'ServiceReferenceEquipment' && p.status === 'SUCCESS');
+        const equipmentProposal = proposals.find((p) => p.field === 'ServiceReferenceEquipment');
         if (equipmentProposal) {
-            const eq = equipments.find((e) => e.Equipment === equipmentProposal.value);
-            if (eq && !has('ServiceRefFunctionalLocation')) {
-                propose('ServiceRefFunctionalLocation', [eq.FunctionalLocation], `equipment ${eq.Equipment}`, 'DERIVED');
-            }
-            if (eq && !has('ReferenceProduct')) {
-                propose('ReferenceProduct', [eq.Material], `equipment ${eq.Equipment}`, 'DERIVED');
-            }
-            if (eq && !has('SoldToParty')) {
-                propose('SoldToParty', [eq.Customer], `equipment ${eq.Equipment}`, 'DERIVED');
+            const candidates = equipmentProposal.candidates.map((id) => equipments.find((e) => e.Equipment === id)).filter(Boolean);
+            const source = equipmentProposal.status === 'SUCCESS' ? `equipment ${equipmentProposal.value}` : `equipment candidates ${equipmentProposal.candidates.join(', ')}`;
+            const unanimous = (key) => (candidates.length && candidates.every((e) => e[key] === candidates[0][key]) ? candidates[0][key] : undefined);
+            for (const [field, key] of [
+                ['ServiceRefFunctionalLocation', 'FunctionalLocation'],
+                ['ReferenceProduct', 'Material'],
+                ['SoldToParty', 'Customer']
+            ]) {
+                const value = unanimous(key);
+                if (value && !has(field)) {
+                    propose(field, [value], source, 'DERIVED');
+                }
             }
         }
         // service team → its service organization → the sales organization of the service organization

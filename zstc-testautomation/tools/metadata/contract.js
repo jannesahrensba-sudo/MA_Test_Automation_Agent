@@ -970,16 +970,16 @@ const annotations = {
         [
             'SAP__UI.LineItem',
             V.coll([
-                df('BusinessObjectType'),
-                df('FieldName'),
-                dfCrit('ValidationStatus', 'Criticality', 'Status'),
-                df('ValidationMessage'),
-                df('ProposedValue'),
-                df('SuggestedValue'),
-                dfAction('applySuggestion', 'Apply Suggestion', { Inline: V.bool(true) }, [hiddenInDisplayMode]),
-                df('Category'),
-                df('RuleID'),
-                df('Source')
+                df('FieldName', undefined, {}, 'High'),
+                dfCrit('ValidationStatus', 'Criticality', 'Status', 'High'),
+                df('ValidationMessage', undefined, {}, 'High'),
+                df('SuggestedValue', undefined, {}, 'High'),
+                dfAction('applySuggestion', 'Apply Suggestion', { Inline: V.bool(true) }, [hiddenInDisplayMode, ...importance('High')]),
+                df('ProposedValue', undefined, {}, 'Medium'),
+                df('BusinessObjectType', undefined, {}, 'Low'),
+                df('Category', undefined, {}, 'Low'),
+                df('RuleID', undefined, {}, 'Low'),
+                df('Source', undefined, {}, 'Low')
             ]),
             undefined,
             [['SAP__UI.Criticality', V.path('Criticality')]]

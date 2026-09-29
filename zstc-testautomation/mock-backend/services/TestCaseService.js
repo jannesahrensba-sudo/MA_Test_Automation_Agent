@@ -235,12 +235,15 @@ function initialTestCase(tc) {
 /** Creates the 1:1 child TestCaseData for a new draft with the default values of the customizing */
 async function createTestData(repo, tc) {
     const requirements = await getRequirements(repo, tc.ProcessProfile || DEFAULT_PROCESS_PROFILE);
+    // every property is part of the entity (null when empty): OData responses must contain all selected properties
     const data = {
         TestCaseUUID: tc.TestCaseUUID,
         IsActiveEntity: false,
         HasActiveEntity: false,
         HasDraftEntity: false,
         DraftAdministrativeData: null,
+        ...Object.fromEntries(CONTROLLED_FIELDS.map((field) => [field, null])),
+        SalesOrganizationOrgUnitID: '',
         __FieldControl: fieldControl(requirements)
     };
     for (const req of requirements) {
@@ -252,11 +255,21 @@ async function createTestData(repo, tc) {
     return data;
 }
 
-/** Determinations on the test data (RAP: determination on modify) */
-async function determineTestData(repo, data, pools) {
+/**
+ * Determinations on the test data (RAP: determination on modify).
+ * The reference product is derived from the equipment (source DERIVED): it is set when empty and re-derived whenever
+ * the equipment changes; a reference product the user maintains afterwards is kept and checked by rule R5.
+ *
+ * @param {object} repo repository
+ * @param {object} data TestCaseData entry
+ * @param {object} pools value help pools
+ * @param {string[]} [changedFields] fields changed by the triggering modification
+ * @returns {Promise<object>} applied patch
+ */
+async function determineTestData(repo, data, pools, changedFields = []) {
     const patch = {};
     const equipment = pools.equipments.find((e) => e.Equipment === data.ServiceReferenceEquipment);
-    if (equipment && isEmpty(data.ReferenceProduct)) {
+    if (equipment && (isEmpty(data.ReferenceProduct) || changedFields.includes('ServiceReferenceEquipment')) && data.ReferenceProduct !== equipment.Material) {
         patch.ReferenceProduct = equipment.Material;
     }
     if (equipment && isEmpty(data.ServiceRefFunctionalLocation)) {
@@ -282,7 +295,7 @@ async function onTestDataChanged(repo, dataKeys, changedFields) {
         return;
     }
     const { pools } = await loadPools(repo);
-    await determineTestData(repo, data, pools);
+    await determineTestData(repo, data, pools, changedFields);
     const tc = await repo.findOne('TestCase', dataKeys);
     if (!tc) {
         return;
@@ -337,11 +350,14 @@ async function replaceValidationRows(repo, tc, items) {
     }
 }
 
-/** State messages per field (worst severity wins) — the traffic light per field in the message popover */
+/**
+ * State messages per field (worst severity wins) for errors and warnings — they mark the fields and fill the message
+ * popover. Validated fields (SUCCESS) are listed in the section "Validation Issues" only.
+ */
 function stateMessages(items) {
     const severityOf = { ERROR: SEVERITY.ERROR, WARNING: SEVERITY.WARNING, INFO: SEVERITY.INFO, SUCCESS: SEVERITY.SUCCESS };
     const byTarget = new Map();
-    for (const item of items) {
+    for (const item of items.filter((i) => i.ValidationStatus === 'ERROR' || i.ValidationStatus === 'WARNING')) {
         const current = byTarget.get(item.target);
         if (!current || severityOf[item.ValidationStatus] > severityOf[current.ValidationStatus]) {
             byTarget.set(item.target, item);
@@ -473,7 +489,7 @@ async function analyze(repo, keys) {
     });
     if (Object.keys(patch).length) {
         await repo.update('TestCaseData', tcKeys(tc), patch);
-        await determineTestData(repo, { ...data, ...patch }, pools);
+        await determineTestData(repo, { ...data, ...patch }, pools, Object.keys(patch));
     }
     await replaceValidationRows(repo, tc, rows);
     const ambiguousCount = rows.filter((r) => r.ValidationStatus === ITEM_STATUS.WARNING).length;
@@ -766,7 +782,7 @@ async function applySuggestion(repo, validationKeys, selectedValue) {
         await repo.update('TestCaseData', tcKeys(tc), { [row.FieldName]: typed });
         const data = await getData(repo, tc);
         const { pools } = await loadPools(repo);
-        await determineTestData(repo, data, pools);
+        await determineTestData(repo, data, pools, [row.FieldName]);
     }
     const updatedRow = await repo.update('ValidationResult', validationKeys, {
         ResolvedValue: value,

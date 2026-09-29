@@ -45,6 +45,11 @@ test('"Fischer" and "EL-10" are ambiguous and come with candidate lists (DoD-5)'
     const equipment = proposals.find((p) => p.field === 'ServiceReferenceEquipment');
     assert.equal(equipment.status, 'WARNING');
     assert.deepEqual(equipment.candidates.slice(0, 2), ['EL-100', 'EL-101']);
+    // both candidates are installed at H2POWC00-PROD: the functional location is derived unambiguously
+    const fl = proposals.find((p) => p.field === 'ServiceRefFunctionalLocation');
+    assert.equal(fl.value, 'H2POWC00-PROD');
+    assert.equal(fl.status, 'SUCCESS');
+    assert.equal(fl.source, 'DERIVED');
 });
 
 test('unknown words produce no proposals (no invented values)', (t) => {

@@ -97,7 +97,7 @@ test('error path: wrong equipment → INVALID, suggestion applied → VALID', as
     const { repo, tenantId } = setup();
     t.after(() => teardown(tenantId));
     const draft = await createDraft(repo);
-    await repo.update('TestCaseData', draft, { ...GOLDEN, ServiceReferenceEquipment: 'EL-200' });
+    await repo.update('TestCaseData', draft, { ...GOLDEN, ServiceReferenceEquipment: 'EL-200', ReferenceProduct: 'P700-EL-200' });
     const first = await service.validateTestCase(repo, draft);
     assert.equal(first.result.overall, 'INVALID');
     const message = first.testCase.SAP__Messages.find((m) => m.target === '_TestCaseData/ServiceReferenceEquipment');
@@ -109,7 +109,9 @@ test('error path: wrong equipment → INVALID, suggestion applied → VALID', as
     const applied = await service.applySuggestion(repo, { ValidationUUID: finding.ValidationUUID, IsActiveEntity: false }, 'EL-101');
     assert.equal(applied.validationResult.ResolvedValue, 'EL-101');
     assert.equal(service.deriveValidationResult(applied.validationResult).__OperationControl.applySuggestion, false);
-    assert.equal((await repo.findOne('TestCaseData', draft)).ServiceReferenceEquipment, 'EL-101');
+    const changed = await repo.findOne('TestCaseData', draft);
+    assert.equal(changed.ServiceReferenceEquipment, 'EL-101');
+    assert.equal(changed.ReferenceProduct, 'P700-EL-100', 'the derived reference product follows the equipment');
 
     const second = await service.validateTestCase(repo, draft);
     assert.equal(second.result.overall, 'VALID');
