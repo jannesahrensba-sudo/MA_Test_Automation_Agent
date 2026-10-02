@@ -1,0 +1,34 @@
+[
+    {
+        "Code": "PASSED",
+        "Text": "Passed"
+    },
+    {
+        "Code": "FAILED",
+        "Text": "Failed"
+    },
+    {
+        "Code": "IN_PROGRESS",
+        "Text": "In progress"
+    },
+    {
+        "Code": "NOT_EXECUTED",
+        "Text": "Not executed"
+    },
+    {
+        "Code": "NOT_COVERED",
+        "Text": "Not covered"
+    },
+    {
+        "Code": "MANUAL",
+        "Text": "Manual / decision"
+    },
+    {
+        "Code": "OPEN",
+        "Text": "Process not modeled"
+    },
+    {
+        "Code": "LATER",
+        "Text": "Later extension"
+    }
+]

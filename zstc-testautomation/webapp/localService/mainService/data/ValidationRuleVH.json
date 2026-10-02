@@ -42,5 +42,9 @@
     {
         "Code": "R10_DEVICE_TYPE",
         "Text": "R10 · Service and part fit the device type"
+    },
+    {
+        "Code": "R11_CONTRACT",
+        "Text": "R11 · Service contract is valid and covers the reference object"
     }
 ]

@@ -75,6 +75,11 @@
         "BusinessObject": "SERVICE_REQUEST"
     },
     {
+        "FieldName": "ServiceContract",
+        "FieldLabel": "Service Contract",
+        "BusinessObject": "SERVICE_CONTRACT"
+    },
+    {
         "FieldName": "ServiceProduct",
         "FieldLabel": "Service Product",
         "BusinessObject": "SERVICE_ORDER"

@@ -1,0 +1,10 @@
+[
+    {
+        "Code": "SINGLE",
+        "Text": "Single run"
+    },
+    {
+        "Code": "REGRESSION",
+        "Text": "Release regression run"
+    }
+]

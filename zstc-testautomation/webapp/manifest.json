@@ -130,6 +130,36 @@
                     "pattern": "ProcessProfile({key}):?query:",
                     "name": "ProcessProfileObjectPage",
                     "target": "ProcessProfileObjectPage"
+                },
+                {
+                    "pattern": "ProcessTeam:?query:",
+                    "name": "ProcessTeamList",
+                    "target": "ProcessTeamList"
+                },
+                {
+                    "pattern": "ProcessTeam({key}):?query:",
+                    "name": "ProcessTeamObjectPage",
+                    "target": "ProcessTeamObjectPage"
+                },
+                {
+                    "pattern": "BusinessProcess:?query:",
+                    "name": "BusinessProcessList",
+                    "target": "BusinessProcessList"
+                },
+                {
+                    "pattern": "BusinessProcess({key}):?query:",
+                    "name": "BusinessProcessObjectPage",
+                    "target": "BusinessProcessObjectPage"
+                },
+                {
+                    "pattern": "Release:?query:",
+                    "name": "ReleaseList",
+                    "target": "ReleaseList"
+                },
+                {
+                    "pattern": "Release({key}):?query:",
+                    "name": "ReleaseObjectPage",
+                    "target": "ReleaseObjectPage"
                 }
             ],
             "targets": {
@@ -234,6 +264,20 @@
                                     "tableSettings": {
                                         "type": "ResponsiveTable"
                                     }
+                                },
+                                "_Step/@com.sap.vocabularies.UI.v1.LineItem": {
+                                    "tableSettings": {
+                                        "type": "ResponsiveTable",
+                                        "creationMode": {
+                                            "name": "Inline",
+                                            "createAtEnd": true
+                                        }
+                                    }
+                                },
+                                "_Version/@com.sap.vocabularies.UI.v1.LineItem": {
+                                    "tableSettings": {
+                                        "type": "ResponsiveTable"
+                                    }
                                 }
                             },
                             "content": {
@@ -315,6 +359,224 @@
                             }
                         }
                     }
+                },
+                "ProcessTeamList": {
+                    "type": "Component",
+                    "id": "ProcessTeamList",
+                    "name": "sap.fe.templates.ListReport",
+                    "options": {
+                        "settings": {
+                            "contextPath": "/ProcessTeam",
+                            "variantManagement": "Page",
+                            "initialLoad": "Enabled",
+                            "navigation": {
+                                "ProcessTeam": {
+                                    "detail": {
+                                        "route": "ProcessTeamObjectPage"
+                                    }
+                                }
+                            },
+                            "controlConfiguration": {
+                                "@com.sap.vocabularies.UI.v1.LineItem": {
+                                    "tableSettings": {
+                                        "type": "ResponsiveTable"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "ProcessTeamObjectPage": {
+                    "type": "Component",
+                    "id": "ProcessTeamObjectPage",
+                    "name": "sap.fe.templates.ObjectPage",
+                    "options": {
+                        "settings": {
+                            "contextPath": "/ProcessTeam",
+                            "editableHeaderContent": false,
+                            "controlConfiguration": {
+                                "_Member/@com.sap.vocabularies.UI.v1.LineItem": {
+                                    "tableSettings": {
+                                        "type": "ResponsiveTable",
+                                        "creationMode": {
+                                            "name": "Inline",
+                                            "createAtEnd": true
+                                        }
+                                    }
+                                },
+                                "_ResponsibleStep/@com.sap.vocabularies.UI.v1.LineItem": {
+                                    "tableSettings": {
+                                        "type": "ResponsiveTable"
+                                    }
+                                },
+                                "_OwnedProcess/@com.sap.vocabularies.UI.v1.LineItem": {
+                                    "tableSettings": {
+                                        "type": "ResponsiveTable"
+                                    }
+                                }
+                            },
+                            "navigation": {
+                                "_ResponsibleStep": {
+                                    "detail": {
+                                        "route": "BusinessProcessObjectPage"
+                                    }
+                                },
+                                "_OwnedProcess": {
+                                    "detail": {
+                                        "route": "BusinessProcessObjectPage"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "BusinessProcessList": {
+                    "type": "Component",
+                    "id": "BusinessProcessList",
+                    "name": "sap.fe.templates.ListReport",
+                    "options": {
+                        "settings": {
+                            "contextPath": "/BusinessProcess",
+                            "variantManagement": "Page",
+                            "initialLoad": "Enabled",
+                            "navigation": {
+                                "BusinessProcess": {
+                                    "detail": {
+                                        "route": "BusinessProcessObjectPage"
+                                    }
+                                }
+                            },
+                            "controlConfiguration": {
+                                "@com.sap.vocabularies.UI.v1.LineItem": {
+                                    "tableSettings": {
+                                        "type": "ResponsiveTable"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "BusinessProcessObjectPage": {
+                    "type": "Component",
+                    "id": "BusinessProcessObjectPage",
+                    "name": "sap.fe.templates.ObjectPage",
+                    "options": {
+                        "settings": {
+                            "contextPath": "/BusinessProcess",
+                            "editableHeaderContent": false,
+                            "controlConfiguration": {
+                                "_Step/@com.sap.vocabularies.UI.v1.LineItem": {
+                                    "tableSettings": {
+                                        "type": "GridTable",
+                                        "creationMode": {
+                                            "name": "Inline",
+                                            "createAtEnd": true
+                                        },
+                                        "enableFullScreen": true,
+                                        "rowCountMode": "Auto"
+                                    }
+                                },
+                                "_Variant/@com.sap.vocabularies.UI.v1.LineItem": {
+                                    "tableSettings": {
+                                        "type": "ResponsiveTable",
+                                        "creationMode": {
+                                            "name": "Inline",
+                                            "createAtEnd": true
+                                        }
+                                    }
+                                },
+                                "_Version/@com.sap.vocabularies.UI.v1.LineItem": {
+                                    "tableSettings": {
+                                        "type": "ResponsiveTable"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "ReleaseList": {
+                    "type": "Component",
+                    "id": "ReleaseList",
+                    "name": "sap.fe.templates.ListReport",
+                    "options": {
+                        "settings": {
+                            "contextPath": "/Release",
+                            "variantManagement": "Page",
+                            "initialLoad": "Enabled",
+                            "navigation": {
+                                "Release": {
+                                    "detail": {
+                                        "route": "ReleaseObjectPage"
+                                    }
+                                }
+                            },
+                            "controlConfiguration": {
+                                "@com.sap.vocabularies.UI.v1.LineItem": {
+                                    "tableSettings": {
+                                        "type": "ResponsiveTable"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "ReleaseObjectPage": {
+                    "type": "Component",
+                    "id": "ReleaseObjectPage",
+                    "name": "sap.fe.templates.ObjectPage",
+                    "options": {
+                        "settings": {
+                            "contextPath": "/Release",
+                            "editableHeaderContent": false,
+                            "controlConfiguration": {
+                                "_Scope/@com.sap.vocabularies.UI.v1.LineItem": {
+                                    "tableSettings": {
+                                        "type": "ResponsiveTable",
+                                        "creationMode": {
+                                            "name": "Inline",
+                                            "createAtEnd": true
+                                        }
+                                    }
+                                },
+                                "_TestCase/@com.sap.vocabularies.UI.v1.LineItem": {
+                                    "tableSettings": {
+                                        "type": "ResponsiveTable",
+                                        "enableFullScreen": true
+                                    }
+                                },
+                                "_StepCoverage/@com.sap.vocabularies.UI.v1.LineItem": {
+                                    "tableSettings": {
+                                        "type": "ResponsiveTable",
+                                        "enableFullScreen": true
+                                    }
+                                },
+                                "_LatestRunItem/@com.sap.vocabularies.UI.v1.LineItem": {
+                                    "tableSettings": {
+                                        "type": "ResponsiveTable",
+                                        "enableFullScreen": true
+                                    }
+                                },
+                                "_RegressionRun/@com.sap.vocabularies.UI.v1.LineItem": {
+                                    "tableSettings": {
+                                        "type": "ResponsiveTable"
+                                    }
+                                }
+                            },
+                            "sectionLayout": "Page",
+                            "navigation": {
+                                "_TestCase": {
+                                    "detail": {
+                                        "route": "TestCaseObjectPage"
+                                    }
+                                },
+                                "_LatestRunItem": {
+                                    "detail": {
+                                        "route": "TestCaseObjectPage"
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         },
@@ -323,6 +585,12 @@
                 "sap.ui.controllerExtensions": {
                     "sap.fe.templates.ObjectPage.ObjectPageController#zstc.testautomation::TestCaseObjectPage": {
                         "controllerName": "zstc.testautomation.ext.controller.TestCaseObjectPageExt"
+                    },
+                    "sap.fe.templates.ObjectPage.ObjectPageController#zstc.testautomation::ReleaseObjectPage": {
+                        "controllerName": "zstc.testautomation.ext.controller.ReleaseObjectPageExt"
+                    },
+                    "sap.fe.templates.ObjectPage.ObjectPageController#zstc.testautomation::ProcessTeamObjectPage": {
+                        "controllerName": "zstc.testautomation.ext.controller.ProcessTeamObjectPageExt"
                     }
                 }
             }

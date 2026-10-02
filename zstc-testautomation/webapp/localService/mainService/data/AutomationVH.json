@@ -1,0 +1,18 @@
+[
+    {
+        "Code": "AUTOMATED",
+        "Text": "Automated (API chain)"
+    },
+    {
+        "Code": "DECISION",
+        "Text": "Decision (via process variant)"
+    },
+    {
+        "Code": "MANUAL",
+        "Text": "Manual / external"
+    },
+    {
+        "Code": "PLANNED",
+        "Text": "Planned API extension"
+    }
+]

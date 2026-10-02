@@ -29,24 +29,46 @@ const ITEM_STATUS = Object.freeze({ SUCCESS: 'SUCCESS', WARNING: 'WARNING', ERRO
 const STEP_STATUS = Object.freeze({ PLANNED: 'PLANNED', RUNNING: 'RUNNING', DONE: 'DONE', FAILED: 'FAILED', SKIPPED: 'SKIPPED' });
 const ASSERTION = Object.freeze({ PASSED: 'PASSED', WARNING: 'WARNING', FAILED: 'FAILED', NOT_EVALUATED: 'NOT_EVALUATED' });
 
+/* process teams, processes and releases */
+const ASSIGNMENT = Object.freeze({ ASSIGNED: 'ASSIGNED', ASSUMED: 'ASSUMED', OPEN: 'OPEN' });
+const TEAM_ROLE = Object.freeze({ PROCESS_OWNER: 'PROCESS_OWNER', TEST_EXECUTOR: 'TEST_EXECUTOR' });
+const RELEASE_STATUS = Object.freeze({ PLANNED: 'PLANNED', IN_TEST: 'IN_TEST', RELEASED: 'RELEASED', CLOSED: 'CLOSED' });
+const COVERAGE = Object.freeze({
+    PASSED: 'PASSED',
+    FAILED: 'FAILED',
+    IN_PROGRESS: 'IN_PROGRESS',
+    NOT_EXECUTED: 'NOT_EXECUTED',
+    NOT_COVERED: 'NOT_COVERED',
+    MANUAL: 'MANUAL',
+    OPEN: 'OPEN',
+    LATER: 'LATER'
+});
+const RUN_TYPE = Object.freeze({ SINGLE: 'SINGLE', REGRESSION: 'REGRESSION' });
+const RUN_DECISION = Object.freeze({ STARTED: 'STARTED', SKIPPED: 'SKIPPED' });
+const TEST_LEVEL = Object.freeze({ SUB_PROCESS: 'SUB_PROCESS', E2E: 'E2E' });
+
 const BO = Object.freeze({
     TEST_CASE: 'TEST_CASE',
+    SERVICE_CONTRACT: 'SERVICE_CONTRACT',
     SERVICE_REQUEST: 'SERVICE_REQUEST',
     SERVICE_QUOTATION: 'SERVICE_QUOTATION',
     SERVICE_ORDER: 'SERVICE_ORDER',
     SERVICE_CONFIRMATION: 'SERVICE_CONFIRMATION',
     BILLING_DOC_REQUEST: 'BILLING_DOC_REQUEST',
-    BILLING_DOCUMENT: 'BILLING_DOCUMENT'
+    BILLING_DOCUMENT: 'BILLING_DOCUMENT',
+    ACCOUNTING_DOCUMENT: 'ACCOUNTING_DOCUMENT'
 });
 
 const BO_LABEL = Object.freeze({
     TEST_CASE: 'Test Case',
+    SERVICE_CONTRACT: 'Service Contract',
     SERVICE_REQUEST: 'Service Request',
     SERVICE_QUOTATION: 'Service Quotation',
     SERVICE_ORDER: 'Service Order',
     SERVICE_CONFIRMATION: 'Service Confirmation',
     BILLING_DOC_REQUEST: 'Billing Document Request',
-    BILLING_DOCUMENT: 'Billing Document'
+    BILLING_DOCUMENT: 'Billing Document',
+    ACCOUNTING_DOCUMENT: 'Accounting Document'
 });
 
 const CRITICALITY_BY_CODE = {
@@ -59,10 +81,17 @@ const CRITICALITY_BY_CODE = {
     DONE: CRITICALITY.POSITIVE,
     COMPLETED: CRITICALITY.POSITIVE,
     VALIDATED: CRITICALITY.POSITIVE,
+    ASSIGNED: CRITICALITY.POSITIVE,
+    RELEASED: CRITICALITY.POSITIVE,
+    STARTED: CRITICALITY.POSITIVE,
     // critical
     AMBIGUOUS: CRITICALITY.CRITICAL,
     PASSED_WITH_WARNING: CRITICALITY.CRITICAL,
     WARNING: CRITICALITY.CRITICAL,
+    ASSUMED: CRITICALITY.CRITICAL,
+    OPEN: CRITICALITY.CRITICAL,
+    NOT_EXECUTED: CRITICALITY.CRITICAL,
+    SKIPPED: CRITICALITY.CRITICAL,
     // negative
     INVALID: CRITICALITY.NEGATIVE,
     FAILED: CRITICALITY.NEGATIVE,
@@ -72,9 +101,12 @@ const CRITICALITY_BY_CODE = {
     BLOCKED: CRITICALITY.NEGATIVE,
     CANCELLED: CRITICALITY.NEGATIVE,
     REVOKED: CRITICALITY.NEGATIVE,
+    NOT_COVERED: CRITICALITY.NEGATIVE,
     // information
     RUNNING: CRITICALITY.INFORMATION,
     IN_EXECUTION: CRITICALITY.INFORMATION,
+    IN_TEST: CRITICALITY.INFORMATION,
+    IN_PROGRESS: CRITICALITY.INFORMATION,
     INFO: CRITICALITY.INFORMATION
 };
 
@@ -84,6 +116,19 @@ const CRITICALITY_BY_CODE = {
  */
 function criticalityOf(code) {
     return CRITICALITY_BY_CODE[code] ?? CRITICALITY.NEUTRAL;
+}
+
+/**
+ * Criticality of a percentage KPI (pass rate, coverage): 100 positive · ≥ 80 critical · below negative · no value neutral.
+ *
+ * @param {number|null} percent value 0..100 or null when nothing was measured
+ * @returns {number} UI.CriticalityType value
+ */
+function criticalityOfPercent(percent) {
+    if (percent === null || percent === undefined) {
+        return CRITICALITY.NEUTRAL;
+    }
+    return percent >= 100 ? CRITICALITY.POSITIVE : percent >= 80 ? CRITICALITY.CRITICAL : CRITICALITY.NEGATIVE;
 }
 
 module.exports = {
@@ -96,7 +141,15 @@ module.exports = {
     ITEM_STATUS,
     STEP_STATUS,
     ASSERTION,
+    ASSIGNMENT,
+    TEAM_ROLE,
+    RELEASE_STATUS,
+    COVERAGE,
+    RUN_TYPE,
+    RUN_DECISION,
+    TEST_LEVEL,
     BO,
     BO_LABEL,
-    criticalityOf
+    criticalityOf,
+    criticalityOfPercent
 };

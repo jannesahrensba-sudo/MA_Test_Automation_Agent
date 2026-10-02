@@ -1,0 +1,65 @@
+[
+    {
+        "ProcessID": "SRV-REP",
+        "Variant": "W1_REQUEST",
+        "VariantName": "Weg 1 – Service Request ohne Angebot",
+        "PilotScope": "PILOT",
+        "IsDefault": false
+    },
+    {
+        "ProcessID": "SRV-REP",
+        "Variant": "W2_QUOTATION",
+        "VariantName": "Weg 2 – Angebot, Kunde akzeptiert",
+        "PilotScope": "PILOT",
+        "IsDefault": true
+    },
+    {
+        "ProcessID": "SRV-REP",
+        "Variant": "W2_REJECTED",
+        "VariantName": "Weg 2 – Angebot, Kunde lehnt ab",
+        "PilotScope": "PILOT",
+        "IsDefault": false
+    },
+    {
+        "ProcessID": "SRV-REP",
+        "Variant": "W3_CONTRACT",
+        "VariantName": "Weg 3 – Serviceleistung aus Vertrag (Vertragsfindung)",
+        "PilotScope": "PILOT",
+        "IsDefault": false
+    },
+    {
+        "ProcessID": "SRV-REP",
+        "Variant": "W3_BILLING_PLAN",
+        "VariantName": "Weg 3 – Vertragsabrechnung über Rechnungsplan",
+        "PilotScope": "PILOT",
+        "IsDefault": false
+    },
+    {
+        "ProcessID": "SRV-REP",
+        "Variant": "WARRANTY",
+        "VariantName": "Garantie (spätere API-Erweiterung)",
+        "PilotScope": "LATER",
+        "IsDefault": false
+    },
+    {
+        "ProcessID": "SRV-REP",
+        "Variant": "REQUOTE",
+        "VariantName": "Requote (spätere API-Erweiterung)",
+        "PilotScope": "LATER",
+        "IsDefault": false
+    },
+    {
+        "ProcessID": "SRV-REP",
+        "Variant": "IN_HOUSE_REPAIR",
+        "VariantName": "In-House Repair (spätere API-Erweiterung)",
+        "PilotScope": "LATER",
+        "IsDefault": false
+    },
+    {
+        "ProcessID": "SRV-REP",
+        "Variant": "SOLUTION_QUOTATION",
+        "VariantName": "Solution Quotation (Produkte plus Services, später)",
+        "PilotScope": "LATER",
+        "IsDefault": false
+    }
+]

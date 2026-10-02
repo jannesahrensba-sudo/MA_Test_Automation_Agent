@@ -35,14 +35,25 @@ sap.ui.define(["sap/fe/core/PageController", "sap/ui/model/json/JSONModel"], fun
             const binding = this.getView()
                 .getModel()
                 .bindList("/TestCase", undefined, undefined, undefined, {
-                    $select: "TestCaseUUID,IsActiveEntity,ValidationStatus,ApprovalStatus,ExecutionStatus,FinalResult",
+                    $select: "TestCaseUUID,IsActiveEntity,ValidationStatus,ApprovalStatus,ExecutionStatus,FinalResult,AssignmentStatus",
                     $filter: "IsActiveEntity eq true"
                 });
+            const releaseBinding = this.getView()
+                .getModel()
+                .bindList("/Release", undefined, undefined, undefined, {
+                    $select: "ReleaseID,IsActiveEntity,ReleaseName,ReleaseStatus,PassRate,StepCoverage",
+                    $filter: "IsActiveEntity eq true and ReleaseStatus eq 'IN_TEST'"
+                });
             let rows = [];
+            let releases = [];
             try {
-                rows = (await binding.requestContexts(0, 1000)).map((context) => context.getObject());
+                [rows, releases] = await Promise.all([
+                    binding.requestContexts(0, 1000).then((contexts) => contexts.map((context) => context.getObject())),
+                    releaseBinding.requestContexts(0, 10).then((contexts) => contexts.map((context) => context.getObject()))
+                ]);
             } finally {
                 binding.destroy();
+                releaseBinding.destroy();
             }
             const count = (predicate) => rows.filter(predicate).length;
             const tiles = [
@@ -77,8 +88,28 @@ sap.ui.define(["sap/fe/core/PageController", "sap/ui/model/json/JSONModel"], fun
                     value: String(count((r) => r.ValidationStatus === "INVALID" || r.ValidationStatus === "AMBIGUOUS")),
                     color: "Critical",
                     icon: "sap-icon://validate"
+                },
+                {
+                    header: bundle.getText("kpiAssignmentOpen"),
+                    subheader: "",
+                    footer: bundle.getText("kpiFooterLifecycle"),
+                    value: String(count((r) => r.AssignmentStatus === "OPEN")),
+                    color: "Critical",
+                    icon: "sap-icon://chain-link"
                 }
-            ].concat(
+            ]
+                .concat(
+                    releases.map((release) => ({
+                        header: bundle.getText("kpiReleasePassRate"),
+                        subheader: release.ReleaseName,
+                        footer: bundle.getText("kpiFooterRelease", [release.StepCoverage]),
+                        value: String(release.PassRate),
+                        color: release.PassRate >= 100 ? "Good" : release.PassRate >= 80 ? "Critical" : "Error",
+                        icon: "sap-icon://calendar",
+                        release: release.ReleaseID
+                    }))
+                )
+                .concat(
                 RESULT_TILES.map((tile) => ({
                     header: bundle.getText(tile.i18n),
                     subheader: "",
@@ -99,8 +130,29 @@ sap.ui.define(["sap/fe/core/PageController", "sap/ui/model/json/JSONModel"], fun
             return this.routing.navigateToRoute("TestCaseList");
         },
 
+        /** KPI tiles: the release tile opens the release, all other tiles the test case list */
+        onTilePress: function (event) {
+            const release = event.getSource().getBindingContext("kpi").getProperty("release");
+            if (release) {
+                return this.routing.navigateToRoute("ReleaseObjectPage", { key: "ReleaseID='" + encodeURIComponent(release) + "',IsActiveEntity=true" });
+            }
+            return this.onShowTestCases();
+        },
+
         onShowConfiguration: function () {
             return this.routing.navigateToRoute("ProcessProfileList");
+        },
+
+        onShowReleases: function () {
+            return this.routing.navigateToRoute("ReleaseList");
+        },
+
+        onShowProcesses: function () {
+            return this.routing.navigateToRoute("BusinessProcessList");
+        },
+
+        onShowProcessTeams: function () {
+            return this.routing.navigateToRoute("ProcessTeamList");
         },
 
         onShowAssistant: function () {

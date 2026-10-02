@@ -1,0 +1,86 @@
+[
+    {
+        "ProcessTeam": "PT-REPARATUR",
+        "ProcessTeamName": "Prozessteam Reparatur",
+        "ProcessArea": "Service – Reparatur",
+        "Description": "Verantwortet den Service-Reparaturprozess (Pilot): Störungsmeldung, Auftrag, Durchführung und Rückmeldung.",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "IsActive": true,
+        "ProcessOwnerCount": 3,
+        "TestExecutorCount": 2,
+        "ResponsibleStepCount": 8,
+        "TestCaseCount": 10,
+        "OpenAssignmentCount": 12,
+        "SAP__Messages": [],
+        "__EntityControl": {
+            "Updatable": true,
+            "Deletable": false
+        }
+    },
+    {
+        "ProcessTeam": "PT-ANGEBOT",
+        "ProcessTeamName": "Prozessteam Angebot",
+        "ProcessArea": "Vertrieb – Angebot",
+        "Description": "Verantwortet den Angebotsprozess. Im Reparaturprozess Übergabe bei Weg 2 (Service Quotation, Kundenentscheidung) – Zuordnung ist eine Annahme.",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "IsActive": true,
+        "ProcessOwnerCount": 1,
+        "TestExecutorCount": 1,
+        "ResponsibleStepCount": 5,
+        "TestCaseCount": 1,
+        "OpenAssignmentCount": 0,
+        "SAP__Messages": [],
+        "__EntityControl": {
+            "Updatable": true,
+            "Deletable": false
+        }
+    },
+    {
+        "ProcessTeam": "PT-MONTAGE",
+        "ProcessTeamName": "Prozessteam Montage",
+        "ProcessArea": "Service – Montage",
+        "Description": "Verantwortet den Montageprozess (Erst- und Austauschmontage). Prozessschritte noch nicht modelliert.",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "IsActive": true,
+        "ProcessOwnerCount": 1,
+        "TestExecutorCount": 1,
+        "ResponsibleStepCount": 0,
+        "TestCaseCount": 0,
+        "OpenAssignmentCount": 0,
+        "SAP__Messages": [],
+        "__EntityControl": {
+            "Updatable": true,
+            "Deletable": false
+        }
+    },
+    {
+        "ProcessTeam": "PT-ABLESUNG",
+        "ProcessTeamName": "Prozessteam Ablesung",
+        "ProcessArea": "Messdienst – Ablesung",
+        "Description": "Verantwortet die Ablesung (messdienstspezifisch). Prozessschritte und Abbildung im SAP-System noch offen.",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "IsActive": true,
+        "ProcessOwnerCount": 1,
+        "TestExecutorCount": 1,
+        "ResponsibleStepCount": 0,
+        "TestCaseCount": 0,
+        "OpenAssignmentCount": 0,
+        "SAP__Messages": [],
+        "__EntityControl": {
+            "Updatable": true,
+            "Deletable": false
+        }
+    }
+]

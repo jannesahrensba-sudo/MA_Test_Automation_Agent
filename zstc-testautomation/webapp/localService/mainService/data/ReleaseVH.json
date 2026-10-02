@@ -1,0 +1,50 @@
+[
+    {
+        "ReleaseID": "S4-2025-FPS01",
+        "ReleaseName": "SAP S/4HANA 2025 FPS01",
+        "ReleaseType": "SAP_FPS",
+        "ReleaseStatus": "RELEASED",
+        "TestStartDate": "2026-03-02",
+        "TestEndDate": "2026-03-27"
+    },
+    {
+        "ReleaseID": "INT-2026.10",
+        "ReleaseName": "Prozessrelease Oktober 2026",
+        "ReleaseType": "INTERNAL",
+        "ReleaseStatus": "IN_TEST",
+        "TestStartDate": "2026-09-28",
+        "TestEndDate": "2026-10-16"
+    },
+    {
+        "ReleaseID": "S4-2025-FPS02",
+        "ReleaseName": "SAP S/4HANA 2025 FPS02",
+        "ReleaseType": "SAP_FPS",
+        "ReleaseStatus": "PLANNED",
+        "TestStartDate": "2026-11-02",
+        "TestEndDate": "2026-11-27"
+    },
+    {
+        "ReleaseID": "INT-2026.12",
+        "ReleaseName": "Prozessrelease Dezember 2026",
+        "ReleaseType": "INTERNAL",
+        "ReleaseStatus": "PLANNED",
+        "TestStartDate": "2026-12-07",
+        "TestEndDate": "2026-12-18"
+    },
+    {
+        "ReleaseID": "S4-2025-FPS03",
+        "ReleaseName": "SAP S/4HANA 2025 FPS03",
+        "ReleaseType": "SAP_FPS",
+        "ReleaseStatus": "PLANNED",
+        "TestStartDate": "2027-03-01",
+        "TestEndDate": "2027-03-26"
+    },
+    {
+        "ReleaseID": "S4-2027",
+        "ReleaseName": "SAP S/4HANA 2027 (Upgrade)",
+        "ReleaseType": "SAP_RELEASE",
+        "ReleaseStatus": "PLANNED",
+        "TestStartDate": "2028-01-10",
+        "TestEndDate": "2028-03-03"
+    }
+]

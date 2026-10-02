@@ -80,6 +80,17 @@ sap.ui.define(["./prompts", "./agentTools", "./RuleBasedAgent", "./messagesLoop"
                 title: read.testCase.Title || "",
                 processProfile: read.testCase.ProcessProfile,
                 isActive: read.testCase.IsActiveEntity === true,
+                // process reference: determined by the backend (team, process, way, end object, test level, assignment)
+                process: {
+                    team: read.testCase.ProcessTeam || "",
+                    process: read.testCase.BusinessProcess || "",
+                    variant: read.testCase.ProcessVariant || "",
+                    endObject: read.testCase.EndObject || "",
+                    level: read.testCase.TestLevel || "",
+                    assignment: read.testCase.AssignmentStatus || "",
+                    note: read.testCase.AssignmentNote || "",
+                    version: read.testCase.Version
+                },
                 values: read.values,
                 validation: {
                     status: read.testCase.ValidationStatus,

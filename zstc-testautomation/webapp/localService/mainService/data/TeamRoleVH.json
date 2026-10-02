@@ -1,0 +1,10 @@
+[
+    {
+        "Code": "PROCESS_OWNER",
+        "Text": "Process Owner (business responsibility, approves)"
+    },
+    {
+        "Code": "TEST_EXECUTOR",
+        "Text": "Test Executor (may run tests)"
+    }
+]

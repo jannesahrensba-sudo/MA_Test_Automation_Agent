@@ -1,0 +1,30 @@
+[
+    {
+        "ProcessID": "SRV-REP",
+        "ProcessName": "Service-Reparaturprozess",
+        "OwnerTeam": "PT-REPARATUR",
+        "ProcessVersion": 2,
+        "PilotScope": "PILOT"
+    },
+    {
+        "ProcessID": "MON",
+        "ProcessName": "Montageprozess",
+        "OwnerTeam": "PT-MONTAGE",
+        "ProcessVersion": 1,
+        "PilotScope": "LATER"
+    },
+    {
+        "ProcessID": "ANG",
+        "ProcessName": "Angebotsprozess",
+        "OwnerTeam": "PT-ANGEBOT",
+        "ProcessVersion": 1,
+        "PilotScope": "LATER"
+    },
+    {
+        "ProcessID": "ABL",
+        "ProcessName": "Ablesung",
+        "OwnerTeam": "PT-ABLESUNG",
+        "ProcessVersion": 1,
+        "PilotScope": "LATER"
+    }
+]

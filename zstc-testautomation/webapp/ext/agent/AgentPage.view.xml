@@ -62,6 +62,7 @@
                                 <MenuItem id="exampleRwm" key="rwm" text="{i18n>agentExampleRwm}" icon="sap-icon://alert" />
                                 <MenuItem id="exampleAmbiguous" key="ambiguous" text="{i18n>agentExampleAmbiguous}" icon="sap-icon://question-mark" />
                                 <MenuItem id="exampleCologne" key="cologne" text="{i18n>agentExampleCologne}" icon="sap-icon://alert" />
+                                <MenuItem id="exampleContract" key="contract" text="{i18n>agentExampleContract}" icon="sap-icon://document-text" />
                             </Menu>
                         </menu>
                     </MenuButton>

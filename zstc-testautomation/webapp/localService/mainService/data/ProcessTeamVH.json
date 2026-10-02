@@ -1,0 +1,22 @@
+[
+    {
+        "ProcessTeam": "PT-REPARATUR",
+        "ProcessTeamName": "Prozessteam Reparatur",
+        "ProcessArea": "Service – Reparatur"
+    },
+    {
+        "ProcessTeam": "PT-ANGEBOT",
+        "ProcessTeamName": "Prozessteam Angebot",
+        "ProcessArea": "Vertrieb – Angebot"
+    },
+    {
+        "ProcessTeam": "PT-MONTAGE",
+        "ProcessTeamName": "Prozessteam Montage",
+        "ProcessArea": "Service – Montage"
+    },
+    {
+        "ProcessTeam": "PT-ABLESUNG",
+        "ProcessTeamName": "Prozessteam Ablesung",
+        "ProcessArea": "Messdienst – Ablesung"
+    }
+]

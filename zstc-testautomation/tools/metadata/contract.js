@@ -27,6 +27,13 @@ const dto = (name, label, opts = {}) => ({ name, type: 'Edm.DateTimeOffset', pre
 const int16 = (name, label, opts = {}) => ({ name, type: 'Edm.Int16', label, ...opts });
 const int32 = (name, label, opts = {}) => ({ name, type: 'Edm.Int32', label, ...opts });
 const byte = (name, label, opts = {}) => ({ name, type: 'Edm.Byte', label, ...opts });
+const date = (name, label, opts = {}) => ({ name, type: 'Edm.Date', label, ...opts });
+/** fixed-value code list (Code/Text) as value help of a property */
+const fixedCodes = (collection) => ({ collection, key: 'Code', display: ['Text'], fixed: true });
+/** code property with its text from a code list (text navigation `_<name>` → <collection>) */
+const code = (name, maxLength, label, collection, opts = {}) =>
+    str(name, maxLength, label, { text: `_${name}/Text`, textArrangement: 'TextOnly', ...(opts.computed ? {} : { valueList: fixedCodes(collection) }), ...opts });
+const codeNav = (name, collection) => textNav(`_${name}`, collection, name, 'Code');
 /** Criticality helper property (UI.CriticalityType values 0..5), computed and hidden */
 const crit = (name) => byte(name, 'Criticality', { computed: true, hidden: true });
 
@@ -184,6 +191,107 @@ const valueHelps = [
             str('FieldLabel', 60, 'Field Label'),
             str('BusinessObject', 30, 'Business Object')
         ]
+    },
+    {
+        name: 'ServiceContractVH',
+        realBasis: 'A_ServiceContract + A_ServiceContrItemObjectList (API_SERVICE_CONTRACT_SRV)',
+        keys: ['ServiceContract'],
+        props: [
+            str('ServiceContract', 10, 'Service Contract', { text: 'ServiceContractDescription', textArrangement: 'TextFirst' }),
+            str('ServiceContractDescription', 40, 'Description'),
+            str('SoldToParty', 10, 'Customer'),
+            // object list of the contract item: a property (superior functional location) covers all devices below it
+            str('ServiceRefFunctionalLocation', 40, 'Covered Functional Location'),
+            str('Product', 40, 'Contract Product'),
+            date('ServiceContractStartDate', 'Valid From'),
+            date('ServiceContractEndDate', 'Valid To'),
+            bool('ServiceContractIsReleased', 'Released'),
+            str('BillingPlanRule', 40, 'Billing Plan'),
+            dec('BillingPlanNetAmount', 15, 2, 'Billing Plan Amount', { currency: 'TransactionCurrency' }),
+            str('TransactionCurrency', 5, 'Currency')
+        ]
+    },
+    /* --------------------------- process teams, processes, releases (read models) --------------------------- */
+    {
+        name: 'ProcessTeamVH',
+        realBasis: 'project table of the process teams (target: Responsibility Management team type, to verify)',
+        keys: ['ProcessTeam'],
+        props: [
+            str('ProcessTeam', 20, 'Process Team', { text: 'ProcessTeamName', textArrangement: 'TextFirst' }),
+            str('ProcessTeamName', 60, 'Team Name'),
+            str('ProcessArea', 40, 'Process Area')
+        ]
+    },
+    {
+        name: 'UserVH',
+        realBasis: 'I_BusinessUserVH (to verify)',
+        keys: ['UserID'],
+        props: [str('UserID', 12, 'User', { text: 'UserName', textArrangement: 'TextFirst' }), str('UserName', 80, 'Name')]
+    },
+    {
+        name: 'TeamMemberVH',
+        realBasis: 'team members and functions (project table; target: Responsibility Management, to verify)',
+        keys: ['ProcessTeam', 'UserID', 'TeamRole'],
+        props: [
+            str('ProcessTeam', 20, 'Process Team'),
+            str('UserID', 12, 'User', { text: 'UserName', textArrangement: 'TextFirst' }),
+            str('UserName', 80, 'Name'),
+            str('TeamRole', 20, 'Role')
+        ]
+    },
+    {
+        name: 'BusinessProcessVH',
+        realBasis: 'project process catalog (target: SAP Cloud ALM solution process, to verify)',
+        keys: ['ProcessID'],
+        props: [
+            str('ProcessID', 20, 'Process', { text: 'ProcessName', textArrangement: 'TextFirst' }),
+            str('ProcessName', 60, 'Process Name'),
+            str('OwnerTeam', 20, 'Owner Team'),
+            int16('ProcessVersion', 'Version'),
+            str('PilotScope', 10, 'Pilot Scope')
+        ]
+    },
+    {
+        name: 'ProcessVariantVH',
+        realBasis: 'project process catalog: paths through the process flow',
+        keys: ['ProcessID', 'Variant'],
+        props: [
+            str('ProcessID', 20, 'Process'),
+            str('Variant', 20, 'Process Variant', { text: 'VariantName', textArrangement: 'TextFirst' }),
+            str('VariantName', 80, 'Variant Name'),
+            str('PilotScope', 10, 'Pilot Scope'),
+            bool('IsDefault', 'Default')
+        ]
+    },
+    {
+        name: 'ProcessStepVH',
+        realBasis: 'project process catalog: process steps (target: SAP Cloud ALM process steps, to verify)',
+        keys: ['ProcessID', 'StepID'],
+        props: [
+            str('ProcessID', 20, 'Process'),
+            str('StepID', 20, 'Process Step', { text: 'StepName', textArrangement: 'TextFirst' }),
+            str('StepName', 80, 'Step Name'),
+            int16('Sequence', 'Sequence'),
+            str('BusinessObjectType', 30, 'Business Object'),
+            str('ResponsibleTeam', 20, 'Responsible Team'),
+            str('TeamAssignment', 10, 'Team Assignment'),
+            str('Variants', 120, 'Variants'),
+            str('PilotScope', 10, 'Pilot Scope'),
+            str('Automation', 10, 'Automation')
+        ]
+    },
+    {
+        name: 'ReleaseVH',
+        realBasis: 'project release calendar (target: SAP Cloud ALM release/timebox, to verify)',
+        keys: ['ReleaseID'],
+        props: [
+            str('ReleaseID', 20, 'Release', { text: 'ReleaseName', textArrangement: 'TextFirst' }),
+            str('ReleaseName', 60, 'Release Name'),
+            str('ReleaseType', 20, 'Release Type'),
+            str('ReleaseStatus', 20, 'Status'),
+            date('TestStartDate', 'Test Start'),
+            date('TestEndDate', 'Test End')
+        ]
     }
 ];
 
@@ -202,7 +310,19 @@ const codeListNames = [
     ['SourceTypeVH', 'Source', 20],
     ['StepStatusVH', 'Step Status', 20],
     ['AssertionResultVH', 'Result', 20],
-    ['ExecutionProviderVH', 'Execution Provider', 60]
+    ['ExecutionProviderVH', 'Execution Provider', 60],
+    // process teams, processes and releases
+    ['TeamRoleVH', 'Team Role', 40],
+    ['AssignmentStatusVH', 'Assignment', 30],
+    ['PilotScopeVH', 'Pilot Scope', 30],
+    ['AutomationVH', 'Automation', 40],
+    ['ReleaseTypeVH', 'Release Type', 40],
+    ['ReleaseStatusVH', 'Release Status', 20],
+    ['TestLevelVH', 'Test Level', 40],
+    ['RunTypeVH', 'Run Type', 30],
+    ['CoverageStatusVH', 'Coverage', 30],
+    ['RunDecisionVH', 'Decision', 20],
+    ['EndObjectVH', 'End Object', 40]
 ];
 const codeLists = codeListNames.map(([name, label, textLength]) => ({
     name,
@@ -232,6 +352,7 @@ const controlledDataFields = [
     'ServiceRefFunctionalLocation',
     'ServiceReferenceEquipment',
     'ReferenceProduct',
+    'ServiceContract',
     'ServiceProduct',
     'ServiceDuration',
     'ServiceDurationUnit',
@@ -252,6 +373,9 @@ const testCaseActions = [
     'cancelExecution',
     'revalidate'
 ];
+
+/** Actions of the release: regression run over the release scope and scope takeover from the predecessor release */
+const releaseActions = ['startRegressionRun', 'refreshRegressionRun', 'copyScopeFromPredecessor'];
 
 const entities = [
     /* ------------------------------ BO 1: Test case (draft root) ------------------------------ */
@@ -293,10 +417,65 @@ const entities = [
             dto('ExecutionFinishedAt', 'Execution Finished', { computed: true }),
             int32('ExecutionDuration', 'Duration (s)', { computed: true }),
             str('ExternalExecutionID', 40, 'External Execution ID', { computed: true }),
-            guid('LatestExecutionUUID', 'Latest Execution', { computed: true, hidden: true })
+            guid('LatestExecutionUUID', 'Latest Execution', { computed: true, hidden: true }),
+            // process reference: process team → business process → process variant (path) → process steps → test steps
+            str('ProcessTeam', 20, 'Process Team', {
+                text: '_ProcessTeam/ProcessTeamName',
+                textArrangement: 'TextFirst',
+                valueList: { collection: 'ProcessTeamVH', key: 'ProcessTeam', display: ['ProcessTeamName', 'ProcessArea'] }
+            }),
+            str('BusinessProcess', 20, 'Business Process', {
+                text: '_BusinessProcess/ProcessName',
+                textArrangement: 'TextFirst',
+                valueList: { collection: 'BusinessProcessVH', key: 'ProcessID', display: ['ProcessName', 'OwnerTeam', 'ProcessVersion', 'PilotScope'] }
+            }),
+            str('ProcessVariant', 20, 'Process Variant', {
+                text: '_ProcessVariant/VariantName',
+                textArrangement: 'TextFirst',
+                valueList: { collection: 'ProcessVariantVH', key: 'Variant', display: ['VariantName', 'PilotScope'], in: [['BusinessProcess', 'ProcessID']] }
+            }),
+            code('EndObject', 30, 'Run up to', 'EndObjectVH'),
+            code('TestLevel', 20, 'Test Level', 'TestLevelVH'),
+            str('BusinessOwner', 12, 'Business Owner', {
+                text: '_BusinessOwner/UserName',
+                textArrangement: 'TextFirst',
+                valueList: {
+                    collection: 'TeamMemberVH',
+                    key: 'UserID',
+                    display: ['UserName'],
+                    in: [['ProcessTeam', 'ProcessTeam']],
+                    constants: [['TeamRole', 'PROCESS_OWNER']]
+                }
+            }),
+            str('Preconditions', 1000, 'Preconditions', { multiLine: true }),
+            str('ExternalTestCaseID', 40, 'External Test Case ID'),
+            int16('ProcessVersion', 'Process Version', { computed: true }),
+            code('AssignmentStatus', 10, 'Process Assignment', 'AssignmentStatusVH', { computed: true }),
+            crit('AssignmentCriticality'),
+            str('AssignmentNote', 255, 'Assignment Note', { computed: true }),
+            // versioned test case: every saved change creates a new version; an approval is valid for one version only
+            int16('Version', 'Version', { computed: true }),
+            int16('ApprovedVersion', 'Approved Version', { computed: true }),
+            str('ContentHash', 64, 'Content Hash', { computed: true, hidden: true })
         ],
         navs: [
             { name: '_TestCaseData', target: 'TestCaseData', partner: '_TestCase', constraints: [['TestCaseUUID', 'TestCaseUUID']], cascade: true },
+            { name: '_Step', target: 'TestCaseStep', collection: true, partner: '_TestCase', constraints: [['TestCaseUUID', 'TestCaseUUID']], cascade: true },
+            { name: '_Version', target: 'TestCaseVersion', collection: true, constraints: [['TestCaseUUID', 'TestCaseUUID']] },
+            textNav('_ProcessTeam', 'ProcessTeamVH', 'ProcessTeam', 'ProcessTeam'),
+            textNav('_BusinessProcess', 'BusinessProcessVH', 'BusinessProcess', 'ProcessID'),
+            {
+                name: '_ProcessVariant',
+                target: 'ProcessVariantVH',
+                constraints: [
+                    ['BusinessProcess', 'ProcessID'],
+                    ['ProcessVariant', 'Variant']
+                ]
+            },
+            codeNav('EndObject', 'EndObjectVH'),
+            codeNav('TestLevel', 'TestLevelVH'),
+            textNav('_BusinessOwner', 'UserVH', 'BusinessOwner', 'UserID'),
+            codeNav('AssignmentStatus', 'AssignmentStatusVH'),
             { name: '_ValidationResult', target: 'ValidationResult', collection: true, partner: '_TestCase', constraints: [['TestCaseUUID', 'TestCaseUUID']], cascade: true },
             { name: '_Execution', target: 'Execution', collection: true, partner: '_TestCase', constraints: [['TestCaseUUID', 'TestCaseUUID']], cascade: true },
             { name: '_LatestExecution', target: 'Execution', constraints: [['LatestExecutionUUID', 'ExecutionUUID']] },
@@ -408,6 +587,17 @@ const entities = [
                 textArrangement: 'TextFirst',
                 valueList: { collection: 'ProductVH', key: 'Product', display: ['ProductDescription', 'ProductGroup'], constants: [['ProductType', 'FERT']] }
             }),
+            // Service contract (A_ServiceOrder.ReferenceServiceContract): contract determination of variant "service from a contract"
+            str('ServiceContract', 10, 'Service Contract', {
+                text: '_ServiceContract/ServiceContractDescription',
+                textArrangement: 'TextFirst',
+                valueList: {
+                    collection: 'ServiceContractVH',
+                    key: 'ServiceContract',
+                    display: ['ServiceContractDescription', 'ServiceRefFunctionalLocation', 'ServiceContractEndDate', 'ServiceContractIsReleased'],
+                    in: [['SoldToParty', 'SoldToParty']]
+                }
+            }),
             // Service order items (A_ServiceOrderItem)
             str('ServiceProduct', 40, 'Service Product', {
                 text: '_ServiceProduct/ProductDescription',
@@ -458,6 +648,7 @@ const entities = [
             textNav('_FunctionalLocation', 'FunctionalLocationVH', 'ServiceRefFunctionalLocation', 'FunctionalLocation'),
             textNav('_Equipment', 'EquipmentVH', 'ServiceReferenceEquipment', 'Equipment'),
             textNav('_ReferenceProduct', 'ProductVH', 'ReferenceProduct', 'Product'),
+            textNav('_ServiceContract', 'ServiceContractVH', 'ServiceContract', 'ServiceContract'),
             textNav('_ServiceProduct', 'ProductVH', 'ServiceProduct', 'Product'),
             textNav('_ServicePart', 'ProductVH', 'ServicePart', 'Product')
         ]
@@ -516,10 +707,23 @@ const entities = [
             str('TechnicalResult', 10, 'Technical Result', { computed: true }),
             str('FunctionalResult', 25, 'Functional Result', { computed: true, text: '_FunctionalResult/Text', textArrangement: 'TextOnly' }),
             crit('FunctionalResultCriticality'),
-            longText('TechnicalLog', 'Technical Log', { computed: true })
+            longText('TechnicalLog', 'Technical Log', { computed: true }),
+            // traceability: release, versions and process path of the run
+            str('ReleaseID', 20, 'Release', { computed: true, text: '_Release/ReleaseName', textArrangement: 'TextFirst' }),
+            int16('TestCaseVersion', 'Test Case Version', { computed: true }),
+            str('ProcessID', 20, 'Process', { computed: true }),
+            int16('ProcessVersion', 'Process Version', { computed: true }),
+            str('ProcessVariant', 20, 'Process Variant', { computed: true }),
+            code('EndObject', 30, 'Run up to', 'EndObjectVH', { computed: true }),
+            code('RunType', 20, 'Run Type', 'RunTypeVH', { computed: true }),
+            guid('RegressionRunUUID', 'Regression Run', { computed: true, hidden: true }),
+            str('ExecutedBy', 12, 'Executed By', { computed: true })
         ],
         navs: [
             { name: '_TestCase', target: 'TestCase', partner: '_Execution', nullable: false, constraints: [['TestCaseUUID', 'TestCaseUUID']] },
+            textNav('_Release', 'ReleaseVH', 'ReleaseID', 'ReleaseID'),
+            codeNav('EndObject', 'EndObjectVH'),
+            codeNav('RunType', 'RunTypeVH'),
             { name: '_ExecutionStep', target: 'ExecutionStep', collection: true, partner: '_Execution', constraints: [['ExecutionUUID', 'ExecutionUUID']], cascade: true },
             { name: '_DocumentReference', target: 'DocumentReference', collection: true, partner: '_Execution', constraints: [['ExecutionUUID', 'ExecutionUUID']], cascade: true },
             { name: '_TestAssertion', target: 'TestAssertion', collection: true, partner: '_Execution', constraints: [['ExecutionUUID', 'ExecutionUUID']], cascade: true },
@@ -545,10 +749,14 @@ const entities = [
             crit('Criticality'),
             dto('StartedAt', 'Started At', { computed: true }),
             dto('FinishedAt', 'Finished At', { computed: true }),
-            str('Message', 255, 'Message', { computed: true })
+            str('Message', 255, 'Message', { computed: true }),
+            str('ProcessStepID', 20, 'Process Step', { computed: true, text: 'StepName', textArrangement: 'TextFirst' }),
+            str('StepName', 80, 'Process Step Name', { computed: true }),
+            str('ResponsibleTeam', 20, 'Responsible Team', { computed: true, text: '_ResponsibleTeam/ProcessTeamName', textArrangement: 'TextFirst' })
         ],
         navs: [
             { name: '_Execution', target: 'Execution', partner: '_ExecutionStep', nullable: false, constraints: [['ExecutionUUID', 'ExecutionUUID']] },
+            textNav('_ResponsibleTeam', 'ProcessTeamVH', 'ResponsibleTeam', 'ProcessTeam'),
             textNav('_BusinessObjectType', 'BusinessObjectTypeVH', 'BusinessObjectType', 'Code'),
             textNav('_StepStatus', 'StepStatusVH', 'ExecutionStatus', 'Code')
         ]
@@ -573,7 +781,9 @@ const entities = [
             str('TransactionCurrency', 5, 'Currency', { computed: true }),
             str('ExternalURL', 255, 'Link', { computed: true }),
             str('ValidationStatus', 10, 'Check', { computed: true, text: '_Status/Text', textArrangement: 'TextOnly' }),
-            crit('Criticality')
+            crit('Criticality'),
+            str('ProcessStepID', 20, 'Process Step', { computed: true, text: 'StepName', textArrangement: 'TextFirst' }),
+            str('StepName', 80, 'Process Step Name', { computed: true })
         ],
         navs: [
             { name: '_Execution', target: 'Execution', partner: '_DocumentReference', nullable: false, constraints: [['ExecutionUUID', 'ExecutionUUID']] },
@@ -598,13 +808,79 @@ const entities = [
             str('Tolerance', 40, 'Tolerance', { computed: true }),
             str('Result', 20, 'Result', { computed: true, text: '_Result/Text', textArrangement: 'TextOnly' }),
             crit('Criticality'),
-            str('Message', 255, 'Message', { computed: true })
+            str('Message', 255, 'Message', { computed: true }),
+            str('ProcessStepID', 20, 'Process Step', { computed: true, text: 'StepName', textArrangement: 'TextFirst' }),
+            str('StepName', 80, 'Process Step Name', { computed: true })
         ],
         navs: [
             { name: '_Execution', target: 'Execution', partner: '_TestAssertion', nullable: false, constraints: [['ExecutionUUID', 'ExecutionUUID']] },
             textNav('_BusinessObjectType', 'BusinessObjectTypeVH', 'BusinessObjectType', 'Code'),
             textNav('_Result', 'AssertionResultVH', 'Result', 'Code')
         ]
+    },
+    /* ------------------------------ TestCaseStep (test steps derived from the process variant) ------------------------------ */
+    {
+        name: 'TestCaseStep',
+        draft: 'node',
+        keys: ['TestCaseStepUUID'],
+        props: [
+            guid('TestCaseStepUUID', 'Test Step UUID', { nullable: false, computed: true, hidden: true }),
+            guid('TestCaseUUID', 'Test Case UUID', { computed: true, hidden: true }),
+            int16('StepNo', 'Step'),
+            str('ProcessID', 20, 'Process', { computed: true, hidden: true }),
+            str('ProcessStepID', 20, 'Process Step', {
+                text: 'StepName',
+                textArrangement: 'TextFirst',
+                // the process of the test case is a hidden technical field: the value help lists the steps of all processes
+                valueList: {
+                    collection: 'ProcessStepVH',
+                    key: 'StepID',
+                    display: ['StepName', 'ProcessID', 'BusinessObjectType', 'ResponsibleTeam', 'Variants']
+                }
+            }),
+            str('StepName', 80, 'Process Step Name', { computed: true }),
+            code('BusinessObjectType', 30, 'Business Object', 'BusinessObjectTypeVH', { computed: true }),
+            str('Action', 255, 'Action / Instruction'),
+            str('ExpectedResult', 255, 'Expected Result'),
+            str('ResponsibleTeam', 20, 'Responsible Team', { computed: true, text: '_ResponsibleTeam/ProcessTeamName', textArrangement: 'TextFirst' }),
+            code('TeamAssignment', 10, 'Team Assignment', 'AssignmentStatusVH', { computed: true }),
+            crit('TeamAssignmentCriticality'),
+            bool('IsHandover', 'Handover', { computed: true }),
+            code('Automation', 10, 'Automation', 'AutomationVH', { computed: true }),
+            code('StepSource', 20, 'Source', 'SourceTypeVH', { computed: true })
+        ],
+        navs: [
+            { name: '_TestCase', target: 'TestCase', partner: '_Step', nullable: false, constraints: [['TestCaseUUID', 'TestCaseUUID']] },
+            codeNav('BusinessObjectType', 'BusinessObjectTypeVH'),
+            textNav('_ResponsibleTeam', 'ProcessTeamVH', 'ResponsibleTeam', 'ProcessTeam'),
+            codeNav('TeamAssignment', 'AssignmentStatusVH'),
+            codeNav('Automation', 'AutomationVH'),
+            codeNav('StepSource', 'SourceTypeVH')
+        ]
+    },
+    /* ------------------------------ TestCaseVersion (version history, read-only) ------------------------------ */
+    {
+        name: 'TestCaseVersion',
+        keys: ['TestCaseVersionUUID'],
+        props: [
+            guid('TestCaseVersionUUID', 'Version UUID', { nullable: false, computed: true, hidden: true }),
+            guid('TestCaseUUID', 'Test Case UUID', { computed: true, hidden: true }),
+            str('CaseID', 20, 'Case ID', { computed: true }),
+            int16('Version', 'Version', { computed: true }),
+            dto('ActivatedAt', 'Saved At', { computed: true }),
+            str('ActivatedBy', 12, 'Saved By', { computed: true }),
+            str('ChangeSummary', 255, 'Changes', { computed: true }),
+            str('ProcessID', 20, 'Process', { computed: true }),
+            int16('ProcessVersion', 'Process Version', { computed: true }),
+            str('ProcessVariant', 20, 'Process Variant', { computed: true }),
+            code('ApprovalStatus', 20, 'Approval', 'ApprovalStatusVH', { computed: true }),
+            crit('ApprovalCriticality'),
+            str('ApprovedBy', 12, 'Approved By', { computed: true }),
+            dto('ApprovedAt', 'Approved At', { computed: true }),
+            str('ContentHash', 64, 'Content Hash', { computed: true, hidden: true }),
+            longText('Snapshot', 'Snapshot', { computed: true, hidden: true })
+        ],
+        navs: [codeNav('ApprovalStatus', 'ApprovalStatusVH')]
     },
     /* ------------------------------ BO 2: Configuration (draft root) ------------------------------ */
     {
@@ -687,6 +963,391 @@ const entities = [
             textNav('_ValidationRule', 'ValidationRuleVH', 'ValidationRule', 'Code'),
             textNav('_SourceType', 'SourceTypeVH', 'SourceType', 'Code')
         ]
+    },
+    /* ------------------------------ BO 3: Process team (draft root) ------------------------------ */
+    {
+        name: 'ProcessTeam',
+        draft: 'root',
+        keys: ['ProcessTeam'],
+        messages: true,
+        entityControl: true,
+        props: [
+            str('ProcessTeam', 20, 'Process Team', { nullable: false, immutable: true }),
+            str('ProcessTeamName', 60, 'Team Name'),
+            str('ProcessArea', 40, 'Process Area'),
+            str('Description', 1000, 'Description', { multiLine: true }),
+            bool('IsActive', 'Active'),
+            int16('ProcessOwnerCount', 'Process Owners', { computed: true }),
+            int16('TestExecutorCount', 'Test Executors', { computed: true }),
+            int16('ResponsibleStepCount', 'Responsible Steps', { computed: true }),
+            int16('TestCaseCount', 'Test Cases', { computed: true }),
+            int16('OpenAssignmentCount', 'Open Step Assignments', { computed: true })
+        ],
+        navs: [
+            { name: '_Member', target: 'TeamMember', collection: true, partner: '_ProcessTeam', constraints: [['ProcessTeam', 'ProcessTeam']], cascade: true },
+            { name: '_ResponsibleStep', target: 'ProcessStepVH', collection: true, constraints: [['ProcessTeam', 'ResponsibleTeam']] },
+            { name: '_OwnedProcess', target: 'BusinessProcessVH', collection: true, constraints: [['ProcessTeam', 'OwnerTeam']] }
+        ]
+    },
+    {
+        name: 'TeamMember',
+        draft: 'node',
+        keys: ['MemberUUID'],
+        props: [
+            guid('MemberUUID', 'Member UUID', { nullable: false, computed: true, hidden: true }),
+            str('ProcessTeam', 20, 'Process Team', { computed: true, hidden: true }),
+            str('UserID', 12, 'User', {
+                text: '_User/UserName',
+                textArrangement: 'TextFirst',
+                valueList: { collection: 'UserVH', key: 'UserID', display: ['UserName'] }
+            }),
+            code('TeamRole', 20, 'Role', 'TeamRoleVH'),
+            str('Note', 120, 'Note')
+        ],
+        navs: [
+            { name: '_ProcessTeam', target: 'ProcessTeam', partner: '_Member', nullable: false, constraints: [['ProcessTeam', 'ProcessTeam']] },
+            textNav('_User', 'UserVH', 'UserID', 'UserID'),
+            codeNav('TeamRole', 'TeamRoleVH')
+        ]
+    },
+    /* ------------------------------ BO 4: Business process (draft root, versioned) ------------------------------ */
+    {
+        name: 'BusinessProcess',
+        draft: 'root',
+        keys: ['ProcessID'],
+        messages: true,
+        entityControl: true,
+        props: [
+            str('ProcessID', 20, 'Process', { nullable: false, immutable: true }),
+            str('ProcessName', 60, 'Process Name'),
+            str('Description', 1000, 'Description', { multiLine: true }),
+            str('ProcessArea', 40, 'Process Area'),
+            str('OwnerTeam', 20, 'Owner Team', {
+                text: '_OwnerTeam/ProcessTeamName',
+                textArrangement: 'TextFirst',
+                valueList: { collection: 'ProcessTeamVH', key: 'ProcessTeam', display: ['ProcessTeamName'] }
+            }),
+            code('PilotScope', 10, 'Pilot Scope', 'PilotScopeVH'),
+            str('SAPReference', 255, 'SAP Reference', { multiLine: true }),
+            int16('ProcessVersion', 'Version', { computed: true }),
+            str('VersionNote', 255, 'Change Note'),
+            dto('VersionActivatedAt', 'Version Since', { computed: true }),
+            str('VersionActivatedBy', 12, 'Version By', { computed: true }),
+            code('ModelingStatus', 10, 'Process Model', 'AssignmentStatusVH', { computed: true }),
+            crit('ModelingCriticality'),
+            int16('StepCount', 'Steps', { computed: true }),
+            int16('VariantCount', 'Variants', { computed: true }),
+            int16('TestCaseCount', 'Test Cases', { computed: true }),
+            str('ContentHash', 64, 'Content Hash', { computed: true, hidden: true })
+        ],
+        navs: [
+            { name: '_Step', target: 'ProcessStep', collection: true, partner: '_Process', constraints: [['ProcessID', 'ProcessID']], cascade: true },
+            { name: '_Variant', target: 'ProcessVariant', collection: true, partner: '_Process', constraints: [['ProcessID', 'ProcessID']], cascade: true },
+            { name: '_Version', target: 'ProcessVersion', collection: true, constraints: [['ProcessID', 'ProcessID']] },
+            textNav('_OwnerTeam', 'ProcessTeamVH', 'OwnerTeam', 'ProcessTeam'),
+            codeNav('PilotScope', 'PilotScopeVH'),
+            codeNav('ModelingStatus', 'AssignmentStatusVH')
+        ]
+    },
+    {
+        name: 'ProcessStep',
+        draft: 'node',
+        keys: ['ProcessStepUUID'],
+        props: [
+            guid('ProcessStepUUID', 'Process Step UUID', { nullable: false, computed: true, hidden: true }),
+            str('ProcessID', 20, 'Process', { computed: true, hidden: true }),
+            int16('Sequence', 'Sequence'),
+            str('StepID', 20, 'Step ID'),
+            str('StepName', 80, 'Process Step'),
+            code('BusinessObjectType', 30, 'Business Object', 'BusinessObjectTypeVH'),
+            str('ExpectedStatus', 30, 'Expected Status'),
+            str('ResponsibleTeam', 20, 'Responsible Team', {
+                text: '_ResponsibleTeam/ProcessTeamName',
+                textArrangement: 'TextFirst',
+                valueList: { collection: 'ProcessTeamVH', key: 'ProcessTeam', display: ['ProcessTeamName'] }
+            }),
+            code('TeamAssignment', 10, 'Team Assignment', 'AssignmentStatusVH'),
+            crit('TeamAssignmentCriticality'),
+            str('Variants', 120, 'Variants'),
+            code('PilotScope', 10, 'Pilot Scope', 'PilotScopeVH'),
+            code('Automation', 10, 'Automation', 'AutomationVH'),
+            bool('IsHandover', 'Handover', { computed: true }),
+            str('TestAction', 255, 'Test Action (template)'),
+            str('TestExpectedResult', 255, 'Expected Result (template)'),
+            str('SAPReference', 120, 'SAP Reference'),
+            str('Note', 255, 'Note'),
+            int16('TestCaseCount', 'Test Cases', { computed: true })
+        ],
+        navs: [
+            { name: '_Process', target: 'BusinessProcess', partner: '_Step', nullable: false, constraints: [['ProcessID', 'ProcessID']] },
+            codeNav('BusinessObjectType', 'BusinessObjectTypeVH'),
+            textNav('_ResponsibleTeam', 'ProcessTeamVH', 'ResponsibleTeam', 'ProcessTeam'),
+            codeNav('TeamAssignment', 'AssignmentStatusVH'),
+            codeNav('PilotScope', 'PilotScopeVH'),
+            codeNav('Automation', 'AutomationVH')
+        ]
+    },
+    {
+        name: 'ProcessVariant',
+        draft: 'node',
+        keys: ['VariantUUID'],
+        props: [
+            guid('VariantUUID', 'Variant UUID', { nullable: false, computed: true, hidden: true }),
+            str('ProcessID', 20, 'Process', { computed: true, hidden: true }),
+            int16('Sequence', 'Sequence'),
+            str('Variant', 20, 'Variant'),
+            str('VariantName', 80, 'Variant Name'),
+            str('Description', 255, 'Description', { multiLine: true }),
+            code('PilotScope', 10, 'Pilot Scope', 'PilotScopeVH'),
+            bool('IsDefault', 'Default Variant'),
+            str('StepPath', 255, 'Step Path', { computed: true }),
+            str('DocumentPath', 120, 'Document Chain', { computed: true }),
+            int16('TestCaseCount', 'Test Cases', { computed: true })
+        ],
+        navs: [
+            { name: '_Process', target: 'BusinessProcess', partner: '_Variant', nullable: false, constraints: [['ProcessID', 'ProcessID']] },
+            codeNav('PilotScope', 'PilotScopeVH')
+        ]
+    },
+    {
+        name: 'ProcessVersion',
+        keys: ['ProcessVersionUUID'],
+        props: [
+            guid('ProcessVersionUUID', 'Process Version UUID', { nullable: false, computed: true, hidden: true }),
+            str('ProcessID', 20, 'Process', { computed: true }),
+            int16('ProcessVersion', 'Version', { computed: true }),
+            dto('ActivatedAt', 'Activated At', { computed: true }),
+            str('ActivatedBy', 12, 'Activated By', { computed: true }),
+            str('VersionNote', 255, 'Change Note', { computed: true }),
+            int16('StepCount', 'Steps', { computed: true }),
+            int16('VariantCount', 'Variants', { computed: true }),
+            str('ContentHash', 64, 'Content Hash', { computed: true, hidden: true })
+        ],
+        navs: []
+    },
+    /* ------------------------------ BO 5: Release (draft root) with the scope link table ------------------------------ */
+    {
+        name: 'Release',
+        draft: 'root',
+        keys: ['ReleaseID'],
+        messages: true,
+        entityControl: true,
+        operationControl: releaseActions,
+        props: [
+            str('ReleaseID', 20, 'Release', { nullable: false, immutable: true }),
+            str('ReleaseName', 60, 'Release Name'),
+            code('ReleaseType', 20, 'Release Type', 'ReleaseTypeVH'),
+            str('SAPProductVersion', 40, 'SAP Product Version'),
+            str('FeaturePackStack', 10, 'FPS / SPS'),
+            code('ReleaseStatus', 20, 'Release Status', 'ReleaseStatusVH'),
+            crit('ReleaseStatusCriticality'),
+            date('SAPAvailabilityDate', 'SAP Availability (planned)'),
+            date('TestStartDate', 'Test Start'),
+            date('TestEndDate', 'Test End'),
+            date('GoLiveDate', 'Go-Live'),
+            str('PredecessorRelease', 20, 'Predecessor Release', {
+                text: '_PredecessorRelease/ReleaseName',
+                textArrangement: 'TextFirst',
+                valueList: { collection: 'ReleaseVH', key: 'ReleaseID', display: ['ReleaseName', 'ReleaseStatus'] }
+            }),
+            bool('AutoRegression', 'Regression at Test Start'),
+            str('Description', 1000, 'Description', { multiLine: true }),
+            str('SourceNote', 255, 'Source of Dates', { multiLine: true }),
+            int16('ScopeCount', 'Scope Entries', { computed: true }),
+            int16('TestCaseCount', 'Test Cases in Scope', { computed: true }),
+            int16('ApprovedCount', 'Approved', { computed: true }),
+            int16('ExecutedCount', 'Executed', { computed: true }),
+            int16('PassedCount', 'Passed', { computed: true }),
+            int16('FailedCount', 'Failed', { computed: true }),
+            int16('PassRate', 'Pass Rate', { computed: true, unitText: '%' }),
+            crit('PassRateCriticality'),
+            int16('StepCoverage', 'Step Coverage', { computed: true, unitText: '%' }),
+            crit('StepCoverageCriticality'),
+            guid('LatestRunUUID', 'Latest Regression Run', { computed: true, hidden: true }),
+            str('LatestRunID', 30, 'Latest Regression Run', { computed: true }),
+            code('LatestRunStatus', 20, 'Run Status', 'ExecutionStatusVH', { computed: true }),
+            crit('LatestRunCriticality'),
+            dto('LatestRunAt', 'Run Started', { computed: true })
+        ],
+        navs: [
+            { name: '_Scope', target: 'ReleaseScope', collection: true, partner: '_Release', constraints: [['ReleaseID', 'ReleaseID']], cascade: true },
+            { name: '_TestCase', target: 'ReleaseTestCase', collection: true, constraints: [['ReleaseID', 'ReleaseID']] },
+            { name: '_StepCoverage', target: 'ReleaseStepCoverage', collection: true, constraints: [['ReleaseID', 'ReleaseID']] },
+            { name: '_RegressionRun', target: 'RegressionRun', collection: true, constraints: [['ReleaseID', 'ReleaseID']] },
+            { name: '_LatestRunItem', target: 'RegressionRunItem', collection: true, constraints: [['LatestRunUUID', 'RunUUID']] },
+            codeNav('ReleaseType', 'ReleaseTypeVH'),
+            codeNav('ReleaseStatus', 'ReleaseStatusVH'),
+            textNav('_PredecessorRelease', 'ReleaseVH', 'PredecessorRelease', 'ReleaseID'),
+            codeNav('LatestRunStatus', 'ExecutionStatusVH')
+        ]
+    },
+    {
+        // link table ("Zwischentabelle"): release × process team × business process (version)
+        name: 'ReleaseScope',
+        draft: 'node',
+        keys: ['ScopeUUID'],
+        props: [
+            guid('ScopeUUID', 'Scope UUID', { nullable: false, computed: true, hidden: true }),
+            str('ReleaseID', 20, 'Release', { computed: true, hidden: true }),
+            str('ProcessTeam', 20, 'Process Team', {
+                text: '_ProcessTeam/ProcessTeamName',
+                textArrangement: 'TextFirst',
+                valueList: { collection: 'ProcessTeamVH', key: 'ProcessTeam', display: ['ProcessTeamName', 'ProcessArea'] }
+            }),
+            str('ProcessID', 20, 'Process', {
+                text: '_Process/ProcessName',
+                textArrangement: 'TextFirst',
+                valueList: { collection: 'BusinessProcessVH', key: 'ProcessID', display: ['ProcessName', 'OwnerTeam', 'ProcessVersion', 'PilotScope'] }
+            }),
+            int16('ProcessVersion', 'Process Version'),
+            bool('IsRegressionRelevant', 'In Regression'),
+            str('ScopeNote', 255, 'Note'),
+            int16('TestCaseCount', 'Test Cases', { computed: true }),
+            int16('ApprovedCount', 'Approved', { computed: true }),
+            int16('ExecutedCount', 'Executed', { computed: true }),
+            int16('PassedCount', 'Passed', { computed: true }),
+            int16('FailedCount', 'Failed', { computed: true }),
+            int16('PassRate', 'Pass Rate', { computed: true, unitText: '%' }),
+            int16('StepCoverage', 'Step Coverage', { computed: true, unitText: '%' }),
+            code('ScopeStatus', 20, 'Test Status', 'CoverageStatusVH', { computed: true }),
+            crit('ScopeStatusCriticality')
+        ],
+        navs: [
+            { name: '_Release', target: 'Release', partner: '_Scope', nullable: false, constraints: [['ReleaseID', 'ReleaseID']] },
+            textNav('_ProcessTeam', 'ProcessTeamVH', 'ProcessTeam', 'ProcessTeam'),
+            textNav('_Process', 'BusinessProcessVH', 'ProcessID', 'ProcessID'),
+            codeNav('ScopeStatus', 'CoverageStatusVH')
+        ]
+    },
+    {
+        // read model: test cases of the release scope with their result in this release
+        name: 'ReleaseTestCase',
+        keys: ['ReleaseTestCaseUUID'],
+        props: [
+            guid('ReleaseTestCaseUUID', 'Release Test Case UUID', { nullable: false, computed: true, hidden: true }),
+            str('ReleaseID', 20, 'Release', { computed: true, hidden: true }),
+            guid('TestCaseUUID', 'Test Case UUID', { computed: true, hidden: true }),
+            str('CaseID', 20, 'Case ID', { computed: true }),
+            str('Title', 80, 'Title', { computed: true }),
+            str('ProcessTeam', 20, 'Process Team', { computed: true, text: '_ProcessTeam/ProcessTeamName', textArrangement: 'TextFirst' }),
+            str('ProcessID', 20, 'Process', { computed: true, text: '_Process/ProcessName', textArrangement: 'TextFirst' }),
+            str('ProcessVariant', 20, 'Process Variant', { computed: true, text: 'VariantName', textArrangement: 'TextFirst' }),
+            str('VariantName', 80, 'Variant Name', { computed: true }),
+            code('TestLevel', 20, 'Test Level', 'TestLevelVH', { computed: true }),
+            code('EndObject', 30, 'Run up to', 'EndObjectVH', { computed: true }),
+            int16('TestCaseVersion', 'Version', { computed: true }),
+            int16('ApprovedVersion', 'Approved Version', { computed: true }),
+            code('ApprovalStatus', 20, 'Approval', 'ApprovalStatusVH', { computed: true }),
+            crit('ApprovalCriticality'),
+            bool('IsRegressionRelevant', 'In Regression', { computed: true }),
+            code('ResultInRelease', 25, 'Result in Release', 'FinalResultVH', { computed: true }),
+            crit('ResultCriticality'),
+            str('ExternalExecutionID', 40, 'Latest Run', { computed: true }),
+            int16('ExecutedVersion', 'Executed Version', { computed: true }),
+            dto('ExecutedAt', 'Executed At', { computed: true }),
+            str('ExecutedBy', 12, 'Executed By', { computed: true }),
+            code('RunType', 20, 'Run Type', 'RunTypeVH', { computed: true }),
+            str('Remark', 255, 'Remark', { computed: true })
+        ],
+        navs: [
+            textNav('_ProcessTeam', 'ProcessTeamVH', 'ProcessTeam', 'ProcessTeam'),
+            textNav('_Process', 'BusinessProcessVH', 'ProcessID', 'ProcessID'),
+            codeNav('TestLevel', 'TestLevelVH'),
+            codeNav('EndObject', 'EndObjectVH'),
+            codeNav('ApprovalStatus', 'ApprovalStatusVH'),
+            codeNav('ResultInRelease', 'FinalResultVH'),
+            codeNav('RunType', 'RunTypeVH')
+        ]
+    },
+    {
+        // read model: coverage of each process step in the release (design and execution)
+        name: 'ReleaseStepCoverage',
+        keys: ['CoverageUUID'],
+        props: [
+            guid('CoverageUUID', 'Coverage UUID', { nullable: false, computed: true, hidden: true }),
+            str('ReleaseID', 20, 'Release', { computed: true, hidden: true }),
+            str('ProcessID', 20, 'Process', { computed: true, text: '_Process/ProcessName', textArrangement: 'TextFirst' }),
+            int16('Sequence', 'Sequence', { computed: true }),
+            str('StepID', 20, 'Step ID', { computed: true }),
+            str('StepName', 80, 'Process Step', { computed: true }),
+            code('BusinessObjectType', 30, 'Business Object', 'BusinessObjectTypeVH', { computed: true }),
+            str('ResponsibleTeam', 20, 'Responsible Team', { computed: true, text: '_ResponsibleTeam/ProcessTeamName', textArrangement: 'TextFirst' }),
+            code('TeamAssignment', 10, 'Team Assignment', 'AssignmentStatusVH', { computed: true }),
+            bool('IsHandover', 'Handover', { computed: true }),
+            code('Automation', 10, 'Automation', 'AutomationVH', { computed: true }),
+            int16('TestCaseCount', 'Test Cases', { computed: true }),
+            int16('ExecutedCount', 'Executed', { computed: true }),
+            int16('PassedCount', 'Passed', { computed: true }),
+            int16('FailedCount', 'Failed', { computed: true }),
+            code('CoverageStatus', 20, 'Coverage', 'CoverageStatusVH', { computed: true }),
+            crit('CoverageCriticality'),
+            str('LatestDocumentID', 20, 'Latest Document', { computed: true }),
+            str('Remark', 255, 'Remark', { computed: true })
+        ],
+        navs: [
+            textNav('_Process', 'BusinessProcessVH', 'ProcessID', 'ProcessID'),
+            codeNav('BusinessObjectType', 'BusinessObjectTypeVH'),
+            textNav('_ResponsibleTeam', 'ProcessTeamVH', 'ResponsibleTeam', 'ProcessTeam'),
+            codeNav('TeamAssignment', 'AssignmentStatusVH'),
+            codeNav('Automation', 'AutomationVH'),
+            codeNav('CoverageStatus', 'CoverageStatusVH')
+        ]
+    },
+    {
+        name: 'RegressionRun',
+        keys: ['RunUUID'],
+        props: [
+            guid('RunUUID', 'Run UUID', { nullable: false, computed: true, hidden: true }),
+            str('RunID', 30, 'Regression Run', { computed: true }),
+            str('ReleaseID', 20, 'Release', { computed: true, hidden: true }),
+            code('Status', 20, 'Status', 'ExecutionStatusVH', { computed: true }),
+            crit('StatusCriticality'),
+            str('Trigger', 30, 'Trigger', { computed: true }),
+            dto('StartedAt', 'Started At', { computed: true }),
+            str('StartedBy', 12, 'Started By', { computed: true }),
+            dto('FinishedAt', 'Finished At', { computed: true }),
+            int16('CandidateCount', 'Test Cases', { computed: true }),
+            int16('StartedCount', 'Started', { computed: true }),
+            int16('SkippedCount', 'Skipped', { computed: true }),
+            int16('RunningCount', 'Running', { computed: true }),
+            int16('PassedCount', 'Passed', { computed: true }),
+            int16('FailedCount', 'Failed', { computed: true }),
+            int16('PassRate', 'Pass Rate', { computed: true, unitText: '%' }),
+            crit('PassRateCriticality')
+        ],
+        navs: [
+            { name: '_Item', target: 'RegressionRunItem', collection: true, constraints: [['RunUUID', 'RunUUID']] },
+            codeNav('Status', 'ExecutionStatusVH')
+        ]
+    },
+    {
+        name: 'RegressionRunItem',
+        keys: ['RunItemUUID'],
+        props: [
+            guid('RunItemUUID', 'Run Item UUID', { nullable: false, computed: true, hidden: true }),
+            guid('RunUUID', 'Run UUID', { computed: true, hidden: true }),
+            int16('Sequence', 'No.', { computed: true }),
+            guid('TestCaseUUID', 'Test Case UUID', { computed: true, hidden: true }),
+            str('CaseID', 20, 'Case ID', { computed: true }),
+            str('Title', 80, 'Title', { computed: true }),
+            str('ProcessTeam', 20, 'Process Team', { computed: true, text: '_ProcessTeam/ProcessTeamName', textArrangement: 'TextFirst' }),
+            str('ProcessVariant', 20, 'Process Variant', { computed: true }),
+            int16('TestCaseVersion', 'Version', { computed: true }),
+            code('Decision', 20, 'Decision', 'RunDecisionVH', { computed: true }),
+            crit('DecisionCriticality'),
+            str('Reason', 255, 'Reason', { computed: true }),
+            guid('ExecutionUUID', 'Execution UUID', { computed: true, hidden: true }),
+            str('ExternalExecutionID', 40, 'Execution', { computed: true }),
+            code('ExecutionStatus', 20, 'Execution Status', 'ExecutionStatusVH', { computed: true }),
+            code('FinalResult', 25, 'Result', 'FinalResultVH', { computed: true }),
+            crit('ResultCriticality')
+        ],
+        navs: [
+            textNav('_ProcessTeam', 'ProcessTeamVH', 'ProcessTeam', 'ProcessTeam'),
+            codeNav('Decision', 'RunDecisionVH'),
+            codeNav('ExecutionStatus', 'ExecutionStatusVH'),
+            codeNav('FinalResult', 'FinalResultVH')
+        ]
     }
 ];
 
@@ -695,6 +1356,7 @@ const entities = [
 /* ------------------------------------------------------------------------------------------------ */
 const actions = [
     ...testCaseActions.map((name) => ({ name, boundTo: 'TestCase', returns: 'TestCase' })),
+    ...releaseActions.map((name) => ({ name, boundTo: 'Release', returns: 'Release' })),
     {
         name: 'applySuggestion',
         boundTo: 'ValidationResult',
@@ -732,6 +1394,16 @@ const collFacet = (id, label, facets) => V.rec(`${UI}.CollectionFacet`, { ID: V.
 const fieldGroup = (label, fields) => V.rec(`${UI}.FieldGroupType`, { Label: label ? V.str(label) : undefined, Data: V.coll(fields) });
 const dataPoint = (value, title, criticalityPath) =>
     V.rec(`${UI}.DataPointType`, { Value: V.path(value), Title: V.str(title), Criticality: V.path(criticalityPath) });
+/** percentage KPI (0..100) shown as progress indicator in headers and tables */
+const progressPoint = (value, title, criticalityPath) =>
+    V.rec(`${UI}.DataPointType`, {
+        Value: V.path(value),
+        Title: V.str(title),
+        TargetValue: V.int(100),
+        Visualization: V.enum(`${UI}.VisualizationType/Progress`),
+        Criticality: V.path(criticalityPath)
+    });
+const dfAnno = (target, label, level) => V.rec(`${UI}.DataFieldForAnnotation`, { Target: V.annoPath(target), Label: V.str(label) }, importance(level));
 const headerInfo = (typeName, typeNamePlural, titlePath, descriptionPath) =>
     V.rec(`${UI}.HeaderInfoType`, {
         TypeName: V.str(typeName),
@@ -808,6 +1480,7 @@ const annotations = {
             'SAP__UI.HeaderFacets',
             V.coll([
                 refFacet('HeaderScenario', 'Scenario', '@UI.FieldGroup#HeaderInfo'),
+                refFacet('HeaderProcess', 'Process', '@UI.FieldGroup#HeaderProcess'),
                 refFacet('HeaderValidation', 'Validation', '@UI.DataPoint#Validation'),
                 refFacet('HeaderApproval', 'Approval', '@UI.DataPoint#Approval'),
                 refFacet('HeaderExecution', 'Execution', '@UI.DataPoint#Execution'),
@@ -820,11 +1493,20 @@ const annotations = {
         ['SAP__UI.DataPoint', dataPoint('FinalResult', 'Final Result', 'FinalResultCriticality'), 'FinalResult'],
         ['SAP__UI.FieldGroup', fieldGroup(undefined, [df('ScenarioID'), df('ProcessProfile'), df('CreatedBy'), df('CreatedAt')]), 'HeaderInfo'],
         [
+            'SAP__UI.FieldGroup',
+            fieldGroup(undefined, [df('ProcessTeam'), df('ProcessVariant'), df('Version'), dfCrit('AssignmentStatus', 'AssignmentCriticality')]),
+            'HeaderProcess'
+        ],
+        [
             'SAP__UI.LineItem',
             V.coll([
                 df('CaseID', undefined, {}, 'High'),
                 df('ScenarioID', 'Scenario', {}, 'Low'),
                 df('Title', undefined, {}, 'High'),
+                df('ProcessTeam', undefined, {}, 'Medium'),
+                df('ProcessVariant', undefined, {}, 'Medium'),
+                df('Version', undefined, {}, 'Low'),
+                dfCrit('AssignmentStatus', 'AssignmentCriticality', 'Assignment', 'Low'),
                 df('ProcessProfile', undefined, {}, 'Low'),
                 df('CreatedAt', undefined, {}, 'Low'),
                 dfCrit('ValidationStatus', 'ValidationCriticality', 'Validation', 'High'),
@@ -833,7 +1515,12 @@ const annotations = {
                 df('ExecutionDuration', 'Duration (s)', {}, 'Low')
             ])
         ],
-        ['SAP__UI.SelectionFields', V.coll([V.propPath('CaseID'), V.propPath('FinalResult'), V.propPath('CreatedAt'), V.propPath('ProcessProfile'), V.propPath('CreatedBy')])],
+        [
+            'SAP__UI.SelectionFields',
+            V.coll(
+                ['CaseID', 'ProcessTeam', 'BusinessProcess', 'ProcessVariant', 'FinalResult', 'AssignmentStatus', 'CreatedAt', 'ProcessProfile', 'CreatedBy'].map(V.propPath)
+            )
+        ],
         ['SAP__UI.PresentationVariant', sortBy('CreatedAt', true)],
         [
             'SAP__UI.Identification',
@@ -859,11 +1546,31 @@ const annotations = {
             ]),
             'Describe'
         ],
-        ['SAP__UI.FieldGroup', fieldGroup('Approval', [df('ApprovalStatus'), df('ApprovedBy'), df('ApprovedAt')]), 'Approval'],
+        [
+            'SAP__UI.FieldGroup',
+            fieldGroup('Process Assignment', [
+                df('ProcessTeam'),
+                df('BusinessProcess'),
+                df('ProcessVariant'),
+                df('EndObject'),
+                df('TestLevel'),
+                df('BusinessOwner'),
+                df('ProcessVersion'),
+                dfCrit('AssignmentStatus', 'AssignmentCriticality'),
+                df('AssignmentNote'),
+                df('ExternalTestCaseID')
+            ]),
+            'Process'
+        ],
+        ['SAP__UI.FieldGroup', fieldGroup('Preconditions', [df('Preconditions')]), 'Preconditions'],
+        ['SAP__UI.FieldGroup', fieldGroup('Approval', [df('ApprovalStatus'), df('ApprovedBy'), df('ApprovedAt'), df('Version'), df('ApprovedVersion')]), 'Approval'],
         [
             'SAP__UI.FieldGroup',
             fieldGroup('Execution', [
                 df('ExternalExecutionID'),
+                df('_LatestExecution/ReleaseID', 'Release'),
+                df('_LatestExecution/TestCaseVersion', 'Test Case Version'),
+                df('_LatestExecution/RunType', 'Run Type'),
                 df('_LatestExecution/ExecutionProvider', 'Execution Provider'),
                 df('ExecutionStatus'),
                 df('_LatestExecution/ProgressPercent', 'Progress (%)'),
@@ -882,6 +1589,13 @@ const annotations = {
             'SAP__UI.Facets',
             V.coll([
                 collFacet('Input', 'Input', [refFacet('Scenario', 'Scenario', '@UI.FieldGroup#Scenario'), refFacet('Describe', 'Describe Test Scenario', '@UI.FieldGroup#Describe')]),
+                collFacet('ProcessSection', 'Process Reference', [
+                    collFacet('ProcessAssignmentGroup', 'Process Assignment', [
+                        refFacet('ProcessAssignment', 'Process Assignment', '@UI.FieldGroup#Process'),
+                        refFacet('PreconditionsDetails', 'Preconditions', '@UI.FieldGroup#Preconditions')
+                    ]),
+                    collFacet('TestStepsGroup', 'Test Steps', [refFacet('TestSteps', 'Test Steps', '_Step/@UI.PresentationVariant')])
+                ]),
                 collFacet('TestData', 'Validated Test Data', [
                     refFacet('ServiceRequest', '1 · Service Request', '_TestCaseData/@UI.FieldGroup#ServiceRequest'),
                     refFacet('ReferenceObject', '2 · Reference Object', '_TestCaseData/@UI.FieldGroup#ReferenceObject'),
@@ -901,7 +1615,8 @@ const annotations = {
                 collFacet('TechnicalLogSection', 'Technical Log', [
                     collFacet('TechnicalLogGroup', 'Latest Run', [refFacet('TechnicalLogDetails', 'Latest Run', '@UI.FieldGroup#TechnicalLog')]),
                     collFacet('ExecutionHistoryGroup', 'All Runs', [refFacet('ExecutionHistory', 'All Runs', '_Execution/@UI.LineItem#History')])
-                ])
+                ]),
+                collFacet('VersionSection', 'Versions', [refFacet('VersionHistory', 'Versions', '_Version/@UI.PresentationVariant')])
             ])
         ],
         [
@@ -924,6 +1639,43 @@ const annotations = {
                 TargetEntities: V.coll([V.navPath('_TestCaseData'), V.navPath('_ProcessProfile')])
             }),
             'ProcessProfileChanged'
+        ],
+        [
+            'SAP__common.SideEffects',
+            V.rec('SAP__common.SideEffectsType', {
+                SourceProperties: V.coll(['ProcessTeam', 'BusinessProcess', 'ProcessVariant', 'EndObject'].map(V.propPath)),
+                TargetProperties: V.coll(
+                    [
+                        'ProcessTeam',
+                        'BusinessProcess',
+                        'ProcessVariant',
+                        'EndObject',
+                        'BusinessOwner',
+                        'ProcessVersion',
+                        'AssignmentStatus',
+                        'AssignmentCriticality',
+                        'AssignmentNote',
+                        'ValidationStatus',
+                        'ValidationCriticality',
+                        'ApprovalStatus',
+                        'ApprovalCriticality',
+                        'Status',
+                        'StatusCriticality',
+                        'SAP__Messages',
+                        '__OperationControl'
+                    ].map(V.str)
+                ),
+                TargetEntities: V.coll(['_Step', '_TestCaseData', '_ProcessTeam', '_BusinessProcess', '_ProcessVariant', '_BusinessOwner'].map(V.navPath))
+            }),
+            'ProcessChanged'
+        ],
+        [
+            'SAP__common.SideEffects',
+            V.rec('SAP__common.SideEffectsType', {
+                SourceEntities: V.coll([V.navPath('_Step')]),
+                TargetProperties: V.coll(['AssignmentStatus', 'AssignmentCriticality', 'AssignmentNote'].map(V.str))
+            }),
+            'StepsChanged'
         ]
     ],
     [`${NS}.TestCaseDataType`]: [
@@ -947,7 +1699,11 @@ const annotations = {
             ]),
             'ServiceRequest'
         ],
-        ['SAP__UI.FieldGroup', fieldGroup('Reference Object', [df('ServiceRefFunctionalLocation'), df('ServiceReferenceEquipment'), df('ReferenceProduct')]), 'ReferenceObject'],
+        [
+            'SAP__UI.FieldGroup',
+            fieldGroup('Reference Object', [df('ServiceRefFunctionalLocation'), df('ServiceReferenceEquipment'), df('ReferenceProduct'), df('ServiceContract')]),
+            'ReferenceObject'
+        ],
         ['SAP__UI.FieldGroup', fieldGroup('Service Item', [df('ServiceProduct'), df('ServiceDuration')]), 'ServiceItem'],
         ['SAP__UI.FieldGroup', fieldGroup('Service Part', [df('ServicePart'), df('ServicePartQuantity')]), 'PartItem'],
         ['SAP__UI.FieldGroup', fieldGroup('Expected Result', [df('ExpectedNetAmount'), df('NetAmountTolerance')]), 'Expectation'],
@@ -955,8 +1711,8 @@ const annotations = {
             'SAP__common.SideEffects',
             V.rec('SAP__common.SideEffectsType', {
                 SourceProperties: V.coll([V.propPath('ServiceReferenceEquipment')]),
-                TargetProperties: V.coll(['ReferenceProduct', 'ServiceRefFunctionalLocation'].map(V.str)),
-                TargetEntities: V.coll([V.navPath('_ReferenceProduct'), V.navPath('_FunctionalLocation')])
+                TargetProperties: V.coll(['ReferenceProduct', 'ServiceRefFunctionalLocation', 'ServiceContract', 'SoldToParty'].map(V.str)),
+                TargetEntities: V.coll([V.navPath('_ReferenceProduct'), V.navPath('_FunctionalLocation'), V.navPath('_ServiceContract'), V.navPath('_Customer')])
             }),
             'Equipment'
         ],
@@ -997,6 +1753,10 @@ const annotations = {
             V.coll([
                 df('StartedAt'),
                 df('ExternalExecutionID'),
+                df('ReleaseID'),
+                df('TestCaseVersion', 'Version'),
+                df('RunType'),
+                df('ExecutedBy'),
                 df('ExecutionProvider'),
                 dfCrit('Status', 'StatusCriticality'),
                 df('TechnicalResult'),
@@ -1014,7 +1774,9 @@ const annotations = {
             'SAP__UI.LineItem',
             V.coll([
                 df('Sequence'),
+                df('ProcessStepID'),
                 df('BusinessObjectType'),
+                df('ResponsibleTeam'),
                 dfCrit('ExecutionStatus', 'Criticality'),
                 df('ExpectedStatus'),
                 df('ActualStatus'),
@@ -1033,6 +1795,7 @@ const annotations = {
                 df('Sequence'),
                 df('BusinessObjectType'),
                 df('DocumentID'),
+                df('ProcessStepID'),
                 df('PredecessorDocumentID'),
                 df('LifecycleStatus'),
                 df('NetAmount'),
@@ -1047,6 +1810,7 @@ const annotations = {
             'SAP__UI.LineItem',
             V.coll([
                 df('BusinessObjectType'),
+                df('ProcessStepID'),
                 df('Field'),
                 df('ExpectedValue'),
                 df('ActualValue'),
@@ -1088,6 +1852,436 @@ const annotations = {
             V.coll([df('Sequence'), df('BusinessObject'), df('FieldName'), df('Required'), df('ValidationRule'), df('DefaultValue'), df('SourceType'), df('Active')])
         ],
         ['SAP__UI.PresentationVariant', sortBy('Sequence')]
+    ],
+    /* ------------------------------ test steps and versions of the test case ------------------------------ */
+    [`${NS}.TestCaseStepType`]: [
+        ['SAP__UI.HeaderInfo', headerInfo('Test Step', 'Test Steps', 'ProcessStepID', 'Action')],
+        [
+            'SAP__UI.LineItem',
+            V.coll([
+                df('StepNo', undefined, {}, 'High'),
+                df('ProcessStepID', undefined, {}, 'High'),
+                df('BusinessObjectType', undefined, {}, 'Medium'),
+                df('Action', undefined, {}, 'High'),
+                df('ExpectedResult', undefined, {}, 'High'),
+                df('ResponsibleTeam', undefined, {}, 'Medium'),
+                // no criticality in editable draft tables (FE 1.136 requests it through stale row contexts on Edit)
+                df('TeamAssignment', 'Team Assignment', {}, 'Low'),
+                df('IsHandover', undefined, {}, 'Low'),
+                df('Automation', undefined, {}, 'Low'),
+                df('StepSource', undefined, {}, 'Low')
+            ])
+        ],
+        ['SAP__UI.PresentationVariant', sortBy('StepNo')],
+        [
+            'SAP__common.SideEffects',
+            V.rec('SAP__common.SideEffectsType', {
+                SourceProperties: V.coll([V.propPath('ProcessStepID')]),
+                TargetProperties: V.coll(
+                    ['StepName', 'BusinessObjectType', 'ResponsibleTeam', 'TeamAssignment', 'TeamAssignmentCriticality', 'IsHandover', 'Automation'].map(V.str)
+                ),
+                TargetEntities: V.coll([V.navPath('_ResponsibleTeam')])
+            }),
+            'ProcessStep'
+        ]
+    ],
+    [`${NS}.TestCaseVersionType`]: [
+        ['SAP__UI.HeaderInfo', headerInfo('Version', 'Versions', 'Version', 'ChangeSummary')],
+        [
+            'SAP__UI.LineItem',
+            V.coll([
+                df('Version', undefined, {}, 'High'),
+                df('ActivatedAt', undefined, {}, 'High'),
+                df('ActivatedBy', undefined, {}, 'Medium'),
+                df('ChangeSummary', undefined, {}, 'High'),
+                df('ProcessVariant', undefined, {}, 'Low'),
+                df('ProcessVersion', undefined, {}, 'Low'),
+                dfCrit('ApprovalStatus', 'ApprovalCriticality', 'Approval', 'High'),
+                df('ApprovedBy', undefined, {}, 'Medium'),
+                df('ApprovedAt', undefined, {}, 'Low')
+            ])
+        ],
+        ['SAP__UI.PresentationVariant', sortBy('Version', true)]
+    ],
+    /* ------------------------------ process team ------------------------------ */
+    [`${NS}.ProcessTeamType`]: [
+        ['SAP__common.SemanticKey', V.coll([V.propPath('ProcessTeam')])],
+        ['SAP__common.Messages', V.path('SAP__Messages')],
+        ['SAP__UI.HeaderInfo', headerInfo('Process Team', 'Process Teams', 'ProcessTeamName', 'ProcessTeam')],
+        [
+            'SAP__UI.HeaderFacets',
+            V.coll([refFacet('HeaderTeam', 'Team', '@UI.FieldGroup#HeaderTeam'), refFacet('HeaderTeamKpi', 'Responsibility', '@UI.FieldGroup#HeaderTeamKpi')])
+        ],
+        ['SAP__UI.FieldGroup', fieldGroup(undefined, [df('ProcessArea'), df('IsActive')]), 'HeaderTeam'],
+        [
+            'SAP__UI.FieldGroup',
+            fieldGroup(undefined, [df('ProcessOwnerCount'), df('TestExecutorCount'), df('ResponsibleStepCount'), df('TestCaseCount'), df('OpenAssignmentCount')]),
+            'HeaderTeamKpi'
+        ],
+        [
+            'SAP__UI.LineItem',
+            V.coll([
+                df('ProcessTeam', undefined, {}, 'High'),
+                df('ProcessTeamName', undefined, {}, 'High'),
+                df('ProcessArea', undefined, {}, 'Medium'),
+                df('ProcessOwnerCount', undefined, {}, 'Low'),
+                df('TestExecutorCount', undefined, {}, 'Low'),
+                df('ResponsibleStepCount', undefined, {}, 'Medium'),
+                df('TestCaseCount', undefined, {}, 'Medium'),
+                df('OpenAssignmentCount', undefined, {}, 'Low'),
+                df('IsActive', undefined, {}, 'Low')
+            ])
+        ],
+        ['SAP__UI.SelectionFields', V.coll([V.propPath('ProcessTeam'), V.propPath('ProcessArea')])],
+        ['SAP__UI.FieldGroup', fieldGroup('General', [df('ProcessTeam'), df('ProcessTeamName'), df('ProcessArea'), df('Description'), df('IsActive')]), 'General'],
+        [
+            'SAP__UI.Facets',
+            V.coll([
+                refFacet('TeamGeneral', 'General Information', '@UI.FieldGroup#General'),
+                refFacet('TeamMembers', 'Members and Roles', '_Member/@UI.PresentationVariant'),
+                refFacet('TeamSteps', 'Responsible Process Steps', '_ResponsibleStep/@UI.PresentationVariant'),
+                refFacet('TeamProcesses', 'Owned Processes', '_OwnedProcess/@UI.PresentationVariant')
+            ])
+        ]
+    ],
+    [`${NS}.TeamMemberType`]: [
+        ['SAP__UI.HeaderInfo', headerInfo('Team Member', 'Team Members', 'UserID', 'TeamRole')],
+        ['SAP__UI.LineItem', V.coll([df('UserID', undefined, {}, 'High'), df('TeamRole', undefined, {}, 'High'), df('Note', undefined, {}, 'Medium')])],
+        ['SAP__UI.PresentationVariant', sortBy('UserID')]
+    ],
+    [`${NS}.ProcessStepVHType`]: [
+        [
+            'SAP__UI.LineItem',
+            V.coll([
+                df('ProcessID', undefined, {}, 'High'),
+                df('Sequence', undefined, {}, 'Low'),
+                df('StepID', undefined, {}, 'High'),
+                df('BusinessObjectType', undefined, {}, 'Medium'),
+                df('TeamAssignment', undefined, {}, 'Medium'),
+                df('Variants', undefined, {}, 'Low'),
+                df('PilotScope', undefined, {}, 'Low'),
+                df('Automation', undefined, {}, 'Low')
+            ])
+        ],
+        ['SAP__UI.PresentationVariant', sortBy('Sequence')]
+    ],
+    [`${NS}.BusinessProcessVHType`]: [
+        ['SAP__UI.LineItem', V.coll([df('ProcessID', undefined, {}, 'High'), df('ProcessVersion', undefined, {}, 'Medium'), df('PilotScope', undefined, {}, 'Medium')])],
+        ['SAP__UI.PresentationVariant', sortBy('ProcessID')]
+    ],
+    /* ------------------------------ business process ------------------------------ */
+    [`${NS}.BusinessProcessType`]: [
+        ['SAP__common.SemanticKey', V.coll([V.propPath('ProcessID')])],
+        ['SAP__common.Messages', V.path('SAP__Messages')],
+        ['SAP__UI.HeaderInfo', headerInfo('Business Process', 'Business Processes', 'ProcessName', 'ProcessID')],
+        [
+            'SAP__UI.HeaderFacets',
+            V.coll([
+                refFacet('HeaderProcessInfo', 'Process', '@UI.FieldGroup#HeaderProcess'),
+                refFacet('HeaderProcessVersion', 'Version', '@UI.FieldGroup#HeaderVersion'),
+                refFacet('HeaderModeling', 'Process Model', '@UI.DataPoint#Modeling')
+            ])
+        ],
+        ['SAP__UI.FieldGroup', fieldGroup(undefined, [df('OwnerTeam'), df('ProcessArea'), df('PilotScope')]), 'HeaderProcess'],
+        ['SAP__UI.FieldGroup', fieldGroup(undefined, [df('ProcessVersion'), df('VersionActivatedAt'), df('VersionActivatedBy')]), 'HeaderVersion'],
+        ['SAP__UI.DataPoint', dataPoint('ModelingStatus', 'Process Model', 'ModelingCriticality'), 'Modeling'],
+        [
+            'SAP__UI.LineItem',
+            V.coll([
+                df('ProcessID', undefined, {}, 'High'),
+                df('ProcessName', undefined, {}, 'High'),
+                df('OwnerTeam', undefined, {}, 'Medium'),
+                df('ProcessVersion', undefined, {}, 'Medium'),
+                dfCrit('ModelingStatus', 'ModelingCriticality', 'Process Model', 'Medium'),
+                df('PilotScope', undefined, {}, 'Medium'),
+                df('StepCount', undefined, {}, 'Low'),
+                df('VariantCount', undefined, {}, 'Low'),
+                df('TestCaseCount', undefined, {}, 'Low')
+            ])
+        ],
+        ['SAP__UI.SelectionFields', V.coll([V.propPath('ProcessID'), V.propPath('OwnerTeam'), V.propPath('PilotScope')])],
+        [
+            'SAP__UI.FieldGroup',
+            fieldGroup('General', [df('ProcessID'), df('ProcessName'), df('ProcessArea'), df('OwnerTeam'), df('PilotScope'), df('Description'), df('SAPReference')]),
+            'General'
+        ],
+        ['SAP__UI.FieldGroup', fieldGroup('Version', [df('ProcessVersion'), df('VersionActivatedAt'), df('VersionActivatedBy'), df('VersionNote')]), 'Version'],
+        [
+            'SAP__UI.Facets',
+            V.coll([
+                refFacet('ProcessGeneral', 'General Information', '@UI.FieldGroup#General'),
+                refFacet('ProcessSteps', 'Process Steps', '_Step/@UI.PresentationVariant'),
+                refFacet('ProcessVariants', 'Process Variants', '_Variant/@UI.PresentationVariant'),
+                collFacet('ProcessVersionSection', 'Versions', [
+                    collFacet('ProcessVersionCurrent', 'Current Version', [refFacet('ProcessVersionDetails', 'Current Version', '@UI.FieldGroup#Version')]),
+                    collFacet('ProcessVersionHistory', 'History', [refFacet('ProcessVersionList', 'History', '_Version/@UI.PresentationVariant')])
+                ])
+            ])
+        ]
+    ],
+    [`${NS}.ProcessStepType`]: [
+        ['SAP__UI.HeaderInfo', headerInfo('Process Step', 'Process Steps', 'StepID', 'StepName')],
+        [
+            'SAP__UI.LineItem',
+            V.coll([
+                df('Sequence', undefined, {}, 'Low'),
+                df('StepID', undefined, {}, 'High'),
+                df('StepName', undefined, {}, 'High'),
+                df('BusinessObjectType', undefined, {}, 'Medium'),
+                df('ExpectedStatus', undefined, {}, 'Low'),
+                df('ResponsibleTeam', undefined, {}, 'High'),
+                // no criticality in editable draft tables (FE 1.136 requests it through stale row contexts on Edit)
+                df('TeamAssignment', 'Team Assignment', {}, 'Medium'),
+                df('Variants', undefined, {}, 'Medium'),
+                df('PilotScope', undefined, {}, 'Medium'),
+                df('Automation', undefined, {}, 'Medium'),
+                df('IsHandover', undefined, {}, 'Low'),
+                df('TestCaseCount', undefined, {}, 'Low'),
+                df('TestAction', undefined, {}, 'Low'),
+                df('TestExpectedResult', undefined, {}, 'Low'),
+                df('SAPReference', undefined, {}, 'Low'),
+                df('Note', undefined, {}, 'Low')
+            ])
+        ],
+        ['SAP__UI.PresentationVariant', sortBy('Sequence')]
+    ],
+    [`${NS}.ProcessVariantType`]: [
+        ['SAP__UI.HeaderInfo', headerInfo('Process Variant', 'Process Variants', 'Variant', 'VariantName')],
+        [
+            'SAP__UI.LineItem',
+            V.coll([
+                df('Sequence', undefined, {}, 'Low'),
+                df('Variant', undefined, {}, 'High'),
+                df('VariantName', undefined, {}, 'High'),
+                df('PilotScope', undefined, {}, 'Medium'),
+                df('IsDefault', undefined, {}, 'Low'),
+                df('DocumentPath', undefined, {}, 'Medium'),
+                df('StepPath', undefined, {}, 'Low'),
+                df('TestCaseCount', undefined, {}, 'Low'),
+                df('Description', undefined, {}, 'Low')
+            ])
+        ],
+        ['SAP__UI.PresentationVariant', sortBy('Sequence')]
+    ],
+    [`${NS}.ProcessVersionType`]: [
+        ['SAP__UI.HeaderInfo', headerInfo('Process Version', 'Process Versions', 'ProcessVersion', 'VersionNote')],
+        [
+            'SAP__UI.LineItem',
+            V.coll([df('ProcessVersion'), df('ActivatedAt'), df('ActivatedBy'), df('VersionNote'), df('StepCount'), df('VariantCount')])
+        ],
+        ['SAP__UI.PresentationVariant', sortBy('ProcessVersion', true)]
+    ],
+    /* ------------------------------ release ------------------------------ */
+    [`${NS}.ReleaseType`]: [
+        ['SAP__common.SemanticKey', V.coll([V.propPath('ReleaseID')])],
+        ['SAP__common.Messages', V.path('SAP__Messages')],
+        ['SAP__UI.HeaderInfo', headerInfo('Release', 'Releases', 'ReleaseName', 'ReleaseID')],
+        [
+            'SAP__UI.HeaderFacets',
+            V.coll([
+                refFacet('HeaderRelease', 'Release', '@UI.FieldGroup#HeaderRelease'),
+                refFacet('HeaderReleaseStatus', 'Release Status', '@UI.DataPoint#ReleaseStatus'),
+                refFacet('HeaderPassRate', 'Pass Rate', '@UI.DataPoint#PassRate'),
+                refFacet('HeaderStepCoverage', 'Step Coverage', '@UI.DataPoint#StepCoverage'),
+                refFacet('HeaderLatestRun', 'Regression', '@UI.FieldGroup#HeaderRun')
+            ])
+        ],
+        ['SAP__UI.FieldGroup', fieldGroup(undefined, [df('ReleaseType'), df('SAPProductVersion'), df('FeaturePackStack'), df('TestStartDate'), df('TestEndDate')]), 'HeaderRelease'],
+        ['SAP__UI.FieldGroup', fieldGroup(undefined, [df('LatestRunID'), dfCrit('LatestRunStatus', 'LatestRunCriticality'), df('LatestRunAt')]), 'HeaderRun'],
+        ['SAP__UI.DataPoint', dataPoint('ReleaseStatus', 'Release Status', 'ReleaseStatusCriticality'), 'ReleaseStatus'],
+        ['SAP__UI.DataPoint', progressPoint('PassRate', 'Pass Rate', 'PassRateCriticality'), 'PassRate'],
+        ['SAP__UI.DataPoint', progressPoint('StepCoverage', 'Step Coverage', 'StepCoverageCriticality'), 'StepCoverage'],
+        [
+            'SAP__UI.LineItem',
+            V.coll([
+                df('ReleaseID', undefined, {}, 'High'),
+                df('ReleaseName', undefined, {}, 'High'),
+                df('ReleaseType', undefined, {}, 'Medium'),
+                dfCrit('ReleaseStatus', 'ReleaseStatusCriticality', 'Status', 'High'),
+                df('SAPAvailabilityDate', undefined, {}, 'Low'),
+                df('TestStartDate', undefined, {}, 'Medium'),
+                df('TestEndDate', undefined, {}, 'Low'),
+                df('TestCaseCount', undefined, {}, 'Medium'),
+                dfAnno('@UI.DataPoint#PassRate', 'Pass Rate', 'High'),
+                dfAnno('@UI.DataPoint#StepCoverage', 'Step Coverage', 'Medium')
+            ])
+        ],
+        ['SAP__UI.SelectionFields', V.coll([V.propPath('ReleaseID'), V.propPath('ReleaseType'), V.propPath('ReleaseStatus')])],
+        ['SAP__UI.PresentationVariant', sortBy('TestStartDate')],
+        [
+            'SAP__UI.Identification',
+            V.coll([
+                dfAction('startRegressionRun', 'Start Regression Run', {}, [hiddenInEditMode]),
+                dfAction('refreshRegressionRun', 'Refresh Regression Run', {}, [hiddenInEditMode]),
+                dfAction('copyScopeFromPredecessor', 'Copy Scope from Predecessor', {}, [hiddenInEditMode])
+            ])
+        ],
+        [
+            'SAP__UI.FieldGroup',
+            fieldGroup('General', [
+                df('ReleaseID'),
+                df('ReleaseName'),
+                df('ReleaseType'),
+                df('SAPProductVersion'),
+                df('FeaturePackStack'),
+                df('ReleaseStatus'),
+                df('PredecessorRelease'),
+                df('AutoRegression'),
+                df('Description')
+            ]),
+            'General'
+        ],
+        ['SAP__UI.FieldGroup', fieldGroup('Dates', [df('SAPAvailabilityDate'), df('TestStartDate'), df('TestEndDate'), df('GoLiveDate'), df('SourceNote')]), 'Dates'],
+        [
+            'SAP__UI.FieldGroup',
+            fieldGroup('Key Figures', [
+                df('ScopeCount'),
+                df('TestCaseCount'),
+                df('ApprovedCount'),
+                df('ExecutedCount'),
+                df('PassedCount'),
+                df('FailedCount'),
+                df('PassRate'),
+                df('StepCoverage')
+            ]),
+            'Kpi'
+        ],
+        [
+            'SAP__UI.Facets',
+            V.coll([
+                collFacet('ReleaseGeneralSection', 'General Information', [
+                    refFacet('ReleaseGeneral', 'General', '@UI.FieldGroup#General'),
+                    refFacet('ReleaseDates', 'Dates', '@UI.FieldGroup#Dates'),
+                    refFacet('ReleaseKpi', 'Key Figures', '@UI.FieldGroup#Kpi')
+                ]),
+                refFacet('ReleaseScope', 'Scope: Process Teams and Processes', '_Scope/@UI.PresentationVariant'),
+                refFacet('ReleaseTestCases', 'Test Cases in Scope', '_TestCase/@UI.PresentationVariant'),
+                refFacet('ReleaseCoverage', 'Coverage per Process Step', '_StepCoverage/@UI.PresentationVariant'),
+                collFacet('ReleaseRegressionSection', 'Regression Runs', [
+                    collFacet('ReleaseLatestRunGroup', 'Latest Run', [refFacet('ReleaseLatestRunItems', 'Latest Run', '_LatestRunItem/@UI.PresentationVariant')]),
+                    collFacet('ReleaseRunHistoryGroup', 'All Runs', [refFacet('ReleaseRunHistory', 'All Runs', '_RegressionRun/@UI.PresentationVariant')])
+                ])
+            ])
+        ]
+    ],
+    [`${NS}.ReleaseScopeType`]: [
+        ['SAP__UI.HeaderInfo', headerInfo('Scope Entry', 'Scope Entries', 'ProcessTeam', 'ProcessID')],
+        [
+            'SAP__UI.LineItem',
+            V.coll([
+                df('ProcessTeam', undefined, {}, 'High'),
+                df('ProcessID', undefined, {}, 'High'),
+                df('ProcessVersion', undefined, {}, 'Medium'),
+                df('IsRegressionRelevant', undefined, {}, 'Medium'),
+                df('TestCaseCount', undefined, {}, 'Medium'),
+                df('ApprovedCount', undefined, {}, 'Low'),
+                df('ExecutedCount', undefined, {}, 'Low'),
+                df('PassedCount', undefined, {}, 'Low'),
+                df('FailedCount', undefined, {}, 'Low'),
+                // status colour as row highlight: cells with criticality log drill-down errors on Edit/Save in FE 1.136
+                df('PassRate', undefined, {}, 'High'),
+                df('StepCoverage', undefined, {}, 'Medium'),
+                df('ScopeStatus', 'Test Status', {}, 'High'),
+                df('ScopeNote', undefined, {}, 'Low')
+            ]),
+            undefined,
+            [['SAP__UI.Criticality', V.path('ScopeStatusCriticality')]]
+        ],
+        ['SAP__UI.PresentationVariant', sortBy('ProcessTeam')]
+    ],
+    [`${NS}.ReleaseTestCaseType`]: [
+        ['SAP__UI.HeaderInfo', headerInfo('Test Case in Scope', 'Test Cases in Scope', 'CaseID', 'Title')],
+        [
+            'SAP__UI.LineItem',
+            V.coll([
+                df('CaseID', undefined, {}, 'High'),
+                df('Title', undefined, {}, 'High'),
+                df('ProcessTeam', undefined, {}, 'High'),
+                df('ProcessVariant', undefined, {}, 'Medium'),
+                df('TestLevel', undefined, {}, 'Low'),
+                df('EndObject', undefined, {}, 'Low'),
+                df('TestCaseVersion', undefined, {}, 'Medium'),
+                df('ApprovalStatus', 'Approval', {}, 'Medium'),
+                df('IsRegressionRelevant', undefined, {}, 'Low'),
+                // result colour as row highlight (see ReleaseScope)
+                df('ResultInRelease', 'Result in Release', {}, 'High'),
+                df('ExternalExecutionID', undefined, {}, 'Low'),
+                df('ExecutedVersion', undefined, {}, 'Low'),
+                df('ExecutedAt', undefined, {}, 'Low'),
+                df('RunType', undefined, {}, 'Low'),
+                df('Remark', undefined, {}, 'Medium')
+            ]),
+            undefined,
+            [['SAP__UI.Criticality', V.path('ResultCriticality')]]
+        ],
+        ['SAP__UI.PresentationVariant', sortBy('CaseID')]
+    ],
+    [`${NS}.ReleaseStepCoverageType`]: [
+        ['SAP__UI.HeaderInfo', headerInfo('Step Coverage', 'Step Coverage', 'StepID', 'StepName')],
+        [
+            'SAP__UI.LineItem',
+            V.coll([
+                df('Sequence', undefined, {}, 'Low'),
+                df('StepID', undefined, {}, 'High'),
+                df('StepName', undefined, {}, 'High'),
+                df('BusinessObjectType', undefined, {}, 'Low'),
+                df('ResponsibleTeam', undefined, {}, 'Medium'),
+                df('TeamAssignment', undefined, {}, 'Low'),
+                df('IsHandover', undefined, {}, 'Low'),
+                df('Automation', undefined, {}, 'Low'),
+                df('TestCaseCount', undefined, {}, 'Medium'),
+                df('ExecutedCount', undefined, {}, 'Low'),
+                df('PassedCount', undefined, {}, 'Low'),
+                df('FailedCount', undefined, {}, 'Low'),
+                dfCrit('CoverageStatus', 'CoverageCriticality', 'Coverage', 'High'),
+                df('LatestDocumentID', undefined, {}, 'Low'),
+                df('Remark', undefined, {}, 'Medium')
+            ]),
+            undefined,
+            [['SAP__UI.Criticality', V.path('CoverageCriticality')]]
+        ],
+        ['SAP__UI.PresentationVariant', sortBy('Sequence')]
+    ],
+    [`${NS}.RegressionRunType`]: [
+        ['SAP__UI.HeaderInfo', headerInfo('Regression Run', 'Regression Runs', 'RunID', 'Status')],
+        [
+            'SAP__UI.LineItem',
+            V.coll([
+                df('RunID', undefined, {}, 'High'),
+                dfCrit('Status', 'StatusCriticality', 'Status', 'High'),
+                df('Trigger', undefined, {}, 'Low'),
+                df('StartedAt', undefined, {}, 'Medium'),
+                df('StartedBy', undefined, {}, 'Low'),
+                df('CandidateCount', undefined, {}, 'Low'),
+                df('StartedCount', undefined, {}, 'Medium'),
+                df('SkippedCount', undefined, {}, 'Medium'),
+                df('PassedCount', undefined, {}, 'Medium'),
+                df('FailedCount', undefined, {}, 'Medium'),
+                dfCrit('PassRate', 'PassRateCriticality', 'Pass Rate', 'High'),
+                df('FinishedAt', undefined, {}, 'Low')
+            ])
+        ],
+        ['SAP__UI.PresentationVariant', sortBy('StartedAt', true)]
+    ],
+    [`${NS}.RegressionRunItemType`]: [
+        ['SAP__UI.HeaderInfo', headerInfo('Run Item', 'Run Items', 'CaseID', 'Title')],
+        [
+            'SAP__UI.LineItem',
+            V.coll([
+                df('Sequence', undefined, {}, 'Low'),
+                df('CaseID', undefined, {}, 'High'),
+                df('Title', undefined, {}, 'Medium'),
+                df('ProcessTeam', undefined, {}, 'Medium'),
+                df('ProcessVariant', undefined, {}, 'Low'),
+                df('TestCaseVersion', undefined, {}, 'Low'),
+                dfCrit('Decision', 'DecisionCriticality', 'Decision', 'High'),
+                df('Reason', undefined, {}, 'High'),
+                df('ExternalExecutionID', undefined, {}, 'Low'),
+                df('ExecutionStatus', undefined, {}, 'Medium'),
+                dfCrit('FinalResult', 'ResultCriticality', 'Result', 'High')
+            ])
+        ],
+        ['SAP__UI.PresentationVariant', sortBy('Sequence')]
     ]
 };
 
@@ -1096,6 +2290,32 @@ for (const name of testCaseActions) {
     annotations[`${NS}.${name}(${T('TestCase')})`] = [
         ['SAP__core.OperationAvailable', V.path(`_it/__OperationControl/${name}`)],
         ['SAP__common.SideEffects', actionSideEffects[name]]
+    ];
+}
+/* Release actions: availability via __OperationControl; the run refreshes KPIs, scope, coverage and the run tables */
+const releaseTargets = [
+    '_it/ScopeCount',
+    '_it/TestCaseCount',
+    '_it/ApprovedCount',
+    '_it/ExecutedCount',
+    '_it/PassedCount',
+    '_it/FailedCount',
+    '_it/PassRate',
+    '_it/PassRateCriticality',
+    '_it/StepCoverage',
+    '_it/StepCoverageCriticality',
+    '_it/LatestRunUUID',
+    '_it/LatestRunID',
+    '_it/LatestRunStatus',
+    '_it/LatestRunCriticality',
+    '_it/LatestRunAt',
+    '_it/__OperationControl'
+];
+const releaseEntities = ['_it/_Scope', '_it/_TestCase', '_it/_StepCoverage', '_it/_RegressionRun', '_it/_LatestRunItem'];
+for (const name of releaseActions) {
+    annotations[`${NS}.${name}(${T('Release')})`] = [
+        ['SAP__core.OperationAvailable', V.path(`_it/__OperationControl/${name}`)],
+        ['SAP__common.SideEffects', sideEffects(releaseTargets, releaseEntities)]
     ];
 }
 annotations[`${NS}.applySuggestion(${T('ValidationResult')})`] = [
@@ -1123,5 +2343,6 @@ module.exports = {
     actions,
     annotations,
     controlledDataFields,
-    testCaseActions
+    testCaseActions,
+    releaseActions
 };

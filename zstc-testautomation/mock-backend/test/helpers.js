@@ -88,6 +88,9 @@ const GOLDEN = Object.freeze({
 });
 
 const GOLDEN_DOCUMENTS = ['8000000010', '8000000030', '8000000031', '9000000000', '10000012', '90000115'];
+/** next Case ID and external execution ID after the seed data */
+const NEXT_CASE_ID = 'STC-2026-000013';
+const NEXT_EXECUTION_NO = '0005';
 
 let uuidCounter = 0;
 const newUuid = () => `00000000-0000-4000-8000-${String(++uuidCounter).padStart(12, '0')}`;
@@ -99,6 +102,8 @@ async function createDraft(repo, processProfile = 'FS_TM', text = '') {
     Object.assign(tc, service.initialTestCase({ ProcessProfile: processProfile }));
     await repo.add('TestCase', tc);
     await service.createTestData(repo, tc);
+    // like onAfterAddEntry: process reference from the team of the user, test steps of the default variant
+    await service.determineProcessReference(repo, { TestCaseUUID: tc.TestCaseUUID, IsActiveEntity: false }, []);
     await service.syncDerived(repo, tc.TestCaseUUID);
     return { TestCaseUUID: tc.TestCaseUUID, IsActiveEntity: false };
 }
@@ -106,9 +111,19 @@ async function createDraft(repo, processProfile = 'FS_TM', text = '') {
 /** Simulates Activate as the FE mock server does it: draft rows are copied to active rows */
 async function activate(repo, draftKeys) {
     const service = require('../services/TestCaseService');
-    for (const set of ['TestCase', 'TestCaseData', 'ValidationResult']) {
+    const keyNames = { TestCase: 'TestCaseUUID', TestCaseData: 'TestCaseUUID', ValidationResult: 'ValidationUUID', TestCaseStep: 'TestCaseStepUUID' };
+    for (const set of Object.keys(keyNames)) {
+        // the active rows are replaced by the draft rows
+        for (const row of await repo.find(set, { TestCaseUUID: draftKeys.TestCaseUUID, IsActiveEntity: true })) {
+            if (set !== 'TestCase' && set !== 'TestCaseData') {
+                await repo.remove(set, { [keyNames[set]]: row[keyNames[set]], IsActiveEntity: true });
+            }
+        }
         for (const row of await repo.find(set, { TestCaseUUID: draftKeys.TestCaseUUID, IsActiveEntity: false })) {
-            const keyName = set === 'ValidationResult' ? 'ValidationUUID' : 'TestCaseUUID';
+            const keyName = keyNames[set];
+            if (set === 'TestCase' || set === 'TestCaseData') {
+                await repo.remove(set, { [keyName]: row[keyName], IsActiveEntity: true });
+            }
             await repo.remove(set, { [keyName]: row[keyName], IsActiveEntity: false });
             await repo.add(set, { ...row, IsActiveEntity: true, HasDraftEntity: false, DraftAdministrativeData: null });
         }
@@ -119,4 +134,4 @@ async function activate(repo, draftKeys) {
     return keys;
 }
 
-module.exports = { setup, teardown, pools, GOLDEN, GOLDEN_DOCUMENTS, loadAllData, createDraft, activate };
+module.exports = { setup, teardown, pools, GOLDEN, GOLDEN_DOCUMENTS, NEXT_CASE_ID, NEXT_EXECUTION_NO, loadAllData, createDraft, activate };

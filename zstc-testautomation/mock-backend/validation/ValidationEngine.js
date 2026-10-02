@@ -7,6 +7,9 @@
  *   on the value help pools; every finding carries concrete suggestions.
  * - R10: service product and spare part must fit the device type (product group of the equipment's reference product),
  *   e.g. no smoke alarm spare part for a heat cost allocator.
+ * - R11: the service contract of a contract variant must be released, valid and cover the reference object.
+ * - Required fields only apply to the business objects of the executed path (process variant up to the end object):
+ *   a test case that runs up to the service order needs no expected billing value.
  * - Result per field: SUCCESS (validated) · WARNING (several plausible values) · ERROR (missing or invalid).
  *   Deliberately no "AI confidence".
  *
@@ -36,6 +39,7 @@ const FIELDS = [
     ['ServiceRefFunctionalLocation', BO.SERVICE_REQUEST, 'functionalLocations', 'FunctionalLocation', 'FunctionalLocationName'],
     ['ServiceReferenceEquipment', BO.SERVICE_REQUEST, 'equipments', 'Equipment', 'EquipmentName'],
     ['ReferenceProduct', BO.SERVICE_REQUEST, 'products', 'Product', 'ProductDescription'],
+    ['ServiceContract', BO.SERVICE_CONTRACT, 'serviceContracts', 'ServiceContract', 'ServiceContractDescription'],
     ['ServiceProduct', BO.SERVICE_ORDER, 'products', 'Product', 'ProductDescription'],
     ['ServiceDuration', BO.SERVICE_ORDER],
     ['ServiceDurationUnit', BO.SERVICE_ORDER, 'units', 'UnitOfMeasure', 'UnitOfMeasureName'],
@@ -71,13 +75,31 @@ function distance(a, b) {
     return row[t.length];
 }
 
+/** Business objects whose required fields apply for a path: quotation items are order items; priced paths need the expectation */
+function relevantBusinessObjects(chainTypes) {
+    if (!chainTypes) {
+        return undefined;
+    }
+    const relevant = new Set(chainTypes);
+    if (relevant.has(BO.SERVICE_QUOTATION)) {
+        relevant.add(BO.SERVICE_ORDER);
+    }
+    if ([BO.SERVICE_QUOTATION, BO.SERVICE_ORDER, BO.BILLING_DOC_REQUEST, BO.BILLING_DOCUMENT].some((type) => relevant.has(type))) {
+        relevant.add(BO.BILLING_DOCUMENT);
+    }
+    return relevant;
+}
+
 class ValidationContext {
-    constructor({ testCase, data, requirements, pools, extraction, fieldLabels }) {
+    constructor({ testCase, data, requirements, pools, extraction, fieldLabels, chainTypes, requiredByVariant, referenceDate }) {
         this.testCase = testCase || {};
         this.data = data || {};
         this.pools = pools || {};
         this.extraction = extraction || [];
         this.fieldLabels = fieldLabels || {};
+        this.relevantBOs = relevantBusinessObjects(chainTypes);
+        this.requiredByVariant = new Set(requiredByVariant || []);
+        this.referenceDate = referenceDate || new Date().toISOString().slice(0, 10);
         this.requirements = new Map();
         for (const req of requirements || []) {
             if (req.Active !== false) {
@@ -96,6 +118,17 @@ class ValidationContext {
 
     pool(name) {
         return this.pools[name] || [];
+    }
+
+    /** required by the customizing (for a business object of the path) or by the process variant */
+    isRequired(field, req) {
+        if (this.requiredByVariant.has(field.name)) {
+            return true;
+        }
+        if (!req || !req.Required) {
+            return false;
+        }
+        return !this.relevantBOs || this.relevantBOs.has(req.BusinessObject || field.bo);
     }
 
     find(field, value) {
@@ -132,6 +165,19 @@ function deviceProduct(ctx) {
 function fitsDevice(ctx, product) {
     const device = deviceProduct(ctx);
     return !device || !product || fitsGroup(product.ProductGroup, device.ProductGroup);
+}
+
+/** Functional location of the reference object and its superior functional locations (contract object list) */
+function referenceLocations(ctx) {
+    const equipment = ctx.entry('ServiceReferenceEquipment');
+    const start = ctx.value('ServiceRefFunctionalLocation') || equipment?.FunctionalLocation;
+    const locations = [];
+    let current = start;
+    while (current && !locations.includes(current)) {
+        locations.push(current);
+        current = ctx.pool('functionalLocations').find((f) => f.FunctionalLocation === current)?.SuperiorFunctionalLocation;
+    }
+    return locations;
 }
 
 /** Context specific candidate values for a field (used for missing and invalid values) */
@@ -173,6 +219,16 @@ function contextualCandidates(ctx, field) {
         case 'RespyMgmtServiceTeam': {
             const org = ctx.value('ServiceOrganization');
             return ctx.pool('serviceTeams').filter((t) => !org || t.ServiceOrganization === org);
+        }
+        case 'ServiceContract': {
+            const locations = referenceLocations(ctx);
+            const valid = (c) =>
+                c.ServiceContractIsReleased &&
+                (!c.ServiceContractStartDate || ctx.referenceDate >= c.ServiceContractStartDate) &&
+                (!c.ServiceContractEndDate || ctx.referenceDate <= c.ServiceContractEndDate);
+            return ctx
+                .pool('serviceContracts')
+                .filter((c) => valid(c) && (!customer || c.SoldToParty === customer) && (!locations.length || locations.includes(c.ServiceRefFunctionalLocation)));
         }
         default:
             return field.pool ? ctx.pool(field.pool) : [];
@@ -256,9 +312,9 @@ function validate(input) {
         const label = ctx.label(field.name);
         const ruleId = req?.ValidationRule && req.ValidationRule !== 'NONE' ? req.ValidationRule : field.pool ? 'R2_EXISTS' : 'R1_REQUIRED';
 
-        // R1 completeness (customizing driven)
+        // R1 completeness (customizing driven, for the business objects of the path; contract by the variant)
         if (isEmpty(value)) {
-            if (req && req.Required) {
+            if (ctx.isRequired(field, req)) {
                 const suggestions = suggestionsFor(ctx, field);
                 add(
                     field,
@@ -490,6 +546,32 @@ function checkRelationships(ctx, field, entry, label) {
             }
             return undefined;
         }
+        case 'ServiceContract': {
+            const problems = [];
+            if (customer && entry.SoldToParty !== customer) {
+                problems.push(`belongs to customer ${entry.SoldToParty}, not to ${customer}`);
+            }
+            if (!entry.ServiceContractIsReleased) {
+                problems.push('is not released');
+            }
+            if ((entry.ServiceContractStartDate && ctx.referenceDate < entry.ServiceContractStartDate) || (entry.ServiceContractEndDate && ctx.referenceDate > entry.ServiceContractEndDate)) {
+                problems.push(`is not valid on ${ctx.referenceDate} (valid ${entry.ServiceContractStartDate} to ${entry.ServiceContractEndDate})`);
+            }
+            const locations = referenceLocations(ctx);
+            if (locations.length && entry.ServiceRefFunctionalLocation && !locations.includes(entry.ServiceRefFunctionalLocation)) {
+                problems.push(`does not cover ${locations[0]} (covered object ${entry.ServiceRefFunctionalLocation})`);
+            }
+            if (problems.length) {
+                return {
+                    status: ITEM_STATUS.ERROR,
+                    category: 'RELATIONSHIP',
+                    ruleId: 'R11_CONTRACT',
+                    message: `Service contract ${entry.ServiceContract} ${problems.join('; ')}.`,
+                    suggestions: suggestionsFor(ctx, field).filter((key) => key !== entry.ServiceContract)
+                };
+            }
+            return undefined;
+        }
         case 'RequestedServiceEndDateTime': {
             const start = ctx.value('RequestedServiceStartDateTime');
             if (start && new Date(ctx.value('RequestedServiceEndDateTime')) < new Date(start)) {
@@ -508,4 +590,4 @@ function checkRelationships(ctx, field, entry, label) {
     }
 }
 
-module.exports = { validate, FIELDS, FIELD_BY_NAME, isEmpty };
+module.exports = { validate, FIELDS, FIELD_BY_NAME, isEmpty, relevantBusinessObjects };

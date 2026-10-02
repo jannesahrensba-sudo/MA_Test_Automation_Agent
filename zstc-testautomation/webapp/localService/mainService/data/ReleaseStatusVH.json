@@ -1,0 +1,18 @@
+[
+    {
+        "Code": "PLANNED",
+        "Text": "Planned"
+    },
+    {
+        "Code": "IN_TEST",
+        "Text": "In Test"
+    },
+    {
+        "Code": "RELEASED",
+        "Text": "Productive"
+    },
+    {
+        "Code": "CLOSED",
+        "Text": "Closed"
+    }
+]

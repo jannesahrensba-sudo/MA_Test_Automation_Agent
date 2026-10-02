@@ -171,6 +171,10 @@ function propertyAnnotations(entity, prop) {
     if (prop.unit) {
         annos.push(['SAP__measures.Unit', V.path(prop.unit)]);
     }
+    if (prop.unitText) {
+        // constant unit, e.g. % of a KPI (shown as "83 %" by progress indicators)
+        annos.push(['SAP__measures.Unit', V.str(prop.unitText)]);
+    }
     if (prop.currency) {
         annos.push(['SAP__measures.ISOCurrency', V.path(prop.currency)]);
     }
@@ -209,7 +213,21 @@ const SET_CAPABILITIES = {
     DocumentReference: { insertable: false, updatable: false, deletable: false },
     TestAssertion: { insertable: false, updatable: false, deletable: false },
     ProcessProfile: { insertable: false, updatable: '__EntityControl/Updatable', deletable: false, searchable: true },
-    FieldRequirement: { insertable: true, updatable: true, deletable: true }
+    FieldRequirement: { insertable: true, updatable: true, deletable: true },
+    TestCaseStep: { insertable: true, updatable: true, deletable: true },
+    TestCaseVersion: { insertable: false, updatable: false, deletable: false },
+    ProcessTeam: { insertable: true, updatable: '__EntityControl/Updatable', deletable: false, searchable: true },
+    TeamMember: { insertable: true, updatable: true, deletable: true },
+    BusinessProcess: { insertable: true, updatable: '__EntityControl/Updatable', deletable: false, searchable: true },
+    ProcessStep: { insertable: true, updatable: true, deletable: true },
+    ProcessVariant: { insertable: true, updatable: true, deletable: true },
+    ProcessVersion: { insertable: false, updatable: false, deletable: false },
+    Release: { insertable: true, updatable: '__EntityControl/Updatable', deletable: false, searchable: true },
+    ReleaseScope: { insertable: true, updatable: true, deletable: true },
+    ReleaseTestCase: { insertable: false, updatable: false, deletable: false },
+    ReleaseStepCoverage: { insertable: false, updatable: false, deletable: false },
+    RegressionRun: { insertable: false, updatable: false, deletable: false },
+    RegressionRunItem: { insertable: false, updatable: false, deletable: false }
 };
 
 function entitySetAnnotations(entity, byName) {

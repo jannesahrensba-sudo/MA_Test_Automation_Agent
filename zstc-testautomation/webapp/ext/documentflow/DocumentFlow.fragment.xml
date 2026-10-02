@@ -9,12 +9,14 @@
             wheelZoomable="false"
             nodes="{path: '_LatestDocumentReference', parameters: {$orderby: 'Sequence'}, templateShareable: false}">
             <commons:lanes>
-                <commons:ProcessFlowLaneHeader laneId="SERVICE_REQUEST" position="0" iconSrc="sap-icon://request" text="{i18n>boSERVICE_REQUEST}" />
-                <commons:ProcessFlowLaneHeader laneId="SERVICE_QUOTATION" position="1" iconSrc="sap-icon://sales-quote" text="{i18n>boSERVICE_QUOTATION}" />
-                <commons:ProcessFlowLaneHeader laneId="SERVICE_ORDER" position="2" iconSrc="sap-icon://sales-order" text="{i18n>boSERVICE_ORDER}" />
-                <commons:ProcessFlowLaneHeader laneId="SERVICE_CONFIRMATION" position="3" iconSrc="sap-icon://complete" text="{i18n>boSERVICE_CONFIRMATION}" />
-                <commons:ProcessFlowLaneHeader laneId="BILLING_DOC_REQUEST" position="4" iconSrc="sap-icon://request" text="{i18n>boBILLING_DOC_REQUEST}" />
-                <commons:ProcessFlowLaneHeader laneId="BILLING_DOCUMENT" position="5" iconSrc="sap-icon://receipt" text="{i18n>boBILLING_DOCUMENT}" />
+                <commons:ProcessFlowLaneHeader laneId="SERVICE_CONTRACT" position="0" iconSrc="sap-icon://document-text" text="{i18n>boSERVICE_CONTRACT}" />
+                <commons:ProcessFlowLaneHeader laneId="SERVICE_REQUEST" position="1" iconSrc="sap-icon://request" text="{i18n>boSERVICE_REQUEST}" />
+                <commons:ProcessFlowLaneHeader laneId="SERVICE_QUOTATION" position="2" iconSrc="sap-icon://sales-quote" text="{i18n>boSERVICE_QUOTATION}" />
+                <commons:ProcessFlowLaneHeader laneId="SERVICE_ORDER" position="3" iconSrc="sap-icon://sales-order" text="{i18n>boSERVICE_ORDER}" />
+                <commons:ProcessFlowLaneHeader laneId="SERVICE_CONFIRMATION" position="4" iconSrc="sap-icon://complete" text="{i18n>boSERVICE_CONFIRMATION}" />
+                <commons:ProcessFlowLaneHeader laneId="BILLING_DOC_REQUEST" position="5" iconSrc="sap-icon://request" text="{i18n>boBILLING_DOC_REQUEST}" />
+                <commons:ProcessFlowLaneHeader laneId="BILLING_DOCUMENT" position="6" iconSrc="sap-icon://receipt" text="{i18n>boBILLING_DOCUMENT}" />
+                <commons:ProcessFlowLaneHeader laneId="ACCOUNTING_DOCUMENT" position="7" iconSrc="sap-icon://accounting-document-verification" text="{i18n>boACCOUNTING_DOCUMENT}" />
             </commons:lanes>
             <commons:nodes>
                 <commons:ProcessFlowNode

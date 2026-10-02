@@ -1,0 +1,41 @@
+[
+    {
+        "ServiceContract": "4100000001",
+        "ServiceContractDescription": "RWM-Service Musterstraße 12",
+        "SoldToParty": "MD-100010",
+        "ServiceRefFunctionalLocation": "LG-0815",
+        "Product": "MD-SRV-RWM-VTR",
+        "ServiceContractStartDate": "2025-01-01",
+        "ServiceContractEndDate": "2027-12-31",
+        "ServiceContractIsReleased": true,
+        "BillingPlanRule": "jährlich im Voraus (Jahrespauschale)",
+        "BillingPlanNetAmount": 118.8,
+        "TransactionCurrency": "EUR"
+    },
+    {
+        "ServiceContract": "4100000002",
+        "ServiceContractDescription": "Gerätemiete HKV Lindenallee 5",
+        "SoldToParty": "MD-100020",
+        "ServiceRefFunctionalLocation": "LG-2040",
+        "Product": "MD-SRV-HKV-VTR",
+        "ServiceContractStartDate": "2024-07-01",
+        "ServiceContractEndDate": "2026-06-30",
+        "ServiceContractIsReleased": true,
+        "BillingPlanRule": "monatlich",
+        "BillingPlanNetAmount": 24.5,
+        "TransactionCurrency": "EUR"
+    },
+    {
+        "ServiceContract": "4100000003",
+        "ServiceContractDescription": "RWM-Service Parkweg 7 (in Vorbereitung)",
+        "SoldToParty": "MD-100030",
+        "ServiceRefFunctionalLocation": "LG-3100",
+        "Product": "MD-SRV-RWM-VTR",
+        "ServiceContractStartDate": "2026-01-01",
+        "ServiceContractEndDate": "2028-12-31",
+        "ServiceContractIsReleased": false,
+        "BillingPlanRule": "jährlich im Voraus (Jahrespauschale)",
+        "BillingPlanNetAmount": 59.4,
+        "TransactionCurrency": "EUR"
+    }
+]

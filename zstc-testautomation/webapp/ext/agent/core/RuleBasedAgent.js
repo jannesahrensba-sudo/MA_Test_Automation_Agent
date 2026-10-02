@@ -9,9 +9,54 @@ sap.ui.define(["./prompts", "./textMatching"], function (prompts, textMatching) 
      *   3. backend action validate; findings of the device type rules R5/R10 are corrected with the first suggestion
      *   4. German summary with follow-up questions for ambiguous (R7) or missing (R1) values; answers are matched
      *      against the candidates of the open questions
+     *   5. process reference: the backend analysis sets the way through the repair process and the end object from the
+     *      report; answers such as "mit Angebot", "über den Wartungsvertrag" or "nur bis zum Auftrag" change them
      */
 
     const LABEL = prompts.FIELD_LABELS;
+
+    /** way through the repair process named in an answer (same keywords as the analysis in the backend) */
+    const WAY_WORDS = [
+        ["W3_BILLING_PLAN", /rechnungsplan|vertragsabrechnung|pauschale|billing plan/],
+        ["W3_CONTRACT", /vertrag|vertragsfindung|contract/],
+        ["W2_REJECTED", /(angebot|kostenvoranschlag)( \w+){0,6} (abgelehnt|ablehnen|lehnt)|lehnt( \w+){0,6} (angebot|kostenvoranschlag)|rejected/],
+        ["W1_REQUEST", /ohne angebot|kein angebot|direkt beauftrag|without quotation/],
+        ["W2_QUOTATION", /angebot|kostenvoranschlag|\bkva\b|quotation/]
+    ];
+    /** end object of the run ("bis …") named in an answer */
+    const END_OBJECT_WORDS = [
+        ["ACCOUNTING_DOCUMENT", /buchhaltungsbeleg|fi beleg|bis (zur |zum )?buchung|\bfi\b/],
+        ["BILLING_DOC_REQUEST", /bis (zur |zum )?fakturaanforderung/],
+        ["BILLING_DOCUMENT", /bis (zur |zum )?(faktura|rechnung)\b/],
+        ["SERVICE_CONFIRMATION", /bis (zur |zum )?rueckmeldung/],
+        ["SERVICE_ORDER", /bis (zum |zur )?(service ?)?auftrag\b|bis (zum |zur )?service order/],
+        ["SERVICE_QUOTATION", /bis (zum |zur )?(angebot|kundenentscheidung)/],
+        ["SERVICE_REQUEST", /bis (zum |zur )?(service request|anfrage)\b/]
+    ];
+
+    /**
+     * Process reference named in an answer: way (process variant) and end object.
+     *
+     * @param {string} text answer of the user
+     * @returns {{processVariant?: string, endObject?: string}} header changes
+     */
+    function processChoice(text) {
+        const n = textMatching.normalize(text);
+        const header = {};
+        const way = WAY_WORDS.find(function (entry) {
+            return entry[1].test(n);
+        });
+        if (way) {
+            header.processVariant = way[0];
+        }
+        const end = END_OBJECT_WORDS.find(function (entry) {
+            return entry[1].test(n);
+        });
+        if (end) {
+            header.endObject = end[0];
+        }
+        return header;
+    }
 
     function isEmpty(value) {
         return value === null || value === undefined || value === "";
@@ -70,6 +115,7 @@ sap.ui.define(["./prompts", "./textMatching"], function (prompts, textMatching) 
             this.session.step({ icon: "sap-icon://detail-view", text: "Analyse (regelbasierte Extraktion im Backend): " + this.countFilled(analyzed.values) + " Felder befüllt" });
             await this.gateway.validateDraft(uuid);
             let state = await this.session.refreshDraft(uuid);
+            this.session.step(this.processStep(state, masterData, "Prozessbezug"));
             this.session.step(this.validationStep(state));
             const corrections = [];
             state = await this.autoCorrect(state, corrections);
@@ -79,6 +125,15 @@ sap.ui.define(["./prompts", "./textMatching"], function (prompts, textMatching) 
         async followUp(text) {
             const masterData = await this.gateway.masterData();
             const uuid = this.session.draft.uuid;
+            const current = this.session.draft.process || {};
+            // way and end object: only real changes are sent (the backend redetermines the path, the steps and the expectation)
+            const header = processChoice(text);
+            if (header.processVariant === current.variant) {
+                delete header.processVariant;
+            }
+            if (header.endObject === current.endObject) {
+                delete header.endObject;
+            }
             const patch = {};
             for (const question of this.openQuestions) {
                 const ranked = textMatching.rank(question.candidates, text, function (c) {
@@ -102,7 +157,7 @@ sap.ui.define(["./prompts", "./textMatching"], function (prompts, textMatching) 
             } else if (/dringend|eilig|sofort/.test(n)) {
                 patch.ServiceDocumentPriority = "3";
             }
-            if (Object.keys(patch).length === 0) {
+            if (Object.keys(patch).length === 0 && Object.keys(header).length === 0) {
                 const open = this.openQuestions
                     .map(function (q) {
                         return "**" + (LABEL[q.field] || q.field) + "**";
@@ -111,10 +166,34 @@ sap.ui.define(["./prompts", "./textMatching"], function (prompts, textMatching) 
                 return (
                     "Ich konnte Ihre Antwort keinem offenen Punkt zuordnen" +
                     (open ? " (offen: " + open + ")" : "") +
-                    ". Bitte nennen Sie z. B. den Raum des Geräts oder den Namen des Meldenden – oder öffnen Sie den Entwurf im Formular."
+                    ". Bitte nennen Sie z. B. den Raum des Geräts oder den Namen des Meldenden, den Weg („mit Angebot“, „über den Wartungsvertrag“) " +
+                    "oder bis wohin getestet wird („bis zum Auftrag“) – oder öffnen Sie den Entwurf im Formular."
                 );
             }
-            await this.gateway.updateDraft(uuid, {}, patch);
+            await this.gateway.updateDraft(uuid, header, patch);
+            if (Object.keys(header).length) {
+                const changed = await this.gateway.readDraft(uuid);
+                this.session.step({
+                    icon: "sap-icon://process",
+                    text:
+                        "Prozessbezug geändert: " +
+                        [
+                            header.processVariant ? "Weg " + masterData.describe("ProcessVariant", changed.testCase.ProcessVariant) : "",
+                            header.endObject || header.processVariant ? "Lauf bis " + masterData.describe("EndObject", changed.testCase.EndObject) : ""
+                        ]
+                            .filter(Boolean)
+                            .join(", ") +
+                        " – Testschritte und erwarteter Nettowert neu ermittelt"
+                });
+            }
+            if (Object.keys(patch).length === 0) {
+                await this.gateway.validateDraft(uuid);
+                let changedState = await this.session.refreshDraft(uuid);
+                this.session.step(this.validationStep(changedState));
+                const changedCorrections = [];
+                changedState = await this.autoCorrect(changedState, changedCorrections);
+                return this.report(changedState, masterData, changedCorrections);
+            }
             this.session.step({
                 icon: "sap-icon://edit",
                 text:
@@ -165,6 +244,24 @@ sap.ui.define(["./prompts", "./textMatching"], function (prompts, textMatching) 
             }).length;
         }
 
+        /** step with the process reference determined by the backend (team, way, end object, assignment) */
+        processStep(state, masterData, prefix) {
+            const process = state.process || {};
+            return {
+                icon: "sap-icon://process",
+                text:
+                    prefix +
+                    ": " +
+                    prompts
+                        .processRows(process, masterData.describe)
+                        .map(function (row) {
+                            return row.label + " " + row.value;
+                        })
+                        .join(" · "),
+                state: process.assignment === "OPEN" ? "Warning" : "None"
+            };
+        }
+
         validationStep(state) {
             return {
                 icon: "sap-icon://validate",
@@ -187,8 +284,24 @@ sap.ui.define(["./prompts", "./textMatching"], function (prompts, textMatching) 
                     "Ich habe einen Testfall-Entwurf angelegt. Validierung: **" + (prompts.STATUS[state.validation.status] || state.validation.status) + "** – " + prompts.counts(state.validation) + "."
                 );
             }
+            const process = state.process || {};
+            if (process.variant || process.team) {
+                lines.push(
+                    "- Prozessbezug: " +
+                        (process.team ? masterData.describe("ProcessTeam", process.team) : "Team offen") +
+                        " · " +
+                        (process.variant ? masterData.describe("ProcessVariant", process.variant) : "Weg offen") +
+                        (process.endObject ? " · Lauf bis " + masterData.describe("EndObject", process.endObject) : "")
+                );
+            }
+            if (process.assignment && process.assignment !== "ASSIGNED") {
+                lines.push("- Zuordnung: " + (prompts.ASSIGNMENT[process.assignment] || process.assignment) + (process.note ? " – " + process.note : ""));
+            }
             if (!isEmpty(v.ServiceReferenceEquipment) || !isEmpty(v.ServiceRefFunctionalLocation)) {
                 lines.push("- Gerät: " + (d("ServiceReferenceEquipment") || "offen") + (isEmpty(v.ServiceRefFunctionalLocation) ? "" : " in " + d("ServiceRefFunctionalLocation")));
+            }
+            if (!isEmpty(v.ServiceContract)) {
+                lines.push("- Servicevertrag: " + d("ServiceContract"));
             }
             lines.push("- Kunde: " + (d("SoldToParty") || "offen") + " · Meldender: " + (d("ServiceRequestReporter") || "offen"));
             if (!isEmpty(v.ServiceRequestDescription)) {
@@ -244,6 +357,7 @@ sap.ui.define(["./prompts", "./textMatching"], function (prompts, textMatching) 
             } else {
                 lines.push("");
                 lines.push("Bitte prüfen Sie den Entwurf rechts und bestätigen Sie mit **Übernehmen & starten**: Der Testfall wird gespeichert, freigegeben und die Ausführung in der App gestartet.");
+                lines.push("Anderer Weg oder Endpunkt? Schreiben Sie z. B. „mit Angebot“, „Angebot wird abgelehnt“, „über den Wartungsvertrag“ oder „nur bis zum Auftrag“.");
             }
             return lines.join("\n");
         }

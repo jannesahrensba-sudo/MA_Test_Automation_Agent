@@ -18,7 +18,10 @@ sap.ui.define(
             hkv: "Frau Müller aus der Musterstraße 12 in München (1. OG links) meldet über Petra Wagner von der Hausverwaltung, dass der Heizkostenverteiler im Wohnzimmer nichts mehr anzeigt – das Display ist komplett dunkel.",
             rwm: "Im Kinderzimmer der Wohnung Yilmaz (Musterstraße 12, EG rechts) piept der Rauchmelder alle paar Sekunden, obwohl kein Rauch da ist. Bitte dringend jemanden schicken. Gemeldet von Hausmeister Stefan Brandl.",
             ambiguous: "Bei Familie Müller in der Musterstraße 12 funktioniert ein Heizkostenverteiler nicht.",
-            cologne: "Lindenallee 5 in Köln, Herr Nowak: der Rauchwarnmelder im Flur ist abgerissen und liegt auf dem Boden. Meldung von Aylin Demir."
+            cologne: "Lindenallee 5 in Köln, Herr Nowak: der Rauchwarnmelder im Flur ist abgerissen und liegt auf dem Boden. Meldung von Aylin Demir.",
+            contract:
+                "Laut Wartungsvertrag: Im Kinderzimmer der Wohnung Yilmaz (Musterstraße 12, EG rechts) piept der Rauchwarnmelder. Austausch im Rahmen des Vertrags, " +
+                "Test bis zur Faktura. Gemeldet von Hausmeister Stefan Brandl."
         };
 
         const STATUS_STATE = { VALID: "Success", AMBIGUOUS: "Warning", INVALID: "Error", NOT_VALIDATED: "None" };
@@ -72,7 +75,9 @@ sap.ui.define(
                     "assistant",
                     "Guten Tag! Schildern Sie eine Störung aus dem Messdienst auf Deutsch – z. B. einen **Heizkostenverteiler**, der nichts anzeigt, oder einen **Rauchwarnmelder**, der piept. " +
                         "Nennen Sie möglichst Adresse, Wohnung oder Bewohner, Raum und wer die Störung gemeldet hat.\n" +
-                        "Ich erfasse daraus einen Testfall, prüfe ihn gegen die Stammdaten und frage nach, wenn etwas fehlt. Gestartet wird erst nach Ihrer Bestätigung."
+                        "Ich erfasse daraus einen Testfall, prüfe ihn gegen die Stammdaten und frage nach, wenn etwas fehlt. Gestartet wird erst nach Ihrer Bestätigung.\n" +
+                        "Der Testfall wird dem Reparaturprozess zugeordnet: Ihr **Prozessteam** und der **Weg** – ohne Angebot, mit Angebot (angenommen oder abgelehnt) " +
+                        "oder über einen Servicevertrag. Sagen Sie z. B. „laut Wartungsvertrag“ oder „nur bis zum Auftrag“, wenn Sie einen anderen Weg oder Endpunkt testen wollen."
                 );
             },
 
@@ -186,16 +191,19 @@ sap.ui.define(
                     : function (field, value) {
                           return String(value);
                       };
-                const rows = prompts.SUMMARY_FIELDS.filter(function (field) {
-                    const value = draft.values[field];
-                    return value !== null && value !== undefined && value !== "";
-                }).map(function (field) {
-                    const value = draft.values[field];
-                    return {
-                        label: prompts.FIELD_LABELS[field] || field,
-                        value: prompts.display(field, value, draft.values, describe)
-                    };
-                });
+                // process reference first (team, way, end object, assignment), then the test data
+                const rows = prompts.processRows(draft.process, describe).concat(
+                    prompts.SUMMARY_FIELDS.filter(function (field) {
+                        const value = draft.values[field];
+                        return value !== null && value !== undefined && value !== "";
+                    }).map(function (field) {
+                        const value = draft.values[field];
+                        return {
+                            label: prompts.FIELD_LABELS[field] || field,
+                            value: prompts.display(field, value, draft.values, describe)
+                        };
+                    })
+                );
                 const findings = draft.validation.findings.map(function (f) {
                     return {
                         title: f.bezeichnung + " – " + f.regeltext,

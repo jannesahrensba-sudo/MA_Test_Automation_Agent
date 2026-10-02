@@ -36,15 +36,20 @@ test('golden path: describe → analyze → validate → save → approve → ex
 
     const active = await activate(repo, draft);
     const saved = await repo.findOne('TestCase', active);
-    assert.equal(saved.CaseID, 'STC-2026-000007');
+    assert.equal(saved.CaseID, 'STC-2026-000013');
     assert.equal(saved.__OperationControl.approve, true);
     assert.equal(saved.__OperationControl.startExecution, false);
 
     await service.approve(repo, active);
     const started = await service.startExecution(repo, active);
     assert.equal(started.testCase.ExecutionStatus, 'RUNNING');
-    assert.equal(started.testCase.ExternalExecutionID, 'MOCK-20260929-0003');
-    assert.equal((await repo.find('ExecutionStep', { ExecutionUUID: started.testCase.LatestExecutionUUID })).length, 6);
+    assert.equal(started.testCase.ExternalExecutionID, 'MOCK-20260929-0005');
+    // default variant W2_QUOTATION: SR, quotation, customer acceptance, order, confirmation, billing request, billing document
+    const steps = (await repo.find('ExecutionStep', { ExecutionUUID: started.testCase.LatestExecutionUUID })).sort((a, b) => a.Sequence - b.Sequence);
+    assert.deepEqual(
+        steps.map((st) => st.ProcessStepID),
+        ['REP-010', 'REP-030', 'REP-040', 'REP-060', 'REP-080', 'REP-090', 'REP-100']
+    );
     assert.equal((await repo.find('DocumentReference', { ExecutionUUID: started.testCase.LatestExecutionUUID })).length, 0);
 
     tick(5000);
@@ -61,6 +66,12 @@ test('golden path: describe → analyze → validate → save → approve → ex
     const assertions = await repo.find('TestAssertion', { ExecutionUUID: started.testCase.LatestExecutionUUID });
     assert.ok(assertions.length >= 15);
     assert.ok(assertions.every((a) => a.Result === 'PASSED'));
+    assert.ok(assertions.every((a) => a.ProcessStepID), 'every assertion belongs to a process step');
+    assert.equal(documents.find((d) => d.BusinessObjectType === 'SERVICE_QUOTATION').ProcessStepID, 'REP-030');
+    const execution = await repo.findOne('Execution', { ExecutionUUID: started.testCase.LatestExecutionUUID, IsActiveEntity: true });
+    assert.equal(execution.ReleaseID, 'INT-2026.10', 'single run in the release in test of team and process');
+    assert.equal(execution.TestCaseVersion, 1);
+    assert.equal(execution.ProcessVariant, 'W2_QUOTATION');
     const derived = service.deriveTestCase(finished.testCase);
     assert.equal(derived.Status, 'COMPLETED');
     assert.equal(derived.__EntityControl.Deletable, false);
@@ -148,7 +159,8 @@ test('EXECUTION_ERROR: failed step (SIM-6) and cancel (SIM-7)', async (t) => {
     tick(20000);
     const failed = await service.refreshExecution(repo, active);
     assert.equal(failed.testCase.FinalResult, 'FAILED_TECHNICAL');
-    assert.ok(failed.messages.some((m) => /EXECUTION_ERROR in step 4/.test(m.message)));
+    // the confirmation is step 5 of variant W2_QUOTATION
+    assert.ok(failed.messages.some((m) => /EXECUTION_ERROR in step 5/.test(m.message)));
 
     await service.startExecution(repo, active);
     tick(3000);

@@ -26,5 +26,13 @@
     {
         "Code": "BILLING_DOCUMENT",
         "Text": "Billing Document"
+    },
+    {
+        "Code": "SERVICE_CONTRACT",
+        "Text": "Service Contract"
+    },
+    {
+        "Code": "ACCOUNTING_DOCUMENT",
+        "Text": "Accounting Document (FI)"
     }
 ]

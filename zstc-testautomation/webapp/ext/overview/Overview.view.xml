@@ -13,11 +13,14 @@
                 <Button id="serviceAssistant" text="{i18n>agentName}" icon="sap-icon://ai" type="Emphasized" press=".onShowAssistant" />
                 <Button id="newTestCase" text="{i18n>newTestCase}" icon="sap-icon://add" press=".onCreateTestCase" />
                 <Button id="allTestCases" text="{i18n>allTestCases}" icon="sap-icon://list" press=".onShowTestCases" />
+                <Button id="releases" text="{i18n>releases}" icon="sap-icon://calendar" press=".onShowReleases" />
+                <Button id="processes" text="{i18n>processes}" icon="sap-icon://process" press=".onShowProcesses" />
+                <Button id="processTeams" text="{i18n>processTeams}" icon="sap-icon://group" press=".onShowProcessTeams" />
                 <Button id="configuration" text="{i18n>configuration}" icon="sap-icon://action-settings" press=".onShowConfiguration" />
             </OverflowToolbar>
         </VBox>
         <FlexBox id="kpiTiles" wrap="Wrap" items="{kpi>/tiles}">
-            <GenericTile header="{kpi>header}" subheader="{kpi>subheader}" frameType="OneByOne" sizeBehavior="Small" press=".onShowTestCases" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+            <GenericTile header="{kpi>header}" subheader="{kpi>subheader}" frameType="OneByOne" sizeBehavior="Small" press=".onTilePress" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
                 <TileContent footer="{kpi>footer}">
                     <NumericContent value="{kpi>value}" valueColor="{kpi>color}" icon="{kpi>icon}" withMargin="false" />
                 </TileContent>
@@ -31,6 +34,7 @@
                 <StandardListItem id="stepApprove" title="{i18n>processApprove}" description="{i18n>processApproveText}" icon="sap-icon://approvals" wrapping="true" />
                 <StandardListItem id="stepExecute" title="{i18n>processExecute}" description="{i18n>processExecuteText}" icon="sap-icon://process" wrapping="true" />
                 <StandardListItem id="stepVerify" title="{i18n>processVerify}" description="{i18n>processVerifyText}" icon="sap-icon://inspection" wrapping="true" />
+                <StandardListItem id="stepRelease" title="{i18n>processRelease}" description="{i18n>processReleaseText}" icon="sap-icon://calendar" wrapping="true" />
             </List>
         </Panel>
     </macros:Page>

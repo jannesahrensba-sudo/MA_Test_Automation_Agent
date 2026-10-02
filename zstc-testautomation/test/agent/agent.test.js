@@ -10,10 +10,14 @@ const { core, createMemoryGateway, setup, teardown } = require('./helpers');
 const AgentSession = core('AgentSession');
 const messagesLoop = core('messagesLoop');
 const agentTools = core('agentTools');
+const prompts = core('prompts');
 
 const TEXT_HKV =
     'Frau Müller aus der Musterstraße 12 in München (1. OG links) meldet über Petra Wagner von der Hausverwaltung, dass der Heizkostenverteiler im Wohnzimmer nichts mehr anzeigt – das Display ist komplett dunkel.';
 const TEXT_AMBIGUOUS = 'Bei Familie Müller in der Musterstraße 12 funktioniert ein Heizkostenverteiler nicht.';
+const TEXT_CONTRACT =
+    'Laut Wartungsvertrag: Im Kinderzimmer der Wohnung Yilmaz (Musterstraße 12, EG rechts) piept der Rauchwarnmelder. Austausch im Rahmen des Vertrags, ' +
+    'Test bis zur Faktura. Gemeldet von Hausmeister Stefan Brandl.';
 
 function newSession(repo, transport = { kind: 'rules' }) {
     const gateway = createMemoryGateway(repo);
@@ -50,9 +54,21 @@ test('rule-based agent: German heat cost allocator report → valid draft → sa
     assert.equal(session.draft.validation.status, 'VALID');
     assert.equal(session.draft.processProfile, 'MD_HKV_STOER');
     assert.ok(steps.some((s) => /Prozess erkannt: MD_HKV_STOER/.test(s.text)));
+    // process reference: team of the user, a fault report without quotation runs way 1 up to the billing document
+    assert.deepEqual(
+        { team: session.draft.process.team, variant: session.draft.process.variant, endObject: session.draft.process.endObject, assignment: session.draft.process.assignment },
+        { team: 'PT-REPARATUR', variant: 'W1_REQUEST', endObject: 'BILLING_DOCUMENT', assignment: 'ASSIGNED' }
+    );
+    assert.match(answer.text, /Prozessbezug: PT-REPARATUR · .* · W1_REQUEST · Weg 1 .* · Lauf bis Faktura/);
+    assert.ok(steps.some((s) => /^Prozessbezug: Prozessteam PT-REPARATUR/.test(s.text)));
+    const md = await gateway.masterData();
+    assert.deepEqual(
+        prompts.processRows(session.draft.process, md.describe).map((row) => row.label),
+        ['Prozessteam', 'Weg', 'Lauf bis', 'Teststufe', 'Zuordnung']
+    );
     const submitted = await session.submit();
-    assert.equal(submitted.caseId, 'STC-2026-000007');
-    assert.match(submitted.externalExecutionId, /^MOCK-\d{8}-0003$/);
+    assert.equal(submitted.caseId, 'STC-2026-000013');
+    assert.match(submitted.externalExecutionId, /^MOCK-\d{8}-0005$/);
     assert.deepEqual(gateway.calls.map((c) => c[0]).slice(-3), ['save', 'approve', 'start']);
     assert.match((await session.send('Noch etwas?')).text, /bereits übernommen/);
 });
@@ -79,6 +95,79 @@ test('rule-based agent: R10 finding (profile default part for a water meter) is 
     assert.equal(session.draft.values.ServicePart, 'MD-ERS-WZ');
     assert.equal(session.draft.validation.status, 'VALID', answer.text);
     assert.match(answer.text, /Korrigiert: Ersatzteil MD-ERS-HKV/);
+});
+
+test('rule-based agent: way and end object from the answer — quotation rejected, then accepted up to the service order', async (t) => {
+    const { repo, tenantId } = setup();
+    t.after(() => teardown(tenantId));
+    const { session, steps } = newSession(repo);
+    await session.send(TEXT_HKV);
+    assert.equal(session.draft.process.variant, 'W1_REQUEST');
+    const rejected = await session.send('Bitte mit Angebot testen – der Kunde lehnt das Angebot ab.');
+    assert.equal(session.draft.process.variant, 'W2_REJECTED', rejected.text);
+    // the billing document is not on the path of a rejected quotation: the backend takes the last object of the way
+    assert.equal(session.draft.process.endObject, 'SERVICE_QUOTATION');
+    assert.equal(session.draft.validation.status, 'VALID', rejected.text);
+    assert.ok(steps.some((s) => /^Prozessbezug geändert: Weg W2_REJECTED/.test(s.text)));
+    const accepted = await session.send('Doch mit Angebot, das der Kunde annimmt, aber nur bis zum Auftrag.');
+    assert.equal(session.draft.process.variant, 'W2_QUOTATION', accepted.text);
+    assert.equal(session.draft.process.endObject, 'SERVICE_ORDER');
+    assert.equal(session.draft.validation.status, 'VALID', accepted.text);
+    assert.match(accepted.text, /Lauf bis Serviceauftrag/);
+    // an answer without a known point is not sent to the backend
+    assert.match((await session.send('Danke!')).text, /keinem offenen Punkt zuordnen/);
+});
+
+test('rule-based agent: maintenance contract → way 3 with contract determination, saved, approved and started', async (t) => {
+    const { repo, tenantId } = setup();
+    t.after(() => teardown(tenantId));
+    const { session, gateway } = newSession(repo);
+    const answer = await session.send(TEXT_CONTRACT);
+    assert.equal(session.draft.processProfile, 'MD_RWM_STOER');
+    assert.equal(session.draft.process.variant, 'W3_CONTRACT');
+    assert.equal(session.draft.process.endObject, 'BILLING_DOCUMENT');
+    assert.equal(session.draft.values.ServiceReferenceEquipment, 'RWM-0815-022');
+    assert.equal(session.draft.values.ServiceContract, '4100000001');
+    assert.equal(session.draft.validation.status, 'VALID', answer.text);
+    assert.match(answer.text, /Servicevertrag: 4100000001 · RWM-Service Musterstraße 12/);
+    const submitted = await session.submit();
+    assert.equal(submitted.caseId, 'STC-2026-000013');
+    assert.deepEqual(gateway.calls.map((c) => c[0]).slice(-3), ['save', 'approve', 'start']);
+    const execution = (await repo.find('Execution', { IsActiveEntity: true })).find((e) => e.ExternalExecutionID === submitted.externalExecutionId);
+    assert.equal(execution.ProcessVariant, 'W3_CONTRACT');
+    assert.equal(execution.ReleaseID, 'INT-2026.10');
+});
+
+test('capture tool: way, end object and team from the model; billing plan way takes the expectation from the contract', async (t) => {
+    const { repo, tenantId } = setup();
+    t.after(() => teardown(tenantId));
+    const { session } = newSession(repo, { kind: 'sample', sample: async () => ({ text: '' }) });
+    session.originalText = TEXT_CONTRACT;
+    const capture = session.tools.find((tool) => tool.name === 'testfall_entwurf_erfassen');
+    const result = await capture.execute(
+        {
+            prozessprofil: 'MD_RWM_STOER',
+            prozessvariante: 'w3_billing_plan',
+            bis_objekt: 'ACCOUNTING_DOCUMENT',
+            prozessteam: 'PT-REPARATUR',
+            voraussetzungen: 'Vertrag 4100000001 freigegeben, Rechnungsplan fällig',
+            felder: { ServiceReferenceEquipment: 'RWM-0815-022', ServiceRequestReporter: 'MD-CP-1002', ServiceRequestDescription: 'RWM Kinderzimmer: Warnton' }
+        },
+        { signal: undefined }
+    );
+    assert.equal(session.draft.process.variant, 'W3_BILLING_PLAN');
+    assert.equal(session.draft.process.endObject, 'ACCOUNTING_DOCUMENT');
+    assert.equal(session.draft.values.ServiceContract, '4100000001');
+    assert.equal(Number(session.draft.values.ExpectedNetAmount), 118.8);
+    assert.equal(result.validierung, 'VALID', JSON.stringify(result.befunde));
+    assert.match(result.prozessbezug.weg, /W3_BILLING_PLAN/);
+    assert.equal(result.prozessbezug.bis, 'Buchhaltungsbeleg (FI)');
+    assert.equal(result.prozessbezug.zuordnung, 'zugeordnet');
+    assert.equal((await repo.findOne('TestCase', { TestCaseUUID: session.draft.uuid, IsActiveEntity: false })).Preconditions, 'Vertrag 4100000001 freigegeben, Rechnungsplan fällig');
+    // unknown way: reported, not sent
+    const notes = [];
+    assert.deepEqual(agentTools.normalizeProcess({ prozessvariante: 'GARANTIE' }, notes), {});
+    assert.match(notes[0], /Unbekannter Weg GARANTIE/);
 });
 
 test('rule-based agent: a text without location or device creates no draft', async (t) => {

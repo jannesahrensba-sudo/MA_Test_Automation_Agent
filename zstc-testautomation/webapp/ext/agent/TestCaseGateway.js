@@ -13,8 +13,22 @@ sap.ui.define(["sap/ui/model/Sorter", "./core/masterData"], function (Sorter, ma
         serviceTeams: ["ServiceTeamVH", "RespyMgmtServiceTeam,RespyMgmtServiceTeamName,ServiceOrganization"],
         serviceOrganizations: ["ServiceOrganizationVH", "ServiceOrganization,ServiceOrganizationName,SalesOrganization"],
         priorities: ["ServiceDocumentPriorityVH", "ServiceDocumentPriority,ServiceDocumentPriorityName"],
-        processProfiles: ["ProcessProfileVH", "ProcessProfile,ProcessProfileName"]
+        processProfiles: ["ProcessProfileVH", "ProcessProfile,ProcessProfileName"],
+        // process reference: teams, processes, ways (variants), releases and service contracts
+        processTeams: ["ProcessTeamVH", "ProcessTeam,ProcessTeamName,ProcessArea"],
+        processes: ["BusinessProcessVH", "ProcessID,ProcessName,OwnerTeam,ProcessVersion,PilotScope"],
+        variants: ["ProcessVariantVH", "ProcessID,Variant,VariantName,PilotScope,IsDefault"],
+        releases: ["ReleaseVH", "ReleaseID,ReleaseName,ReleaseType,ReleaseStatus,TestStartDate,TestEndDate"],
+        serviceContracts: [
+            "ServiceContractVH",
+            "ServiceContract,ServiceContractDescription,SoldToParty,ServiceRefFunctionalLocation,ServiceContractStartDate,ServiceContractEndDate,ServiceContractIsReleased,BillingPlanNetAmount"
+        ]
     };
+
+    /** header fields of the process reference: key of the tool/session → property of TestCase */
+    const HEADER_FIELDS = { processTeam: "ProcessTeam", processVariant: "ProcessVariant", endObject: "EndObject", preconditions: "Preconditions" };
+    const HEADER_SELECT = "TestCaseUUID,IsActiveEntity,CaseID,Title,ProcessProfile,ValidationStatus,ApprovalStatus,ExecutionStatus,FinalResult," +
+        "ProcessTeam,BusinessProcess,ProcessVariant,EndObject,TestLevel,AssignmentStatus,AssignmentNote,Version,Preconditions";
 
     const DATA_FIELDS = [
         "ServiceRequestType",
@@ -28,6 +42,7 @@ sap.ui.define(["sap/ui/model/Sorter", "./core/masterData"], function (Sorter, ma
         "ServiceRefFunctionalLocation",
         "ServiceReferenceEquipment",
         "ReferenceProduct",
+        "ServiceContract",
         "ServiceProduct",
         "ServiceDuration",
         "ServiceDurationUnit",
@@ -129,7 +144,17 @@ sap.ui.define(["sap/ui/model/Sorter", "./core/masterData"], function (Sorter, ma
 
         async catalog() {
             const masterData = await this.masterData();
-            return { processProfiles: masterData.pools.processProfiles };
+            const pools = masterData.pools;
+            return {
+                processProfiles: pools.processProfiles,
+                processTeams: pools.processTeams || [],
+                variants: (pools.variants || []).filter(function (v) {
+                    return v.PilotScope === "PILOT";
+                }),
+                releasesInTest: (pools.releases || []).filter(function (r) {
+                    return r.ReleaseStatus === "IN_TEST";
+                })
+            };
         }
 
         /** POST TestCase: new draft (defaults of the process profile are set by the backend) */
@@ -153,33 +178,50 @@ sap.ui.define(["sap/ui/model/Sorter", "./core/masterData"], function (Sorter, ma
             }
         }
 
-        /** PATCH TestCase (title) and TestCaseData (fields); the backend determinations run on each change */
+        /**
+         * PATCH TestCase (title, process reference) and TestCaseData (fields); the backend determinations run on each change.
+         * The process reference goes first: the path decides which documents are expected and how the expected value is derived.
+         */
         async updateDraft(uuid, header, fields) {
-            const changes = [];
             const bindings = [];
-            if (header && header.title) {
-                const root = this.model.bindContext(this.draftPath(uuid), undefined, { $$updateGroupId: "$auto", $select: "Title" });
-                bindings.push(root);
-                const context = root.getBoundContext();
-                await context.requestObject();
-                changes.push(context.setProperty("Title", header.title));
-            }
-            const names = Object.keys(fields || {});
-            if (names.length) {
-                const data = this.model.bindContext(this.draftPath(uuid) + "/_TestCaseData", undefined, { $$updateGroupId: "$auto", $select: DATA_FIELDS.join(",") });
-                bindings.push(data);
-                const context = data.getBoundContext();
-                await context.requestObject();
-                names.forEach(function (name) {
-                    let value = fields[name];
-                    if (value !== null && value !== undefined && DECIMAL_FIELDS.indexOf(name) > -1) {
-                        value = String(value);
-                    }
-                    changes.push(context.setProperty(name, value === undefined ? null : value));
-                });
-            }
+            const headerChanges = Object.keys(HEADER_FIELDS).filter(function (key) {
+                return header && header[key] !== undefined && header[key] !== null;
+            });
             try {
-                await Promise.all(changes);
+                if (header && (header.title || headerChanges.length)) {
+                    const root = this.model.bindContext(this.draftPath(uuid), undefined, {
+                        $$updateGroupId: "$auto",
+                        $select: "Title," + Object.values(HEADER_FIELDS).join(",")
+                    });
+                    bindings.push(root);
+                    const context = root.getBoundContext();
+                    await context.requestObject();
+                    const headerPatches = [];
+                    if (header.title) {
+                        headerPatches.push(context.setProperty("Title", header.title));
+                    }
+                    headerChanges.forEach(function (key) {
+                        headerPatches.push(context.setProperty(HEADER_FIELDS[key], header[key]));
+                    });
+                    // the process reference is determined before the test data changes (own request)
+                    await Promise.all(headerPatches);
+                }
+                const names = Object.keys(fields || {});
+                if (names.length) {
+                    const data = this.model.bindContext(this.draftPath(uuid) + "/_TestCaseData", undefined, { $$updateGroupId: "$auto", $select: DATA_FIELDS.join(",") });
+                    bindings.push(data);
+                    const context = data.getBoundContext();
+                    await context.requestObject();
+                    await Promise.all(
+                        names.map(function (name) {
+                            let value = fields[name];
+                            if (value !== null && value !== undefined && DECIMAL_FIELDS.indexOf(name) > -1) {
+                                value = String(value);
+                            }
+                            return context.setProperty(name, value === undefined ? null : value);
+                        })
+                    );
+                }
             } catch (error) {
                 throw odataError(error);
             } finally {
@@ -201,7 +243,7 @@ sap.ui.define(["sap/ui/model/Sorter", "./core/masterData"], function (Sorter, ma
         async readDraft(uuid, active) {
             const path = active ? this.activePath(uuid) : this.draftPath(uuid);
             const [testCase, values, findings] = await Promise.all([
-                this.readObject(path, "TestCaseUUID,IsActiveEntity,CaseID,Title,ProcessProfile,ValidationStatus,ApprovalStatus,ExecutionStatus,FinalResult"),
+                this.readObject(path, HEADER_SELECT),
                 this.readObject(path + "/_TestCaseData", DATA_FIELDS.join(",")),
                 this.readList(
                     path + "/_ValidationResult",

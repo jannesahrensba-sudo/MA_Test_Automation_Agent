@@ -3,9 +3,10 @@
  * MockExecutionProvider — MOCK implementation of ITestExecutionProvider.
  *
  * It does NOT call any SAP test automation. It simulates an asynchronous run:
- *   start() hands over the validated data set and returns an external execution ID ("MOCK-<date>-<no>"),
- *   getStatus() advances the run by elapsed time (SIM-1: one chain step every stepDurationMs),
- *   each finished step creates one document in MockS4ServiceChain, getCreatedDocuments() returns the numbers.
+ *   start() hands over the validated data set (incl. the execution plan of the process variant) and returns an
+ *   external execution ID ("MOCK-<date>-<no>"),
+ *   getStatus() advances the run by elapsed time (SIM-1: one plan step every stepDurationMs),
+ *   each finished step creates (or changes) one document in MockS4ServiceChain, getCreatedDocuments() returns the numbers.
  *
  * Every method below is a stand-in for an OPEN point of the real integration (⚠ NOCH ZU VERIFIZIEREN, F-8).
  */
@@ -36,21 +37,32 @@ class MockExecutionProvider extends ITestExecutionProvider {
         return 'MOCK';
     }
 
-    /** MOCK — real to be clarified (F-8): (1) external start and (2) test data handover */
+    /**
+     * MOCK — real to be clarified (F-8): (1) external start and (2) test data handover.
+     *
+     * @param {object} validatedDataset {data, processProfile, plan?, serviceContract?, referenceLocations?}
+     * @param {object} correlation {caseId, soldToParty}
+     * @returns {{externalExecutionId: string}} external ID
+     */
     start(validatedDataset, correlation) {
         const externalExecutionId = numberRanges.nextExecutionId(this.tenantId);
         const startedAt = clock.now();
+        const plan = validatedDataset.plan && validatedDataset.plan.length ? validatedDataset.plan : CHAIN;
+        const at = new Date(startedAt).toISOString();
         this.runs.set(externalExecutionId, {
             externalExecutionId,
             dataset: validatedDataset,
             correlation,
             startedAt,
+            plan,
             status: EXECUTION.RUNNING,
+            blocked: false,
             documents: [],
-            steps: CHAIN.map((step) => ({ ...step, status: STEP_STATUS.PLANNED, actualStatus: '', startedAt: null, finishedAt: null, message: '' })),
+            steps: plan.map((step) => ({ ...step, status: STEP_STATUS.PLANNED, actualStatus: '', startedAt: null, finishedAt: null, message: '' })),
             log: [
-                `${new Date(startedAt).toISOString()} MOCK start: external execution ${externalExecutionId} for ${correlation.caseId} (provider MockExecutionProvider, no SAP test automation called)`,
-                `${new Date(startedAt).toISOString()} MOCK test data handover: ${Object.keys(validatedDataset.data).length} fields, process profile ${validatedDataset.processProfile}`
+                `${at} MOCK start: external execution ${externalExecutionId} for ${correlation.caseId} (provider MockExecutionProvider, no SAP test automation called)`,
+                `${at} MOCK test data handover: ${Object.keys(validatedDataset.data).length} fields, process profile ${validatedDataset.processProfile}`,
+                `${at} MOCK plan: ${plan.map((step) => step.processStepID || step.businessObjectType).join(' → ')}${validatedDataset.variant ? ` (variant ${validatedDataset.variant})` : ''}`
             ]
         });
         return { externalExecutionId };
@@ -92,10 +104,12 @@ class MockExecutionProvider extends ITestExecutionProvider {
             if (!result.ok) {
                 step.status = STEP_STATUS.FAILED;
                 run.status = EXECUTION.FAILED;
+                // a missing precondition (e.g. no valid contract) blocks the run instead of failing it technically
+                run.blocked = !!result.blocked;
                 run.finishedAt = doneAt;
                 for (const rest of run.steps.filter((s) => s.status === STEP_STATUS.PLANNED)) {
                     rest.status = STEP_STATUS.SKIPPED;
-                    rest.message = 'Skipped after failed predecessor step.';
+                    rest.message = run.blocked ? 'Skipped: precondition of the process variant missing.' : 'Skipped after failed predecessor step.';
                 }
                 return;
             }
@@ -122,10 +136,11 @@ class MockExecutionProvider extends ITestExecutionProvider {
         };
     }
 
-    /** MOCK — real to be clarified (F-8): (4) result */
+    /** MOCK — real to be clarified (F-8): (4) result; BLOCKED = precondition of the variant missing */
     getResult(externalExecutionId) {
         const run = this.run(externalExecutionId);
-        return { technicalResult: run.status === EXECUTION.FAILED ? 'ERROR' : 'OK', log: [...run.log] };
+        const technicalResult = run.status === EXECUTION.FAILED ? (run.blocked ? 'BLOCKED' : 'ERROR') : 'OK';
+        return { technicalResult, log: [...run.log] };
     }
 
     /** MOCK — real to be clarified (F-8): (5) document number return (real fallback: document correlation via Case ID) */

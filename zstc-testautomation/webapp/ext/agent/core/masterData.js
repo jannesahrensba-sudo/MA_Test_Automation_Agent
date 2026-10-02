@@ -11,6 +11,16 @@ sap.ui.define(["./textMatching"], function (textMatching) {
 
     const MAX_HITS = 8;
     const DEVICE_TYPE_LABEL = { "MD-HKV": "Heizkostenverteiler", "MD-RWM": "Rauchwarnmelder", "MD-WZ": "Wasserzähler" };
+    /** German names of the end objects ("Lauf bis") */
+    const END_OBJECT_LABEL = {
+        SERVICE_REQUEST: "Service Request",
+        SERVICE_QUOTATION: "Angebot",
+        SERVICE_ORDER: "Serviceauftrag",
+        SERVICE_CONFIRMATION: "Rückmeldung",
+        BILLING_DOC_REQUEST: "Fakturaanforderung",
+        BILLING_DOCUMENT: "Faktura",
+        ACCOUNTING_DOCUMENT: "Buchhaltungsbeleg (FI)"
+    };
 
     function index(list, key) {
         const map = new Map();
@@ -119,6 +129,22 @@ sap.ui.define(["./textMatching"], function (textMatching) {
                     return { id: t.RespyMgmtServiceTeam, bezeichnung: t.RespyMgmtServiceTeamName, serviceorganisation: t.ServiceOrganization };
                 }
             },
+            servicevertrag: {
+                pool: pools.serviceContracts,
+                text: function (c) {
+                    return [c.ServiceContract, c.ServiceContractDescription, "Vertrag Servicevertrag Wartungsvertrag", locationText(c.ServiceRefFunctionalLocation), customerText(c.SoldToParty)].join(" ");
+                },
+                hit: function (c) {
+                    return {
+                        id: c.ServiceContract,
+                        bezeichnung: c.ServiceContractDescription,
+                        kunde: c.SoldToParty,
+                        objekt: c.ServiceRefFunctionalLocation,
+                        gueltig: (c.ServiceContractStartDate || "") + " bis " + (c.ServiceContractEndDate || ""),
+                        freigegeben: c.ServiceContractIsReleased === true
+                    };
+                }
+            },
             produkt: {
                 pool: pools.products,
                 text: function (p) {
@@ -131,7 +157,7 @@ sap.ui.define(["./textMatching"], function (textMatching) {
         };
 
         /**
-         * @param {string} type geraet | nutzeinheit | liegenschaft | kunde | ansprechpartner | serviceteam | produkt
+         * @param {string} type geraet | nutzeinheit | liegenschaft | kunde | ansprechpartner | serviceteam | servicevertrag | produkt
          * @param {string} text search terms
          * @param {string} [customer] only entries of this customer
          * @returns {object} hits (best first) and whether the best hit is unambiguous
@@ -199,6 +225,21 @@ sap.ui.define(["./textMatching"], function (textMatching) {
                 case "ProcessProfile":
                     text = (find(pools.processProfiles, "ProcessProfile") || {}).ProcessProfileName;
                     break;
+                case "ProcessTeam":
+                    text = (find(pools.processTeams, "ProcessTeam") || {}).ProcessTeamName;
+                    break;
+                case "BusinessProcess":
+                    text = (find(pools.processes, "ProcessID") || {}).ProcessName;
+                    break;
+                case "ProcessVariant":
+                    text = (find(pools.variants, "Variant") || {}).VariantName;
+                    break;
+                case "EndObject":
+                    // the German name is enough ("bis Faktura")
+                    return END_OBJECT_LABEL[id] || String(id);
+                case "ServiceContract":
+                    text = (find(pools.serviceContracts, "ServiceContract") || {}).ServiceContractDescription;
+                    break;
                 default:
                     text = undefined;
             }
@@ -208,5 +249,5 @@ sap.ui.define(["./textMatching"], function (textMatching) {
         return { search: search, describe: describe, types: Object.keys(TYPES), pools: pools };
     }
 
-    return { createMasterData: createMasterData, DEVICE_TYPE_LABEL: DEVICE_TYPE_LABEL };
+    return { createMasterData: createMasterData, DEVICE_TYPE_LABEL: DEVICE_TYPE_LABEL, END_OBJECT_LABEL: END_OBJECT_LABEL };
 });

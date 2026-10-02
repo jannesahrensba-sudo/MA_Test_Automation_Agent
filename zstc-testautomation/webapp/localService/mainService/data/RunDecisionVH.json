@@ -1,0 +1,10 @@
+[
+    {
+        "Code": "STARTED",
+        "Text": "Started"
+    },
+    {
+        "Code": "SKIPPED",
+        "Text": "Skipped"
+    }
+]

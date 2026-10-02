@@ -20,6 +20,7 @@ sap.ui.define([], function () {
         ServiceRefFunctionalLocation: "Nutzeinheit",
         ServiceReferenceEquipment: "Gerät",
         ReferenceProduct: "Gerätetyp",
+        ServiceContract: "Servicevertrag",
         ServiceProduct: "Leistung",
         ServiceDuration: "Einsatzdauer",
         ServiceDurationUnit: "Einheit Dauer",
@@ -28,7 +29,13 @@ sap.ui.define([], function () {
         ServicePartQuantityUnit: "Einheit Menge",
         ExpectedNetAmount: "Erwarteter Nettowert",
         NetAmountTolerance: "Toleranz Nettowert",
-        TransactionCurrency: "Währung"
+        TransactionCurrency: "Währung",
+        // process reference of the test case
+        ProcessTeam: "Prozessteam",
+        BusinessProcess: "Prozess",
+        ProcessVariant: "Weg",
+        EndObject: "Lauf bis",
+        Preconditions: "Voraussetzungen"
     };
 
     const RULES = {
@@ -41,8 +48,11 @@ sap.ui.define([], function () {
         R7_AMBIGUOUS: "mehrdeutig",
         R8_CONTACT_CUSTOMER: "Meldender ist kein Ansprechpartner des Kunden",
         R9_DATE_RANGE: "Zeitraum inkonsistent",
-        R10_DEVICE_TYPE: "passt nicht zum Gerätetyp"
+        R10_DEVICE_TYPE: "passt nicht zum Gerätetyp",
+        R11_CONTRACT: "Servicevertrag ungültig oder deckt das Gerät nicht ab"
     };
+    const ASSIGNMENT = { ASSIGNED: "zugeordnet", ASSUMED: "Annahme – zu bestätigen", OPEN: "offen" };
+    const TEST_LEVEL = { SUB_PROCESS: "Teilprozess (ein Team)", E2E: "End-to-End (teamübergreifend)" };
 
     const STATUS = { VALID: "Gültig", AMBIGUOUS: "Mehrdeutig", INVALID: "Ungültig", NOT_VALIDATED: "Nicht validiert" };
     const PRIORITY = { 1: "sehr hoch", 3: "hoch", 5: "mittel", 9: "niedrig" };
@@ -80,7 +90,8 @@ sap.ui.define([], function () {
         "ServicePart",
         "ServicePartQuantity",
         "ExpectedNetAmount",
-        "NetAmountTolerance"
+        "NetAmountTolerance",
+        "ServiceContract"
     ];
     const NUMERIC_FIELDS = ["ServiceDuration", "ServicePartQuantity", "ExpectedNetAmount", "NetAmountTolerance"];
     /** changes of these fields recalculate the expected net value unless the user stated it */
@@ -91,6 +102,7 @@ sap.ui.define([], function () {
         "ServiceRefFunctionalLocation",
         "ServiceReferenceEquipment",
         "ReferenceProduct",
+        "ServiceContract",
         "ServiceRequestReporter",
         "ServiceRequestDescription",
         "ServiceDocumentPriority",
@@ -116,6 +128,21 @@ sap.ui.define([], function () {
                 return "- " + p.ProcessProfile + ": " + p.ProcessProfileName;
             })
             .join("\n");
+        const teams = (catalog.processTeams || [])
+            .map(function (t) {
+                return "- " + t.ProcessTeam + ": " + t.ProcessTeamName;
+            })
+            .join("\n");
+        const variants = (catalog.variants || [])
+            .map(function (v) {
+                return "- " + v.Variant + ": " + v.VariantName + (v.IsDefault ? " (Standard)" : "");
+            })
+            .join("\n");
+        const releases = (catalog.releasesInTest || [])
+            .map(function (r) {
+                return r.ReleaseID + " (" + r.ReleaseName + ")";
+            })
+            .join(", ");
         return [
             "Du bist der Service-Assistent eines Test-Automatisierungs-Tools für den Service-to-Cash-Prozess (SAP S/4HANA Service) eines Messdienstleisters.",
             "Du arbeitest in einem Mockup mit fiktiven Daten. Aus einer deutschen Störungsmeldung – z. B. „Heizkostenverteiler funktioniert nicht“ oder „Rauchmelder piept“ – erfasst du einen vollständigen, validierten Testfall-Entwurf. Der Nutzer prüft ihn danach, speichert, gibt frei und startet die Ausführung selbst in der App.",
@@ -139,6 +166,17 @@ sap.ui.define([], function () {
             "",
             "Prozessprofile:",
             profiles,
+            "",
+            "Prozessbezug (Service-Reparaturprozess, Pilot):",
+            "- Jeder Testfall gehört zu einem Prozessteam und einem Weg durch den Prozess (prozessvariante). Ohne Angabe belegt das Backend das Team des Benutzers und den Standardweg vor.",
+            "- Weg wählen: Angebot oder Kostenvoranschlag → W2_QUOTATION; Angebot wird abgelehnt → W2_REJECTED; Wartungs-, Service- oder Mietvertrag → W3_CONTRACT (das Backend ermittelt den Servicevertrag, sonst stammdaten_suchen mit Typ servicevertrag); Abrechnung über den Rechnungsplan eines Vertrags → W3_BILLING_PLAN; Störung ohne Angebot → W1_REQUEST.",
+            "- bis_objekt nur setzen, wenn der Nutzer sagt, bis wohin getestet wird, z. B. „bis zum Auftrag“ → SERVICE_ORDER, „bis zur Rückmeldung“ → SERVICE_CONFIRMATION, „mit Buchhaltungsbeleg“ → ACCOUNTING_DOCUMENT. Standard ist die Faktura.",
+            "- prozessteam nur setzen, wenn der Nutzer ein Team nennt. Garantie, Requote und In-House Repair sind spätere Erweiterungen und nicht ausführbar.",
+            "- Die Ausführung gehört automatisch zum Release im Test des Teams" + (releases ? " (zurzeit " + releases + ")" : "") + ". Freigabe und Start prüfen die Rollen im Prozessteam serverseitig.",
+            "Prozessteams:",
+            teams || "- (keine)",
+            "Wege:",
+            variants || "- (keine)",
             "",
             "Antwort: Deutsch, sachlich, kurz (höchstens 8 Zeilen). Nenne Gerät und Nutzeinheit, Validierungsstatus und offene Punkte. Nur einfache Aufzählungen mit „- “ und **fett**, keine Tabellen, keine Überschriften.",
             "Jede Nutzernachricht beginnt mit einem Block [Kontext der App]. Er beschreibt den aktuellen Entwurf und stammt von der App, nicht vom Nutzer."
@@ -167,6 +205,33 @@ sap.ui.define([], function () {
     }
 
     /**
+     * Process reference of the draft as label/value rows (draft card, answer of the mock agent).
+     *
+     * @param {object|undefined} process draft.process (see AgentSession.refreshDraft)
+     * @param {Function} describe (field, id) → readable text
+     * @returns {Array<{label: string, value: string}>} rows
+     */
+    function processRows(process, describe) {
+        if (!process) {
+            return [];
+        }
+        const rows = [
+            { label: FIELD_LABELS.ProcessTeam, value: process.team ? describe("ProcessTeam", process.team) : "offen" },
+            { label: FIELD_LABELS.ProcessVariant, value: process.variant ? describe("ProcessVariant", process.variant) : "offen" }
+        ];
+        if (process.endObject) {
+            rows.push({ label: FIELD_LABELS.EndObject, value: describe("EndObject", process.endObject) });
+        }
+        if (process.level) {
+            rows.push({ label: "Teststufe", value: TEST_LEVEL[process.level] || process.level });
+        }
+        if (process.assignment) {
+            rows.push({ label: "Zuordnung", value: (ASSIGNMENT[process.assignment] || process.assignment) + (process.assignment !== "ASSIGNED" && process.note ? " – " + process.note : "") });
+        }
+        return rows;
+    }
+
+    /**
      * Context block that precedes every user message.
      *
      * @param {object|undefined} draft current draft state (see AgentSession.draftState)
@@ -182,6 +247,12 @@ sap.ui.define([], function () {
             "Testfall-Entwurf " + draft.uuid + (draft.caseId ? " (" + draft.caseId + ")" : "") + ", Prozessprofil " + draft.processProfile,
             "Validierung: " + (STATUS[draft.validation.status] || draft.validation.status) + " – " + counts(draft.validation)
         ];
+        if (draft.process) {
+            lines.push(
+                "Prozessbezug: Team " + (draft.process.team || "offen") + ", Weg " + (draft.process.variant || "offen") + ", Lauf bis " + (draft.process.endObject || "-") +
+                    ", Zuordnung " + (ASSIGNMENT[draft.process.assignment] || draft.process.assignment || "-") + (draft.process.note ? " (" + draft.process.note + ")" : "")
+            );
+        }
         const values = SUMMARY_FIELDS.filter(function (f) {
             return draft.values[f] !== null && draft.values[f] !== undefined && draft.values[f] !== "";
         }).map(function (f) {
@@ -201,6 +272,8 @@ sap.ui.define([], function () {
     return {
         FIELD_LABELS: FIELD_LABELS,
         RULES: RULES,
+        ASSIGNMENT: ASSIGNMENT,
+        TEST_LEVEL: TEST_LEVEL,
         STATUS: STATUS,
         AGENT_FIELDS: AGENT_FIELDS,
         NUMERIC_FIELDS: NUMERIC_FIELDS,
@@ -209,6 +282,7 @@ sap.ui.define([], function () {
         PRIORITY: PRIORITY,
         instructions: instructions,
         contextBlock: contextBlock,
+        processRows: processRows,
         formatValue: formatValue,
         display: display,
         counts: counts

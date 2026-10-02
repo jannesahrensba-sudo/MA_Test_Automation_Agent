@@ -1,0 +1,68 @@
+[
+    {
+        "ProcessTeam": "PT-REPARATUR",
+        "UserID": "REP_LEAD",
+        "UserName": "Teamleitung Reparatur (Mock)",
+        "TeamRole": "PROCESS_OWNER"
+    },
+    {
+        "ProcessTeam": "PT-REPARATUR",
+        "UserID": "QA_LEAD",
+        "UserName": "QA-Leitung (Mock)",
+        "TeamRole": "PROCESS_OWNER"
+    },
+    {
+        "ProcessTeam": "PT-REPARATUR",
+        "UserID": "DEMO_USER",
+        "UserName": "Demo-Benutzer (Mockup)",
+        "TeamRole": "PROCESS_OWNER"
+    },
+    {
+        "ProcessTeam": "PT-REPARATUR",
+        "UserID": "DEMO_USER",
+        "UserName": "Demo-Benutzer (Mockup)",
+        "TeamRole": "TEST_EXECUTOR"
+    },
+    {
+        "ProcessTeam": "PT-REPARATUR",
+        "UserID": "REP_TESTER",
+        "UserName": "Tester Reparatur (Mock)",
+        "TeamRole": "TEST_EXECUTOR"
+    },
+    {
+        "ProcessTeam": "PT-ANGEBOT",
+        "UserID": "ANG_LEAD",
+        "UserName": "Teamleitung Angebot (Mock)",
+        "TeamRole": "PROCESS_OWNER"
+    },
+    {
+        "ProcessTeam": "PT-ANGEBOT",
+        "UserID": "ANG_TESTER",
+        "UserName": "Tester Angebot (Mock)",
+        "TeamRole": "TEST_EXECUTOR"
+    },
+    {
+        "ProcessTeam": "PT-MONTAGE",
+        "UserID": "MON_LEAD",
+        "UserName": "Teamleitung Montage (Mock)",
+        "TeamRole": "PROCESS_OWNER"
+    },
+    {
+        "ProcessTeam": "PT-MONTAGE",
+        "UserID": "MON_TESTER",
+        "UserName": "Tester Montage (Mock)",
+        "TeamRole": "TEST_EXECUTOR"
+    },
+    {
+        "ProcessTeam": "PT-ABLESUNG",
+        "UserID": "ABL_LEAD",
+        "UserName": "Teamleitung Ablesung (Mock)",
+        "TeamRole": "PROCESS_OWNER"
+    },
+    {
+        "ProcessTeam": "PT-ABLESUNG",
+        "UserID": "ABL_TESTER",
+        "UserName": "Tester Ablesung (Mock)",
+        "TeamRole": "TEST_EXECUTOR"
+    }
+]

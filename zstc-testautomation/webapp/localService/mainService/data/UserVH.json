@@ -1,0 +1,42 @@
+[
+    {
+        "UserID": "DEMO_USER",
+        "UserName": "Demo-Benutzer (Mockup)"
+    },
+    {
+        "UserID": "QA_LEAD",
+        "UserName": "QA-Leitung (Mock)"
+    },
+    {
+        "UserID": "REP_LEAD",
+        "UserName": "Teamleitung Reparatur (Mock)"
+    },
+    {
+        "UserID": "REP_TESTER",
+        "UserName": "Tester Reparatur (Mock)"
+    },
+    {
+        "UserID": "ANG_LEAD",
+        "UserName": "Teamleitung Angebot (Mock)"
+    },
+    {
+        "UserID": "ANG_TESTER",
+        "UserName": "Tester Angebot (Mock)"
+    },
+    {
+        "UserID": "MON_LEAD",
+        "UserName": "Teamleitung Montage (Mock)"
+    },
+    {
+        "UserID": "MON_TESTER",
+        "UserName": "Tester Montage (Mock)"
+    },
+    {
+        "UserID": "ABL_LEAD",
+        "UserName": "Teamleitung Ablesung (Mock)"
+    },
+    {
+        "UserID": "ABL_TESTER",
+        "UserName": "Tester Ablesung (Mock)"
+    }
+]

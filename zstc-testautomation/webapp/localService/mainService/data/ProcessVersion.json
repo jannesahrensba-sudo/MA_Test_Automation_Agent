@@ -1,0 +1,57 @@
+[
+    {
+        "ProcessVersionUUID": "9e3f4c30-0001-4a5b-9c6d-000000000001",
+        "ProcessID": "SRV-REP",
+        "ProcessVersion": 1,
+        "ActivatedAt": "2026-03-02T09:00:00.000Z",
+        "ActivatedBy": "REP_LEAD",
+        "VersionNote": "Erstmodellierung: Wege 1 und 2 (Service Request, Angebot), Faktura und FI-Beleg.",
+        "StepCount": 11,
+        "VariantCount": 3,
+        "ContentHash": "db5d7e6d"
+    },
+    {
+        "ProcessVersionUUID": "9e3f4c30-0002-4a5b-9c6d-000000000002",
+        "ProcessID": "SRV-REP",
+        "ProcessVersion": 2,
+        "ActivatedAt": "2026-09-14T09:00:00.000Z",
+        "ActivatedBy": "REP_LEAD",
+        "VersionNote": "Weg 3 ergänzt (Vertragsfindung, Rechnungsplan); spätere Erweiterungen Garantie, Requote, In-House Repair, Solution Quotation erfasst.",
+        "StepCount": 17,
+        "VariantCount": 9,
+        "ContentHash": "f801e1a0"
+    },
+    {
+        "ProcessVersionUUID": "9e3f4c30-0003-4a5b-9c6d-000000000003",
+        "ProcessID": "MON",
+        "ProcessVersion": 1,
+        "ActivatedAt": "2026-03-02T09:00:00.000Z",
+        "ActivatedBy": "REP_LEAD",
+        "VersionNote": "Prozess angelegt; Schritte offen.",
+        "StepCount": 0,
+        "VariantCount": 0,
+        "ContentHash": "a7429f13"
+    },
+    {
+        "ProcessVersionUUID": "9e3f4c30-0004-4a5b-9c6d-000000000004",
+        "ProcessID": "ANG",
+        "ProcessVersion": 1,
+        "ActivatedAt": "2026-03-02T09:00:00.000Z",
+        "ActivatedBy": "REP_LEAD",
+        "VersionNote": "Prozess angelegt; Schritte offen.",
+        "StepCount": 0,
+        "VariantCount": 0,
+        "ContentHash": "0eea6da7"
+    },
+    {
+        "ProcessVersionUUID": "9e3f4c30-0005-4a5b-9c6d-000000000005",
+        "ProcessID": "ABL",
+        "ProcessVersion": 1,
+        "ActivatedAt": "2026-03-02T09:00:00.000Z",
+        "ActivatedBy": "REP_LEAD",
+        "VersionNote": "Prozess angelegt; Schritte offen.",
+        "StepCount": 0,
+        "VariantCount": 0,
+        "ContentHash": "8fd9c61b"
+    }
+]

@@ -1,0 +1,123 @@
+[
+    {
+        "MemberUUID": "5c1e7d40-0001-4b2a-8f31-000000000001",
+        "ProcessTeam": "PT-REPARATUR",
+        "UserID": "REP_LEAD",
+        "TeamRole": "PROCESS_OWNER",
+        "Note": "Teamleitung",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null
+    },
+    {
+        "MemberUUID": "5c1e7d40-0002-4b2a-8f31-000000000002",
+        "ProcessTeam": "PT-REPARATUR",
+        "UserID": "QA_LEAD",
+        "TeamRole": "PROCESS_OWNER",
+        "Note": "Zweite Prozessverantwortung (Vier-Augen-Freigaben)",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null
+    },
+    {
+        "MemberUUID": "5c1e7d40-0003-4b2a-8f31-000000000003",
+        "ProcessTeam": "PT-REPARATUR",
+        "UserID": "DEMO_USER",
+        "TeamRole": "PROCESS_OWNER",
+        "Note": "Mockup-Benutzer: fachliche Verantwortung",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null
+    },
+    {
+        "MemberUUID": "5c1e7d40-0004-4b2a-8f31-000000000004",
+        "ProcessTeam": "PT-REPARATUR",
+        "UserID": "DEMO_USER",
+        "TeamRole": "TEST_EXECUTOR",
+        "Note": "Mockup-Benutzer: Ausführungsberechtigung",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null
+    },
+    {
+        "MemberUUID": "5c1e7d40-0005-4b2a-8f31-000000000005",
+        "ProcessTeam": "PT-REPARATUR",
+        "UserID": "REP_TESTER",
+        "TeamRole": "TEST_EXECUTOR",
+        "Note": "",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null
+    },
+    {
+        "MemberUUID": "5c1e7d40-0006-4b2a-8f31-000000000006",
+        "ProcessTeam": "PT-ANGEBOT",
+        "UserID": "ANG_LEAD",
+        "TeamRole": "PROCESS_OWNER",
+        "Note": "Teamleitung",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null
+    },
+    {
+        "MemberUUID": "5c1e7d40-0007-4b2a-8f31-000000000007",
+        "ProcessTeam": "PT-ANGEBOT",
+        "UserID": "ANG_TESTER",
+        "TeamRole": "TEST_EXECUTOR",
+        "Note": "",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null
+    },
+    {
+        "MemberUUID": "5c1e7d40-0008-4b2a-8f31-000000000008",
+        "ProcessTeam": "PT-MONTAGE",
+        "UserID": "MON_LEAD",
+        "TeamRole": "PROCESS_OWNER",
+        "Note": "Teamleitung",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null
+    },
+    {
+        "MemberUUID": "5c1e7d40-0009-4b2a-8f31-000000000009",
+        "ProcessTeam": "PT-MONTAGE",
+        "UserID": "MON_TESTER",
+        "TeamRole": "TEST_EXECUTOR",
+        "Note": "",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null
+    },
+    {
+        "MemberUUID": "5c1e7d40-0010-4b2a-8f31-000000000010",
+        "ProcessTeam": "PT-ABLESUNG",
+        "UserID": "ABL_LEAD",
+        "TeamRole": "PROCESS_OWNER",
+        "Note": "Teamleitung",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null
+    },
+    {
+        "MemberUUID": "5c1e7d40-0011-4b2a-8f31-000000000011",
+        "ProcessTeam": "PT-ABLESUNG",
+        "UserID": "ABL_TESTER",
+        "TeamRole": "TEST_EXECUTOR",
+        "Note": "",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null
+    }
+]

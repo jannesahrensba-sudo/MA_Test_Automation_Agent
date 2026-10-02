@@ -43,8 +43,18 @@ const core = (name) => loadUi5Module(path.join(CORE_DIR, name));
 /** In-memory gateway with the interface of webapp/ext/agent/TestCaseGateway.js */
 function createMemoryGateway(repo) {
     const { createMasterData } = core('masterData');
-    const pools = backendHelpers.pools(repo);
+    // value help pools of the gateway (TestCaseGateway.VALUE_HELPS), including the process reference
+    const pools = {
+        ...backendHelpers.pools(repo),
+        processTeams: repo.data.ProcessTeamVH,
+        processes: repo.data.BusinessProcessVH,
+        variants: repo.data.ProcessVariantVH,
+        releases: repo.data.ReleaseVH,
+        serviceContracts: repo.data.ServiceContractVH
+    };
     const masterData = createMasterData(pools);
+    /** header fields of the process reference (TestCaseGateway.HEADER_FIELDS) */
+    const HEADER_FIELDS = { processTeam: 'ProcessTeam', processVariant: 'ProcessVariant', endObject: 'EndObject', preconditions: 'Preconditions' };
     const draftKeys = (uuid) => ({ TestCaseUUID: uuid, IsActiveEntity: false });
     const activeKeys = (uuid) => ({ TestCaseUUID: uuid, IsActiveEntity: true });
     const calls = [];
@@ -54,7 +64,12 @@ function createMemoryGateway(repo) {
             return masterData;
         },
         async catalog() {
-            return { processProfiles: pools.processProfiles };
+            return {
+                processProfiles: pools.processProfiles,
+                processTeams: pools.processTeams,
+                variants: pools.variants.filter((v) => v.PilotScope === 'PILOT'),
+                releasesInTest: pools.releases.filter((r) => r.ReleaseStatus === 'IN_TEST')
+            };
         },
         async createDraft({ processProfile, title, text }) {
             calls.push(['createDraft', processProfile]);
@@ -65,9 +80,24 @@ function createMemoryGateway(repo) {
             return keys.TestCaseUUID;
         },
         async updateDraft(uuid, header, fields) {
-            calls.push(['updateDraft', fields]);
+            calls.push(['updateDraft', fields, header]);
             if (header && header.title) {
                 await repo.update('TestCase', draftKeys(uuid), { Title: header.title });
+            }
+            // process reference first, as in the OData PATCH (TestCase.js: onAfterUpdateEntry → onProcessReferenceChanged)
+            const headerPatch = {};
+            for (const [key, property] of Object.entries(HEADER_FIELDS)) {
+                if (header && header[key] !== undefined && header[key] !== null) {
+                    headerPatch[property] = header[key];
+                }
+            }
+            if (Object.keys(headerPatch).length) {
+                const stored = await repo.findOne('TestCase', draftKeys(uuid));
+                const changed = service.PROCESS_FIELDS.filter((field) => field in headerPatch && String(stored[field] ?? '') !== String(headerPatch[field]));
+                await repo.update('TestCase', draftKeys(uuid), headerPatch);
+                if (changed.length) {
+                    await service.onProcessReferenceChanged(repo, draftKeys(uuid), changed);
+                }
             }
             if (fields && Object.keys(fields).length) {
                 await repo.update('TestCaseData', draftKeys(uuid), fields);
@@ -109,6 +139,9 @@ function createMemoryGateway(repo) {
             calls.push(['discard']);
             for (const row of await repo.find('ValidationResult', draftKeys(uuid))) {
                 await repo.remove('ValidationResult', { ValidationUUID: row.ValidationUUID, IsActiveEntity: false });
+            }
+            for (const row of await repo.find('TestCaseStep', draftKeys(uuid))) {
+                await repo.remove('TestCaseStep', { TestCaseStepUUID: row.TestCaseStepUUID, IsActiveEntity: false });
             }
             for (const set of ['TestCase', 'TestCaseData']) {
                 await repo.remove(set, draftKeys(uuid));

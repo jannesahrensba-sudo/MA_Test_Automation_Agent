@@ -1,0 +1,30 @@
+[
+    {
+        "Code": "SERVICE_REQUEST",
+        "Text": "Service Request"
+    },
+    {
+        "Code": "SERVICE_QUOTATION",
+        "Text": "Service Quotation"
+    },
+    {
+        "Code": "SERVICE_ORDER",
+        "Text": "Service Order"
+    },
+    {
+        "Code": "SERVICE_CONFIRMATION",
+        "Text": "Service Confirmation"
+    },
+    {
+        "Code": "BILLING_DOC_REQUEST",
+        "Text": "Billing Document Request"
+    },
+    {
+        "Code": "BILLING_DOCUMENT",
+        "Text": "Billing Document"
+    },
+    {
+        "Code": "ACCOUNTING_DOCUMENT",
+        "Text": "Accounting Document (FI)"
+    }
+]

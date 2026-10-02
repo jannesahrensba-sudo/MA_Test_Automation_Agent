@@ -1,0 +1,26 @@
+[
+    {
+        "Code": "SAP_RELEASE",
+        "Text": "SAP release (initial shipment)"
+    },
+    {
+        "Code": "SAP_FPS",
+        "Text": "SAP Feature Package Stack (FPS)"
+    },
+    {
+        "Code": "SAP_SPS",
+        "Text": "SAP Support Package Stack (SPS)"
+    },
+    {
+        "Code": "CLOUD_RELEASE",
+        "Text": "SAP Cloud release (YYMM)"
+    },
+    {
+        "Code": "CLOUD_HFC",
+        "Text": "SAP Cloud Hotfix Collection"
+    },
+    {
+        "Code": "INTERNAL",
+        "Text": "Internal release (process teams)"
+    }
+]

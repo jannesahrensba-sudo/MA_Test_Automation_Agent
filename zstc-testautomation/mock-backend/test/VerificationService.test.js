@@ -8,7 +8,7 @@ const { setup, teardown, GOLDEN } = require('./helpers');
 /** Runs the mock chain with the given ACTUAL data and verifies against the EXPECTED data */
 function runAndVerify(tick, tenantId, { expected = GOLDEN, actual = GOLDEN, cancelAfterMs } = {}) {
     const provider = new MockExecutionProvider({ tenantId });
-    const { externalExecutionId: id } = provider.start({ data: actual, processProfile: 'FS_TM' }, { caseId: 'STC-2026-000007' });
+    const { externalExecutionId: id } = provider.start({ data: actual, processProfile: 'FS_TM' }, { caseId: 'STC-2026-000013' });
     if (cancelAfterMs !== undefined) {
         tick(cancelAfterMs);
         provider.cancel(id);

@@ -11,6 +11,38 @@ sap.ui.define(["./prompts"], function (prompts) {
      */
 
     const MAX_DESCRIPTION = 40;
+    const VARIANTS = ["W1_REQUEST", "W2_QUOTATION", "W2_REJECTED", "W3_CONTRACT", "W3_BILLING_PLAN"];
+    const END_OBJECTS = ["SERVICE_REQUEST", "SERVICE_QUOTATION", "SERVICE_ORDER", "SERVICE_CONFIRMATION", "BILLING_DOC_REQUEST", "BILLING_DOCUMENT", "ACCOUNTING_DOCUMENT"];
+
+    /** header fields of the process reference from the tool input; unknown codes are reported, not sent */
+    function normalizeProcess(input, notes) {
+        const header = {};
+        const variant = asString(input && input.prozessvariante).toUpperCase();
+        if (variant) {
+            if (VARIANTS.indexOf(variant) > -1) {
+                header.processVariant = variant;
+            } else {
+                notes.push("Unbekannter Weg " + variant + " ignoriert. Erlaubt: " + VARIANTS.join(", ") + ".");
+            }
+        }
+        const endObject = asString(input && input.bis_objekt).toUpperCase();
+        if (endObject) {
+            if (END_OBJECTS.indexOf(endObject) > -1) {
+                header.endObject = endObject;
+            } else {
+                notes.push("Unbekanntes Endobjekt " + endObject + " ignoriert.");
+            }
+        }
+        const team = asString(input && input.prozessteam).toUpperCase();
+        if (team) {
+            header.processTeam = team;
+        }
+        const preconditions = asString(input && input.voraussetzungen);
+        if (preconditions) {
+            header.preconditions = preconditions.slice(0, 1000);
+        }
+        return header;
+    }
 
     function asString(value) {
         return value === null || value === undefined ? "" : String(value).trim();
@@ -59,9 +91,18 @@ sap.ui.define(["./prompts"], function (prompts) {
                 values[field] = prompts.display(field, value, draft.values, describe);
             }
         });
+        const process = draft.process || {};
         return {
             entwurf: draft.uuid,
             prozessprofil: draft.processProfile,
+            prozessbezug: {
+                team: process.team ? describe("ProcessTeam", process.team) : "offen",
+                weg: process.variant ? describe("ProcessVariant", process.variant) : "offen",
+                bis: process.endObject ? describe("EndObject", process.endObject) : "",
+                teststufe: prompts.TEST_LEVEL[process.level] || process.level || "",
+                zuordnung: prompts.ASSIGNMENT[process.assignment] || process.assignment || "",
+                hinweis: process.note || ""
+            },
             titel: draft.title,
             validierung: draft.validation.status,
             fehler: draft.validation.errors,
@@ -90,7 +131,7 @@ sap.ui.define(["./prompts"], function (prompts) {
         const search = {
             name: "stammdaten_suchen",
             description:
-                "Sucht Stammdaten in den Wertehilfen des Service (Kunden, Liegenschaften, Nutzeinheiten, Geräte, Ansprechpartner, Serviceteams, Produkte). " +
+                "Sucht Stammdaten in den Wertehilfen des Service (Kunden, Liegenschaften, Nutzeinheiten, Geräte, Ansprechpartner, Serviceteams, Serviceverträge, Produkte). " +
                 "Liefert je Suche bis zu 8 Treffer (beste zuerst) mit ID, Bezeichnung und Beziehungen sowie 'eindeutig'. " +
                 "Typ geraet sucht auch über Adresse, Bewohner, Geschoss, Raum und Gerätetyp. Mehrere Suchen in einem Aufruf bündeln.",
             inputSchema: {
@@ -102,7 +143,7 @@ sap.ui.define(["./prompts"], function (prompts) {
                         items: {
                             type: "object",
                             properties: {
-                                typ: { type: "string", enum: ["geraet", "nutzeinheit", "liegenschaft", "kunde", "ansprechpartner", "serviceteam", "produkt"] },
+                                typ: { type: "string", enum: ["geraet", "nutzeinheit", "liegenschaft", "kunde", "ansprechpartner", "serviceteam", "servicevertrag", "produkt"] },
                                 text: { type: "string", description: "Suchbegriffe, z. B. 'Musterstraße 12 Müller 1. OG links Wohnzimmer Heizkostenverteiler'" },
                                 kunde: { type: "string", description: "optional: nur Treffer dieses Kunden (Kunden-ID)" }
                             },
@@ -140,13 +181,18 @@ sap.ui.define(["./prompts"], function (prompts) {
             description:
                 "Legt beim ersten Aufruf den Testfall-Entwurf an, sonst aktualisiert es ihn. Danach laufen die Ableitungen des Backends (Kunde, Gerätetyp, " +
                 "Serviceorganisation, Vorbelegungen des Prozessprofils, erwarteter Nettowert aus der Mock-Preisliste) und die Validierung (R1–R10). " +
-                "Liefert alle aktuellen Werte, den Validierungsstatus und die Befunde mit Vorschlägen. Nur gesicherte Felder angeben; " +
-                "leere Felder weglassen. Freigabe und Start der Ausführung sind nicht Teil dieses Tools.",
+                "Liefert alle aktuellen Werte, den Prozessbezug (Team, Weg, Lauf bis), den Validierungsstatus und die Befunde mit Vorschlägen. " +
+                "Nur gesicherte Felder angeben; leere Felder weglassen. Der Prozessbezug (prozessvariante, bis_objekt, prozessteam) leitet die Testschritte ab " +
+                "und legt fest, welche Belege erwartet werden. Freigabe und Start der Ausführung sind nicht Teil dieses Tools.",
             inputSchema: {
                 type: "object",
                 properties: {
                     prozessprofil: { type: "string", description: "Prozessprofil, z. B. MD_HKV_STOER oder MD_RWM_STOER" },
                     titel: { type: "string", description: "kurzer Titel des Testfalls, höchstens 80 Zeichen" },
+                    prozessvariante: { type: "string", enum: VARIANTS, description: "Weg durch den Reparaturprozess" },
+                    bis_objekt: { type: "string", enum: END_OBJECTS, description: "Lauf bis zu diesem Beleg; nur wenn der Nutzer es nennt" },
+                    prozessteam: { type: "string", description: "Prozessteam, nur wenn genannt, z. B. PT-REPARATUR oder PT-ANGEBOT" },
+                    voraussetzungen: { type: "string", description: "Voraussetzungen und Übergaben, nur wenn genannt" },
                     felder: {
                         type: "object",
                         properties: {
@@ -161,7 +207,8 @@ sap.ui.define(["./prompts"], function (prompts) {
                             ServiceDuration: { type: "number", description: "Einsatzdauer in Stunden" },
                             ServicePart: { type: "string", description: "Ersatzteil / Ersatzgerät" },
                             ServicePartQuantity: { type: "number", description: "Menge in Stück" },
-                            ExpectedNetAmount: { type: "number", description: "erwarteter Nettowert in EUR, nur wenn vom Nutzer genannt" }
+                            ExpectedNetAmount: { type: "number", description: "erwarteter Nettowert in EUR, nur wenn vom Nutzer genannt" },
+                            ServiceContract: { type: "string", description: "Servicevertrag (Weg 3), nur aus Suchergebnissen" }
                         }
                     }
                 },
@@ -171,6 +218,7 @@ sap.ui.define(["./prompts"], function (prompts) {
                 return serialized(async function () {
                     const normalized = normalizeFields(input && input.felder);
                     const fields = normalized.fields;
+                    const header = normalizeProcess(input, normalized.notes);
                     const profile = asString(input && input.prozessprofil) || undefined;
                     const title = asString(input && input.titel).slice(0, 80) || undefined;
                     const touchesPricing = prompts.PRICING_FIELDS.some(function (f) {
@@ -187,7 +235,7 @@ sap.ui.define(["./prompts"], function (prompts) {
                     if (!draft) {
                         const uuid = await gateway.createDraft({ processProfile: profile, title: title, text: session.originalText });
                         session.step({ icon: "sap-icon://add-document", text: "Testfall-Entwurf angelegt" + (profile ? " (Profil " + profile + ")" : "") });
-                        await gateway.updateDraft(uuid, {}, fields);
+                        await gateway.updateDraft(uuid, header, fields);
                         draft = { uuid: uuid };
                     } else if (profile && profile !== draft.processProfile) {
                         // other profile: new draft with the defaults of that profile, the values found so far are kept
@@ -199,12 +247,25 @@ sap.ui.define(["./prompts"], function (prompts) {
                             }
                         });
                         const uuid = await gateway.createDraft({ processProfile: profile, title: title || draft.title, text: session.originalText });
-                        await gateway.updateDraft(uuid, {}, Object.assign(carried, fields));
+                        const carriedHeader = draft.process ? { processTeam: draft.process.team, processVariant: draft.process.variant, endObject: draft.process.endObject } : {};
+                        await gateway.updateDraft(uuid, Object.assign(carriedHeader, header), Object.assign(carried, fields));
                         await gateway.discardDraft(draft.uuid).catch(function () {});
                         session.step({ icon: "sap-icon://switch-views", text: "Prozessprofil gewechselt: neuer Entwurf mit Profil " + profile });
                         draft = { uuid: uuid };
                     } else {
-                        await gateway.updateDraft(draft.uuid, { title: title }, fields);
+                        await gateway.updateDraft(draft.uuid, Object.assign({ title: title }, header), fields);
+                    }
+                    if (Object.keys(header).length) {
+                        session.step({
+                            icon: "sap-icon://process",
+                            text:
+                                "Prozessbezug gesetzt: " +
+                                Object.keys(header)
+                                    .map(function (key) {
+                                        return key === "preconditions" ? "Voraussetzungen" : header[key];
+                                    })
+                                    .join(", ")
+                        });
                     }
                     await gateway.validateDraft(draft.uuid);
                     const state = await session.refreshDraft(draft.uuid);
@@ -230,5 +291,5 @@ sap.ui.define(["./prompts"], function (prompts) {
         return [search, capture];
     }
 
-    return { createTools: createTools, normalizeFields: normalizeFields, summarizeDraft: summarizeDraft };
+    return { createTools: createTools, normalizeFields: normalizeFields, normalizeProcess: normalizeProcess, summarizeDraft: summarizeDraft, VARIANTS: VARIANTS, END_OBJECTS: END_OBJECTS };
 });

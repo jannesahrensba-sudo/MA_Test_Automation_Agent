@@ -1,0 +1,14 @@
+[
+    {
+        "Code": "ASSIGNED",
+        "Text": "Assigned"
+    },
+    {
+        "Code": "ASSUMED",
+        "Text": "Assumption – to be confirmed"
+    },
+    {
+        "Code": "OPEN",
+        "Text": "Open"
+    }
+]
