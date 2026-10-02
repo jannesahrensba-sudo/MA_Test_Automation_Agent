@@ -524,7 +524,7 @@
         "ReleaseID": "INT-2026.10",
         "TestCaseUUID": "6f1c2a10-0012-4c3e-9a51-000000000012",
         "CaseID": "STC-2026-000012",
-        "Title": "Teilprozess Angebot: Angebot bis zur Kundenannahme",
+        "Title": "Team Angebot: Angebot bis zur Kundenannahme",
         "ProcessTeam": "PT-ANGEBOT",
         "ProcessID": "SRV-REP",
         "ProcessVariant": "W2_QUOTATION",

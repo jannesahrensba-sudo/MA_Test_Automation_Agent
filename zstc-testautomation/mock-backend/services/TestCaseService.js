@@ -19,7 +19,7 @@ const { verify } = require('../verification/VerificationService');
 const numberRanges = require('../common/numberRanges');
 const pricing = require('../common/pricing');
 const clock = require('../common/clock');
-const { VALIDATION, APPROVAL, EXECUTION, RESULT, LIFECYCLE, ITEM_STATUS, STEP_STATUS, ASSIGNMENT, TEAM_ROLE, RELEASE_STATUS, RUN_TYPE, TEST_LEVEL, BO, criticalityOf } = require('../common/codes');
+const { VALIDATION, APPROVAL, EXECUTION, RESULT, LIFECYCLE, ITEM_STATUS, STEP_STATUS, ASSIGNMENT, TEAM_ROLE, RELEASE_STATUS, RUN_TYPE, TEST_LEVEL, BO, BO_LABEL, criticalityOf } = require('../common/codes');
 const { CATEGORY, SEVERITY, sapMessage, MockServiceError } = require('../common/messages');
 const catalog = require('../process/processCatalog');
 const { assignmentOf } = require('../process/assignment');
@@ -621,8 +621,21 @@ async function onProcessProfileChanged(repo, tc) {
  * @returns {Promise<object>} applied patch
  */
 async function onProcessReferenceChanged(repo, keys, changed) {
+    const requested = await getTestCase(repo, keys);
     const patch = await determineProcessReference(repo, keys, changed);
     const tc = await getTestCase(repo, keys);
+    // "run up to" is only possible on the way: a replaced end object is reported at the field (state message)
+    const messages = [];
+    if (patch.EndObject !== undefined && requested.EndObject && patch.EndObject !== requested.EndObject) {
+        const label = (code) => BO_LABEL[code] || code;
+        messages.push(
+            sapMessage(
+                109,
+                `${label(requested.EndObject)} is not on way ${tc.ProcessVariant}: the run now goes up to ${label(tc.EndObject) || 'the end of the way'}.`,
+                { severity: SEVERITY.WARNING, target: 'EndObject', transition: false }
+            )
+        );
+    }
     const data = await getData(repo, tc);
     if (data.TestCaseUUID) {
         const context = await pathContext(repo, tc);
@@ -638,7 +651,7 @@ async function onProcessReferenceChanged(repo, keys, changed) {
     await repo.update('TestCase', tcKeys(tc), {
         ValidationStatus: VALIDATION.NOT_VALIDATED,
         ApprovalStatus: tc.ApprovalStatus === APPROVAL.APPROVED ? APPROVAL.REVOKED : tc.ApprovalStatus,
-        SAP__Messages: [],
+        SAP__Messages: messages,
         ChangedAt: clock.nowIso()
     });
     return patch;

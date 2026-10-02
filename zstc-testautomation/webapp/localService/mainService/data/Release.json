@@ -13,7 +13,7 @@
         "PassRate": 0,
         "PassRateCriticality": 0,
         "StepCoverage": 0,
-        "StepCoverageCriticality": 1,
+        "StepCoverageCriticality": 0,
         "LatestRunUUID": null,
         "LatestRunID": "",
         "LatestRunStatus": "",

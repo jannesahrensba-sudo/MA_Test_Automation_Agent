@@ -302,3 +302,35 @@ test('process versioning: a saved change of the process model creates a new vers
     assert.equal(versions.length, 3);
     assert.equal((await repo.findOne('ProcessStepVH', { ProcessID: 'SRV-REP', StepID: 'REP-090' })).ResponsibleTeam, 'PT-REPARATUR');
 });
+
+test('process hints: way, end object and team from German wording; negated contracts do not select way 3', () => {
+    const { processHints } = require('../extraction/processHints');
+    assert.equal(processHints('Laut Wartungsvertrag: Rauchwarnmelder piept, Test bis zur Faktura').variant, 'W3_CONTRACT');
+    assert.equal(processHints('Laut Wartungsvertrag: Rauchwarnmelder piept, Test bis zur Faktura').endObject, 'BILLING_DOCUMENT');
+    assert.equal(processHints('Jahrespauschale über den Rechnungsplan abrechnen').variant, 'W3_BILLING_PLAN');
+    assert.equal(processHints('Kostenvoranschlag erstellen, der Kunde lehnt das Angebot ab').variant, 'W2_REJECTED');
+    assert.equal(processHints('Bitte ein Angebot machen, bis zum Auftrag').endObject, 'SERVICE_ORDER');
+    assert.equal(processHints('Heizkostenverteiler defekt, kein Wartungsvertrag vorhanden', { meteringFault: true }).variant, 'W1_REQUEST');
+    assert.equal(processHints('Prozessteam Angebot testet das Angebot').team, 'PT-ANGEBOT');
+    assert.equal(processHints('Display dunkel').variant, undefined);
+});
+
+test('"run up to" outside the way is replaced by the end of the way and reported at the field', async (t) => {
+    const { repo, tenantId } = setup();
+    t.after(() => teardown(tenantId));
+    const draft = await createDraft(repo);
+    await repo.update('TestCase', draft, { ProcessVariant: 'W2_REJECTED' });
+    await service.onProcessReferenceChanged(repo, draft, ['ProcessVariant']);
+    const tc = await repo.findOne('TestCase', draft);
+    assert.equal(tc.EndObject, 'SERVICE_QUOTATION');
+    assert.equal(tc.SAP__Messages.length, 1);
+    assert.equal(tc.SAP__Messages[0].code, 'ZSTC_TA/109');
+    assert.equal(tc.SAP__Messages[0].target, 'EndObject');
+    assert.match(tc.SAP__Messages[0].message, /Billing Document is not on way W2_REJECTED: the run now goes up to Service Quotation/);
+    // an end object on the way is kept without a message
+    await repo.update('TestCase', draft, { ProcessVariant: 'W2_QUOTATION', EndObject: 'SERVICE_ORDER' });
+    await service.onProcessReferenceChanged(repo, draft, ['ProcessVariant', 'EndObject']);
+    const kept = await repo.findOne('TestCase', draft);
+    assert.equal(kept.EndObject, 'SERVICE_ORDER');
+    assert.deepEqual(kept.SAP__Messages, []);
+});

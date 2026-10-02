@@ -503,8 +503,9 @@ const CASES = [
         uuid: '6f1c2a10-0012-4c3e-9a51-000000000012',
         CaseID: 'STC-2026-000012',
         ScenarioID: 'MD-ANG-W2',
-        Title: 'Teilprozess Angebot: Angebot bis zur Kundenannahme',
-        Description: 'Teilprozess des Prozessteams Angebot im Reparaturprozess (Weg 2): Angebot zum Service Request anlegen und die Annahme durch den Kunden buchen (Endobjekt Service Quotation).',
+        Title: 'Team Angebot: Angebot bis zur Kundenannahme',
+        Description:
+            'Abschnitt des Prozessteams Angebot im Reparaturprozess (Weg 2): Der Lauf legt den Service Request an (Team Reparatur, Übergabe), dann das Angebot, und bucht die Annahme durch den Kunden (Endobjekt Service Quotation). Wegen der Übergabe ein E2E-Test.',
         NaturalLanguageInput: '',
         ProcessProfile: 'MD_HKV_STOER',
         process: { team: 'PT-ANGEBOT', variant: 'W2_QUOTATION', endObject: 'SERVICE_QUOTATION' },

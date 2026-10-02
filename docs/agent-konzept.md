@@ -70,7 +70,8 @@ Service-Assistent (Startseite, FPM Custom Page)          webapp/ext/agent/
 | Tool | Zweck | OData-Operationen | Ergebnis |
 |---|---|---|---|
 | `stammdaten_suchen` | 1–6 Suchen je Aufruf. Typen: `geraet` (auch über Adresse, Bewohner, Geschoss, Raum), `nutzeinheit`, `liegenschaft`, `kunde`, `ansprechpartner`, `serviceteam`, `produkt` | GET auf `CustomerVH`, `FunctionalLocationVH`, `EquipmentVH`, `ContactPersonVH`, `ServiceTeamVH`, `ProductVH` … | bis zu 8 Treffer je Suche (ID, Bezeichnung, Beziehungen) und `eindeutig` |
-| `testfall_entwurf_erfassen` | Entwurf anlegen oder aktualisieren und validieren | POST `TestCase` (Draft, mit Prozessprofil) · PATCH `TestCaseData` · Aktion `validate` · GET `_TestCaseData`, `_ValidationResult` | aktuelle Werte (mit Texten), Validierungsstatus, Befunde mit Vorschlägen |
+| `stammdaten_suchen` (Typ `servicevertrag`) | Servicevertrag zu Kunde, Liegenschaft oder Gerät (Weg 3) | GET `ServiceContractVH` | Vertrag mit Gültigkeit und Freigabe |
+| `testfall_entwurf_erfassen` | Entwurf anlegen oder aktualisieren und validieren; mit `prozessvariante` (Weg), `bis_objekt` (Endobjekt), `prozessteam` und `voraussetzungen` | POST `TestCase` (Draft, mit Prozessprofil) · PATCH `TestCase` (Prozessbezug, zuerst) · PATCH `TestCaseData` · Aktion `validate` · GET `_TestCaseData`, `_ValidationResult` | aktuelle Werte (mit Texten), Prozessbezug (Team, Weg, Lauf bis, Teststufe, Zuordnung), Validierungsstatus, Befunde mit Vorschlägen |
 
 Die Übergabe ist **kein Tool**. Speichern (`Prepare`, `Activate`), `approve` und `startExecution` löst allein die Schaltfläche **Übernehmen & starten** aus. So bleibt der Mensch im Prozess. Auch die Plattformhinweise zu page tools verlangen das: Destruktives gehört hinter einen eigenen Bestätigungsschritt.
 
@@ -80,7 +81,9 @@ Die Übergabe ist **kein Tool**. Speichern (`Prepare`, `Activate`), `approve` un
 - Die Serviceorganisation folgt aus dem Serviceteam.
 - Der Gerätetyp (Referenzprodukt) folgt aus dem Gerät.
 - Die Vorbelegungen kommen aus dem Prozessprofil (1 Std. Einsatz, 1 Ersatzgerät).
-- Der erwartete Nettowert kommt aus der Mock-Preisliste, wenn er leer ist.
+- Der erwartete Nettowert kommt aus der Mock-Preisliste, wenn er leer ist. Bei Weg 3 Rechnungsplan kommt er aus dem Rechnungsplan des Vertrags.
+- Prozessbezug: Team des Benutzers und Standardweg als Vorbelegung. Bei Weg 3 ermittelt das Backend den Servicevertrag (Vertragsfindung). Testschritte und Teststufe folgen aus Weg und Endobjekt.
+- Ändert sich der Weg, ermittelt das Backend Testschritte, Vertrag und Erwartung neu. Eine bestehende Freigabe wird widerrufen.
 
 ### 3.3 Regeln für den Agenten (Instruktionen in `core/prompts.js`)
 
@@ -88,7 +91,8 @@ Die Übergabe ist **kein Tool**. Speichern (`Prepare`, `Activate`), `approve` un
 - **Prozessprofil nach Gerätetyp:** Heizkostenverteiler → `MD_HKV_STOER`, Rauchwarnmelder → `MD_RWM_STOER`, Szenarien außerhalb des Messdienstes → `FS_TM`.
 - **Fachlogik:** Leistung und Ersatzteil passen zum Gerätetyp (Regel R10). Der Meldende ist Ansprechpartner der Hausverwaltung, nicht der Bewohner. Die Problembeschreibung hat höchstens 40 Zeichen. Rauchwarnmelder bekommen Priorität hoch.
 - **Kontext:** Jede Nutzernachricht beginnt mit einem Kontextblock der App (aktueller Entwurf, Befunde). So bleibt der Stand auch bei zustandslosen Aufrufen erhalten.
-- **Keine Freigabe und kein Start durch den Agenten.**
+- **Prozessbezug:** Weg nach Wortlaut wählen: Angebot → `W2_QUOTATION`, Angebot abgelehnt → `W2_REJECTED`, Wartungs-, Service- oder Mietvertrag → `W3_CONTRACT`, Rechnungsplan → `W3_BILLING_PLAN`, Störung ohne Angebot → `W1_REQUEST`. `bis_objekt` nur auf ausdrücklichen Wunsch („bis zum Auftrag“). Garantie, Requote und In-House Repair sind nicht ausführbar.
+- **Keine Freigabe und kein Start durch den Agenten.** Freigabe und Start prüfen die Rollen im Prozessteam serverseitig. Die Ausführung gehört automatisch zum Release, der für Team und Prozess im Test ist.
 
 ### 3.4 Transports
 
@@ -96,7 +100,7 @@ Die Übergabe ist **kein Tool**. Speichern (`Prepare`, `Activate`), `approve` un
 |---|---|---|---|
 | claude.ai `sample` | Hosted-Variante im claude.ai-Artifact-Viewer. Wird per `window.claude.use("sample")` erkannt, Tools über `sample.limits().tools` | Claude auf dem Konto der Betrachterin. Die erste Nachricht fragt nach Zustimmung. | keine in der Seite. Die Plattform ruft die Tools der Seite auf. |
 | Lokaler Proxy `/agent-api` | `npm start` mit gesetzten Umgebungsvariablen | Claude über die Messages API (offizielles SDK `@anthropic-ai/sdk`) | `ANTHROPIC_API_KEY` und `ANTHROPIC_MODEL` nur in der Umgebung des lokalen Servers. Nur Anfragen von localhost. |
-| Mock-Agent (regelbasiert) | immer, und als Rückfall | **keins**: Backend-Aktion `analyze` (MockTestCaseExtractionService, deutsches Stichwortvokabular) und deterministische Rückfragen | – |
+| Mock-Agent (regelbasiert) | immer, und als Rückfall | **keins**: Backend-Aktion `analyze` (MockTestCaseExtractionService, deutsches Stichwortvokabular, Wegerkennung `processHints`) und deterministische Rückfragen; Antworten wie „mit Angebot“, „über den Wartungsvertrag“ oder „nur bis zum Auftrag“ ändern Weg und Endobjekt | – |
 
 Der lokale Proxy setzt serverseitig:
 
@@ -124,8 +128,8 @@ Die Tool-Schleife läuft in der Seite (`core/messagesLoop.js`), weil die Tools d
 
 | Was | Wie |
 |---|---|
-| Unit-Tests (`npm test`, 50) | Proxy (Status, Bereinigung der Anfrage, eine Runde über das SDK gegen einen Fake-Upstream), Stammdatensuche, Mock-Agent (gültig, Rückfragen, Auto-Korrektur R10, kein Entwurf ohne Ort/Gerät), Tool-Normalisierung, Messages-API-Schleife (nur ergänzen, `is_error`, Refusal), `sample`-Transport mit simulierter Plattform |
-| E2E (Playwright, lokal) | **Mock-Agent:** deutsche Meldung → Gültig → Übernehmen & starten → Object Page `Passed` (108,00 EUR). **Rückfragen:** Gerät mehrdeutig, Meldender fehlt → Antwort → Gültig, Entwurf im Formular, Chat bleibt erhalten. **Lokaler Proxy:** gegen einen skriptgesteuerten Fake-Upstream mit echter SDK-Anfrage (`x-api-key`, Fallback-Beta, Caching) → `Passed` (94,00 EUR). **claude.ai `sample`:** simuliertes `window.claude` ruft die Tools der Seite auf |
+| Unit-Tests (`npm test`, 64 gesamt) | Proxy (Status, Bereinigung der Anfrage, eine Runde über das SDK gegen einen Fake-Upstream), Stammdatensuche, Mock-Agent (gültig, Rückfragen, Auto-Korrektur R10, kein Entwurf ohne Ort/Gerät, Prozessbezug, Wegwechsel per Antwort, Wartungsvertrag mit Vertragsfindung bis zum Start), Tool-Normalisierung (inkl. Weg und Endobjekt), Rechnungsplan-Weg über das Tool, Messages-API-Schleife (nur ergänzen, `is_error`, Refusal), `sample`-Transport mit simulierter Plattform |
+| E2E (Playwright, lokal) | **Mock-Agent:** deutsche Meldung → Gültig → Übernehmen & starten → Object Page `Passed` (108,00 EUR). **Rückfragen:** Gerät mehrdeutig, Meldender fehlt → Antwort → Gültig, Entwurf im Formular, Chat bleibt erhalten. **Lokaler Proxy:** gegen einen skriptgesteuerten Fake-Upstream mit echter SDK-Anfrage (`x-api-key`, Fallback-Beta, Caching) → `Passed` (94,00 EUR). **claude.ai `sample`:** simuliertes `window.claude` ruft die Tools der Seite auf. **Prozessbezug:** Beispiel „Weg 3: Rauchwarnmelder laut Wartungsvertrag“ → Vertrag `4100000001`, Gültig → „nur bis zum Auftrag“ → Lauf bis Serviceauftrag → Übernehmen & starten → `Passed` |
 | Nicht geprüft | echte Antworten von Claude. In dieser Umgebung gibt es keinen API-Schlüssel, und der claude.ai-Viewer ist nicht automatisierbar. |
 
 ## 6. Quellen (Suchergebnisse, keine Primärquellen)

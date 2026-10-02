@@ -2156,25 +2156,7 @@
                 <Annotation Term="SAP__common.Text" Path="_TestLevel/Text">
                     <Annotation Term="SAP__UI.TextArrangement" EnumMember="SAP__UI.TextArrangementType/TextOnly"/>
                 </Annotation>
-                <Annotation Term="SAP__common.ValueList">
-                    <Record Type="SAP__common.ValueListType">
-                        <PropertyValue Property="Label" String="Test Level"/>
-                        <PropertyValue Property="CollectionPath" String="TestLevelVH"/>
-                        <PropertyValue Property="SearchSupported" Bool="false"/>
-                        <PropertyValue Property="Parameters">
-                            <Collection>
-                                <Record Type="SAP__common.ValueListParameterInOut">
-                                    <PropertyValue Property="LocalDataProperty" PropertyPath="TestLevel"/>
-                                    <PropertyValue Property="ValueListProperty" String="Code"/>
-                                </Record>
-                                <Record Type="SAP__common.ValueListParameterDisplayOnly">
-                                    <PropertyValue Property="ValueListProperty" String="Text"/>
-                                </Record>
-                            </Collection>
-                        </PropertyValue>
-                    </Record>
-                </Annotation>
-                <Annotation Term="SAP__common.ValueListWithFixedValues" Bool="true"/>
+                <Annotation Term="SAP__core.Computed" Bool="true"/>
             </Annotations>
             <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.TestCaseType/BusinessOwner">
                 <Annotation Term="SAP__common.Label" String="Business Owner"/>

@@ -317,7 +317,8 @@ async function refreshRelease(repo, state, release) {
             PassRate: passRate ?? 0,
             PassRateCriticality: criticalityOfPercent(passRate),
             StepCoverage: coverage ?? 0,
-            StepCoverageCriticality: criticalityOfPercent(coverage),
+            // no run in this release yet: no judgement (neutral) instead of a red 0 %
+            StepCoverageCriticality: executed ? criticalityOfPercent(coverage) : 0,
             LatestRunUUID: latest?.RunUUID || null,
             LatestRunID: latest?.RunID || '',
             LatestRunStatus: latest?.Status || '',

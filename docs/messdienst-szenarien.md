@@ -1,6 +1,6 @@
 # Messdienst-Szenarien: Heizkostenverteiler und Rauchwarnmelder
 
-Stand: 29.09.2026 · Fachdomäne des [Service-Assistenten](agent-konzept.md)
+Stand: 02.10.2026 · Fachdomäne des [Service-Assistenten](agent-konzept.md) · Prozessteams und Releases: [prozessteams-releases.md](prozessteams-releases.md)
 
 ## 1. Fachlicher Bezug
 
@@ -35,7 +35,16 @@ Die Prozesslogik ist an Messdienstleistern wie **Brunata Metrona** ausgerichtet.
 | Monteurteam der Region | Verantwortliches Serviceteam (`RespyMgmtServiceTeam`) | `MD-TEAM-MUC`, `MD-TEAM-CGN`, `MD-TEAM-LEJ` |
 | Serviceorganisation / Vertrieb | `ServiceOrganization`, `SalesOrganization` | `SO-MD-SUED`, `SO-MD-WEST`, `SO-MD-OST`; Verkaufsorganisation `2010` |
 
-Die Belegkette bleibt die bestehende Service-to-Cash-Kette: Service Request → Angebot → Auftrag → Rückmeldung → Fakturaanforderung → Faktura. Sie wird durch MockS4ServiceChain simuliert.
+Die Belegkette folgt dem **Weg** des Testfalls durch den Service-Reparaturprozess. MockS4ServiceChain simuliert sie:
+
+- Weg 1: Service Request → Auftrag → Rückmeldung → Fakturaanforderung → Faktura.
+- Weg 2: zusätzlich Angebot und Kundenentscheidung. Lehnt der Kunde ab, endet der Prozess ohne Auftrag.
+- Weg 3: Vertragsfindung → Auftrag mit Vertragsbezug → … → Faktura, oder Rechnungsplan des Vertrags → Fakturaanforderung → Faktura.
+- Optional bis zum Buchhaltungsbeleg (FI).
+
+| Messdienst | S/4HANA-Service-Objekt | Mock-Daten |
+|---|---|---|
+| Servicevertrag (Wartung, Gerätemiete) | Service Contract mit Objektliste (Liegenschaft) und Rechnungsplan | `4100000001` RWM-Service Musterstraße 12 (freigegeben, bis 31.12.2027, 118,80 EUR/Jahr) · `4100000002` Gerätemiete HKV Lindenallee 5 (abgelaufen 30.06.2026) · `4100000003` RWM-Service Parkweg 7 (nicht freigegeben) |
 
 ## 3. Prozessprofile (Konfiguration, ohne Codeänderung anpassbar)
 
@@ -46,7 +55,9 @@ Die Belegkette bleibt die bestehende Service-to-Cash-Kette: Service Request → 
 
 ## 4. Regeln und Ableitungen
 
-**Neue Validierungsregel R10 (Gerätetyp):**
+**Regel R11 (Servicevertrag):** Bei Weg 3 muss der Vertrag freigegeben und am Stichtag gültig sein, zum Kunden gehören und die Liegenschaft des Geräts abdecken. Beispiel: `4100000002` ist abgelaufen (Seed-Testfall `STC-2026-000009`).
+
+**Validierungsregel R10 (Gerätetyp):**
 
 - Serviceprodukt und Ersatzteil müssen zur Produktgruppe des Geräts passen oder zu deren übergeordneter Gruppe (`MD` passt zu `MD-HKV`).
 - Beispiel: Ein Ersatz-Heizkostenverteiler für einen Rauchwarnmelder ist ein Fehler, der Vorschlag lautet `MD-ERS-RWM`.
@@ -87,6 +98,12 @@ HKV-Störung: 1 Std. + 1 Ersatzgerät = **108,00 EUR**. RWM-Störung: **94,00 EU
 | `STC-2026-000004` | Referenzlauf: HKV in Köln mit Fehleranzeige getauscht (`MD_HKV_STOER`) | ausgeführt, PASSED |
 | `STC-2026-000005` | Negativfall: Ersatz-HKV für einen Rauchwarnmelder (`MD_RWM_STOER`) | INVALID (R10), Vorschlag `MD-ERS-RWM` |
 | `STC-2026-000006` | Golden Case Messdienst: Rauchwarnmelder piept (`MD_RWM_STOER`) | erfasst, noch nicht validiert |
+| `STC-2026-000007` | Weg 1 bis zum FI-Beleg: Warmwasserzähler ohne Anzeige | ausgeführt, PASSED |
+| `STC-2026-000008` | Weg 2: Angebot für RWM-Tausch, Kunde lehnt ab | ausgeführt, PASSED |
+| `STC-2026-000009` | Weg 3 negativ: abgelaufener Gerätemietvertrag `4100000002` | INVALID (R11) |
+| `STC-2026-000010` | Weg 3: RWM-Tausch aus dem Servicevertrag `4100000001` | freigegeben |
+| `STC-2026-000011` | Weg 3: Vertragsabrechnung über den Rechnungsplan (118,80 EUR) | freigegeben |
+| `STC-2026-000012` | Team Angebot: Angebot bis zur Kundenannahme | freigegeben; Start durch `DEMO_USER` abgelehnt (keine Rolle im Team Angebot) |
 
 ## 7. Beispielmeldungen für den Service-Assistenten
 
@@ -97,14 +114,16 @@ HKV-Störung: 1 Std. + 1 Ersatzgerät = **108,00 EUR**. RWM-Störung: **94,00 EU
 | „Bei Familie Müller in der Musterstraße 12 funktioniert ein Heizkostenverteiler nicht.“ | Rückfragen: Welches Gerät (Wohnzimmer, Schlafzimmer, Bad)? Wer ist Meldender? |
 | „Lindenallee 5 in Köln, Herr Nowak: der Rauchwarnmelder im Flur ist abgerissen und liegt auf dem Boden. Meldung von Aylin Demir.“ | `RWM-2040-021`, Team Köln, Gültig |
 | „Musterstraße 12, 1. OG links (Müller): der Warmwasserzähler im Bad ist defekt. Gemeldet von Petra Wagner.“ | Profil HKV → R10 korrigiert das Ersatzteil auf `MD-ERS-WZ`, Gültig |
+| „Laut Wartungsvertrag: Im Kinderzimmer der Wohnung Yilmaz (Musterstraße 12, EG rechts) piept der Rauchwarnmelder. Austausch im Rahmen des Vertrags, Test bis zur Faktura. Gemeldet von Hausmeister Stefan Brandl.“ | Weg 3, Vertrag `4100000001` ermittelt, Gültig; Antwort „nur bis zum Auftrag“ verkürzt den Lauf |
 
 ## 8. Grenzen des Modells
 
 Nicht abgebildet sind:
 
-- Gewährleistung und Vertragsleistung ohne Faktura
+- Gewährleistung (Garantie), Requote und In-House Repair: als spätere API-Erweiterungen erfasst, nicht ausführbar
+- Vertragskonditionen bei Weg 3 (kostenfreie oder vergünstigte Leistungen): im Mockup gilt die Preisliste ⚠
 - Ferninspektion als eigener Prozess
 - Nutzerwechsel und Zwischenablesung
 - unterjährige Verbrauchsinformation
 
-Der Tausch vor Ort ist immer der Service-to-Cash-Pfad mit Faktura an die Hausverwaltung. Weitere Profile lassen sich über die Konfiguration ergänzen, etwa „Austausch in Gewährleistung“ mit eigenem Execution Provider. Das hängt vom realen Prozess ab: ⚠ NOCH ZU VERIFIZIEREN.
+Ohne Vertrag ist der Tausch vor Ort der Service-to-Cash-Pfad mit Faktura an die Hausverwaltung. Weitere Profile lassen sich über die Konfiguration ergänzen, etwa „Austausch in Gewährleistung“ mit eigenem Execution Provider. Das hängt vom realen Prozess ab: ⚠ NOCH ZU VERIFIZIEREN.

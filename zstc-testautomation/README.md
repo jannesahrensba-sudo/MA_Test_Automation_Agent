@@ -15,14 +15,24 @@ Klickbarer Mockup auf Basis von **SAP Fiori elements for OData V4 + Flexible Pro
 
 Fachdomäne sind Messdienst-Störungen mit fiktiven Stammdaten ([Messdienst-Szenarien](../docs/messdienst-szenarien.md)). Die bisherige H2-Referenzdomäne bleibt erhalten.
 
+**Prozessteams, Prozesse und Releases** ([Konzept](../docs/prozessteams-releases.md)):
+
+- Jeder Testfall gehört zu einem Prozessteam, einem Prozess und einem Weg durch den Prozess. Er läuft bis zu einem wählbaren Endobjekt.
+- Rückverfolgbarkeit: Prozessteam → Prozess → Prozessschritt → Testfall → Testlauf → Ergebnis.
+- Pilot ist der Service-Reparaturprozess mit drei Wegen (ohne Angebot, mit Angebot, aus Vertrag).
+- Releases (SAP-Release, FPS, SPS, Cloud-Release, interne Releases der Prozessteams) haben einen Scope aus Team × Prozess und starten bei Testbeginn automatisch einen Regressionslauf.
+- Freigabe und Ausführung prüft das Backend gegen die Rollen im Prozessteam.
+
 **Was ist Mock?**
 
 - `MockTestCaseExtractionService`: Keyword-/Token-Matching (englische IDs und deutsches Messdienst-Vokabular), kein Sprachmodell.
 - Mock-Agent (regelbasiert): der Service-Assistent ohne Sprachmodell. Er ist immer verfügbar und so gekennzeichnet. Mit Claude arbeitet der Agent über die claude.ai-Capability `sample` (Hosted-Variante) oder über den lokalen Proxy (siehe unten).
-- `MockExecutionProvider` mit `MockS4ServiceChain`: simulierte Service-to-Cash-Kette, keine SAP-Testautomatisierung.
+- `MockExecutionProvider` mit `MockS4ServiceChain`: simulierte Service-to-Cash-Kette, keine SAP-Testautomatisierung. Die Kette folgt dem Weg des Testfalls, inklusive Vertragsfindung, Rechnungsplan und FI-Beleg.
+- Wegerkennung aus dem Text (`processHints`): Schlüsselwortregeln wie „Angebot“, „Wartungsvertrag“, „bis zum Auftrag“, kein Sprachmodell.
+- Regressionslauf eines Release: startet je Testfall eine Mock-Ausführung.
 - Mock-Nummernkreise und Mock-Preisliste.
 
-Die Validierung (`ValidationEngine`, Regeln R1–R10) und die Verifikation (`VerificationService`) sind echte, deterministische Logik. Sie arbeiten hier auf Mock-Daten.
+Die Validierung (`ValidationEngine`, Regeln R1–R11) und die Verifikation (`VerificationService`) sind echte, deterministische Logik. Dasselbe gilt für Rollenprüfung, Versionierung und die Release-Auswertung. Sie arbeiten hier auf Mock-Daten.
 
 ## Starten
 
@@ -72,18 +82,24 @@ In der Hosted-Variante braucht es keinen Schlüssel. Im claude.ai-Viewer nutzt d
 
 ## Klickpfade
 
-Die Seed-Daten enthalten sechs Testfälle:
+Die Seed-Daten enthalten zwölf Testfälle:
 
-| Case ID | Domäne | Inhalt |
-|---|---|---|
-| `STC-2026-000001` | H2 | Referenzlauf, PASSED |
-| `STC-2026-000002` | H2 | falsches Equipment, INVALID |
-| `STC-2026-000003` | H2 | Golden Case, vorerfasst |
-| `STC-2026-000004` | Messdienst | Referenzlauf HKV-Tausch, PASSED |
-| `STC-2026-000005` | Messdienst | falsches Ersatzteil für Rauchwarnmelder, INVALID (R10) |
-| `STC-2026-000006` | Messdienst | Golden Case Rauchwarnmelder, vorerfasst |
+| Case ID | Domäne | Weg | Inhalt |
+|---|---|---|---|
+| `STC-2026-000001` | H2 | Weg 2 | Referenzlauf, PASSED |
+| `STC-2026-000002` | H2 | – | falsches Equipment, INVALID; Altfall ohne Prozessbezug (Zuordnung offen) |
+| `STC-2026-000003` | H2 | Weg 2 | Golden Case, vorerfasst |
+| `STC-2026-000004` | Messdienst | Weg 1 | Referenzlauf HKV-Tausch, PASSED; danach geändert (Version 2, neue Freigabe nötig) |
+| `STC-2026-000005` | Messdienst | Weg 1 | falsches Ersatzteil für Rauchwarnmelder, INVALID (R10) |
+| `STC-2026-000006` | Messdienst | Weg 2 | Golden Case Rauchwarnmelder, vorerfasst |
+| `STC-2026-000007` | Messdienst | Weg 1 | Warmwasserzähler bis zum FI-Beleg, PASSED |
+| `STC-2026-000008` | Messdienst | Weg 2 abgelehnt | Angebot für RWM-Tausch abgelehnt, PASSED |
+| `STC-2026-000009` | Messdienst | Weg 3 | abgelaufener Gerätemietvertrag, INVALID (R11) |
+| `STC-2026-000010` | Messdienst | Weg 3 | RWM-Tausch aus dem Servicevertrag, freigegeben |
+| `STC-2026-000011` | Messdienst | Weg 3 Rechnungsplan | Vertragsabrechnung RWM-Service, freigegeben |
+| `STC-2026-000012` | Messdienst | Weg 2 | Team Angebot bis zur Kundenannahme, freigegeben (Start durch `DEMO_USER` wird abgelehnt) |
 
-Neue Testfälle bekommen ab `STC-2026-000007` fortlaufende Nummern. Die Golden-Belegnummern entstehen beim **ersten** Lauf je Sitzung; jeder weitere Lauf zählt fortlaufend weiter.
+Neue Testfälle bekommen ab `STC-2026-000013` fortlaufende Nummern. Die Golden-Belegnummern entstehen beim **ersten** Lauf je Sitzung; jeder weitere Lauf zählt fortlaufend weiter.
 
 ### Service-Assistent: Störungsmeldung → Start in der App (Agent)
 
@@ -98,11 +114,38 @@ Neue Testfälle bekommen ab `STC-2026-000007` fortlaufende Nummern. Die Golden-B
    - Ergebnis: **Gültig**
    - Gerät `HKV-0815-031` in der Nutzeinheit `LG-0815-NE03`, Kunde `MD-100010`, Meldende Petra Wagner
    - Team `MD-TEAM-MUC`, 1 Std. Monteureinsatz + Ersatzgerät, erwarteter Nettowert 108,00 EUR
-4. **Übernehmen & starten**: Der Testfall wird gespeichert (`STC-2026-000007`), freigegeben und gestartet. Danach öffnet sich die Object Page der App. Sie zeigt den laufenden Status, dann Final Result `Passed` und den Belegfluss.
+   - Prozessbezug: Prozessteam Reparatur, Weg 1 (Störung ohne Angebot), Lauf bis Faktura, Zuordnung „zugeordnet“
+4. **Übernehmen & starten**: Der Testfall wird gespeichert (`STC-2026-000013`), freigegeben und gestartet. Danach öffnet sich die Object Page der App. Sie zeigt den laufenden Status, dann Final Result `Passed` und den Belegfluss.
 
 **Rückfragen:** Das Beispiel *Mehrdeutig: HKV bei Müller* ergibt die Fragen „Welches Gerät?“ (Wohnzimmer, Schlafzimmer, Bad) und „Meldender fehlt“. Die Antwort „Im Schlafzimmer, gemeldet von Petra Wagner“ macht den Entwurf gültig. *Im Formular öffnen* zeigt den Entwurf auf der Object Page; zurück bleibt die Unterhaltung erhalten.
 
 **Rauchwarnmelder:** *Rauchmelder piept* ergibt Profil `MD_RWM_STOER`, Priorität hoch und 94,00 EUR. *Rauchwarnmelder abgerissen (Köln)* ergibt die Nutzeinheit Nowak und das Monteurteam Köln.
+
+**Weg und Endobjekt:**
+
+- *Weg 3: Rauchwarnmelder laut Wartungsvertrag* ergibt Weg 3 und den ermittelten Servicevertrag `4100000001`.
+- Die Antwort „nur bis zum Auftrag“ verkürzt den Lauf auf die Service Order; Testschritte und Erwartung werden neu ermittelt.
+- „mit Angebot, der Kunde lehnt ab“ wechselt auf Weg 2 abgelehnt.
+
+### Prozessteams, Prozesse und Releases
+
+1. **Overview → Process Teams → Prozessteam Reparatur:** Mitglieder mit Rollen (*Process Owner* gibt frei, *Test Executor* führt aus), verantwortete Prozessschritte und eigene Prozesse.
+2. **Overview → Processes → Service-Reparaturprozess:**
+   - Schritte REP-010 … REP-110 mit verantwortlichem Team, Zuordnung (zugeordnet, Annahme, offen), Übergaben und Automatisierung.
+   - Die fünf Wege des Pilots und vier spätere Erweiterungen (Garantie, Requote, In-House Repair, Solution Quotation).
+   - Versionshistorie: Version 2 ergänzt Weg 3.
+3. **Overview → Releases → Prozessrelease Oktober 2026** (`INT-2026.10`, In Test):
+   - **Start Regression Run** startet alle freigegebenen Testfälle des Scope. Nicht ausführbare Testfälle werden mit Begründung übersprungen.
+   - Der Lauf aktualisiert sich bis zum Ende. Danach zeigt der Kopf Pass Rate und Step Coverage.
+   - *Test Cases in Scope* und *Coverage per Process Step* zeigen das Ergebnis je Testfall und je Prozessschritt. Eine Zeile öffnet den Testfall bzw. den Prozess.
+4. **Release `S4-2025-FPS02`** (Planned):
+   - **Copy Scope from Predecessor** übernimmt fünf Scope-Zeilen.
+   - **Edit** → *Release Status* „In Test“ → **Save**: Der Regressionslauf startet automatisch.
+5. **Testfall `STC-2026-000012`** (Team Angebot) → **Start Execution**: Das Backend lehnt ab, weil `DEMO_USER` im Team Angebot keine Ausführungsberechtigung hat.
+6. **Testfall `STC-2026-000010`** → **Edit** → *Process Variant* auf Weg 1 ändern:
+   - Testschritte, Servicevertrag und erwarteter Nettowert werden neu ermittelt.
+   - **Save** erzeugt Version 2 und widerruft die Freigabe. *Approve* gibt die neue Version frei.
+7. **Test Cases** (Liste): Filter nach Prozessteam, Prozess, Weg und Zuordnung. Die Kachel *Assignment Open* auf der Übersicht zählt die Testfälle mit offener Zuordnung; in der Liste filtert man dafür nach *Process Assignment* = Open.
 
 ### Golden Path (DoD-2)
 
@@ -118,10 +161,10 @@ Neue Testfälle bekommen ab `STC-2026-000007` fortlaufende Nummern. Die Golden-B
 
    Alternativ lassen sich die Felder direkt per Type-ahead erfassen, z. B. `C700`, `H2POW`, `EL-1`, `P700`, `Fischer`.
 3. **Validate** (Footer) → *Validation finished: 21 fields validated · 0 warnings · 0 errors*, Status `Valid`.
-4. **Create** → Case ID `STC-2026-000007` (bzw. die nächste freie Nummer).
-5. **Approve**, dann **Start Execution**. Der Status aktualisiert sich alle 2 s; die sechs Schritte laufen sichtbar bis `Finished`.
+4. **Create** → Case ID `STC-2026-000013` (bzw. die nächste freie Nummer). *Process Reference* zeigt Team Reparatur, Weg 2 (Standardweg: Angebot, Kunde akzeptiert) und die sieben abgeleiteten Testschritte.
+5. **Approve**, dann **Start Execution**. Der Status aktualisiert sich alle 2 s; die sieben Schritte laufen sichtbar bis `Finished`. Die Ausführung gehört zum Release `INT-2026.10` (In Test).
 6. **Ergebnis:**
-   - Final Result `Passed`, 19 Assertions `Passed`.
+   - Final Result `Passed`, 20 Assertions `Passed`.
    - *SAP Objects* und *Document Flow* zeigen **8000000010 · 8000000030 · 8000000031 · 9000000000 · 10000012 · 90000115**.
    - Nettowert 3.693,00 EUR.
 
@@ -179,7 +222,7 @@ Eine abgeschlossene Ausführung lässt sich mit *Start Execution* wiederholen; a
 | Befehl | Zweck |
 |---|---|
 | `npm start` | lokaler Server mit FLP-Sandbox, OData-V4-Mockserver und Agent-Proxy `/agent-api` |
-| `npm test` | Unit-Tests (`node --test`, 50 Tests): ValidationEngine, Extraction (inkl. Deutsch/Messdienst), MockExecutionProvider, VerificationService, TestCaseService, Messdienst-Szenarien, Agent-Kern (Mock-Agent, Tools, Messages-API-Schleife, `sample`-Transport), lokaler Claude-Proxy gegen Fake-Upstream |
+| `npm test` | Unit-Tests (`node --test`, 64 Tests): ValidationEngine, Extraction (inkl. Deutsch/Messdienst), MockExecutionProvider, VerificationService, TestCaseService, Messdienst-Szenarien, Prozesse/Releases (Wege, Versionen, Rollen, Regressionslauf), Agent-Kern (Mock-Agent, Tools, Messages-API-Schleife, `sample`-Transport), lokaler Claude-Proxy gegen Fake-Upstream |
 | `npm run build` | UI5-Build der App nach `dist/` (ohne Mock-Service) |
 | `npm run build:hosted` | statische Hosted-Variante nach `dist-hosted/site/`: SAPUI5-Preloads, Themes mit eingebetteten Schriften, Browser-Mockserver |
 | `npm run metadata` | erzeugt `webapp/localService/mainService/metadata.xml` aus `tools/metadata/contract.js` |
@@ -190,26 +233,27 @@ Eine abgeschlossene Ausführung lässt sich mit *Start Execution* wiederholen; a
 ```
 zstc-testautomation/
 ├── webapp/                     App (unverändert beim Swap auf RAP)
-│   ├── manifest.json           Routing: Service-Assistent (Start, FPM), Overview (FPM), Test Cases (LR/OP), Configuration (LR/OP)
+│   ├── manifest.json           Routing: Service-Assistent (Start, FPM), Overview (FPM), Test Cases, Configuration, Process Teams, Processes, Releases (je LR/OP)
 │   ├── ext/agent/              Service-Assistent: Seite, OData-Gateway, Transports (claude.ai / Proxy / Mock-Agent)
 │   │   └── core/               Agent-Kern ohne UI5-Abhängigkeit: Instruktionen, Tools, Messages-API-Schleife, Mock-Agent, Stammdatensuche
 │   ├── ext/overview/           FPM Custom Page (Kennzahlen, Einstiege, Tabelle)
 │   ├── ext/capture/            Custom Subsection „Test Case in Words“
 │   ├── ext/documentflow/       Custom Section Document Flow (sap.suite.ui.commons.ProcessFlow)
-│   ├── ext/controller/         Controller Extension der Object Page (Status-Polling)
+│   ├── ext/controller/         Controller Extensions: Status-Polling (Testfall, Regressionslauf), Navigation aus Lesemodellen
 │   └── localService/mainService/
 │       ├── metadata.xml        Vertrag ZUI_STC_TEST_CASE_O4 inkl. UI-Annotationen (generiert)
 │       └── data/               Mock-Daten (*.json) und dünne Handler (*.js) → mock-backend
 ├── mock-backend/               Verhalten des Mock-Backends (Node.js, nicht im UI-Bundle)
-│   ├── services/               TestCaseService, ConfigurationService, Repository, Mockserver-Adapter
-│   ├── validation/             ValidationEngine (Regeln R1–R9)
-│   ├── extraction/             ITestCaseExtractionService / MockTestCaseExtractionService
+│   ├── services/               TestCaseService, ConfigurationService, ProcessService, ReleaseService, TraceabilityService, Repository, Mockserver-Adapter
+│   ├── process/                Prozesskatalog (Wege, Pfade, Endobjekte, Übergaben), Zuordnungsstatus, Rollenprüfung
+│   ├── validation/             ValidationEngine (Regeln R1–R11)
+│   ├── extraction/             ITestCaseExtractionService / MockTestCaseExtractionService, Wegerkennung (processHints)
 │   ├── execution/              ITestExecutionProvider / MockExecutionProvider, MockS4ServiceChain
 │   ├── verification/           VerificationService
 │   └── test/                   Unit-Tests
 ├── test/agent/                 Unit-Tests des Agent-Kerns (Node, In-Memory-Gateway auf dem Mock-Backend)
 ├── tools/agent-proxy/          lokaler Entwicklungs-Proxy zur Claude API (UI5-Middleware, Schlüssel nur serverseitig)
 ├── tools/metadata/             Vertragsquelle und EDMX-Generator
-├── tools/seed/                 Seed-Generator
+├── tools/seed/                 Seed-Generator, Prozesskatalog (Teams, Prozesse, Schritte, Wege, Releases, Scope)
 └── tools/hosted/               Hosted-Variante (Browser-Mockserver, Seite, Build)
 ```

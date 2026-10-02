@@ -435,7 +435,8 @@ const entities = [
                 valueList: { collection: 'ProcessVariantVH', key: 'Variant', display: ['VariantName', 'PilotScope'], in: [['BusinessProcess', 'ProcessID']] }
             }),
             code('EndObject', 30, 'Run up to', 'EndObjectVH'),
-            code('TestLevel', 20, 'Test Level', 'TestLevelVH'),
+            // derived from the path (handover to another team → E2E), never entered
+            code('TestLevel', 20, 'Test Level', 'TestLevelVH', { computed: true }),
             str('BusinessOwner', 12, 'Business Owner', {
                 text: '_BusinessOwner/UserName',
                 textArrangement: 'TextFirst',

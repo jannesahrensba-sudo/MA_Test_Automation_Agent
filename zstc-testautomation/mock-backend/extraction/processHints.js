@@ -5,7 +5,7 @@
  *
  *   "Angebot", "Kostenvoranschlag"                → W2_QUOTATION (customer accepts)
  *   "Angebot … abgelehnt", "lehnt … ab"          → W2_REJECTED
- *   "Wartungsvertrag", "Servicevertrag", "Vertragsfindung" → W3_CONTRACT
+ *   "Wartungsvertrag", "Servicevertrag", "Vertragsfindung" → W3_CONTRACT (not when negated: "ohne Wartungsvertrag")
  *   "Rechnungsplan", "Vertragsabrechnung", "Pauschale abrechnen" → W3_BILLING_PLAN
  *   "ohne Angebot", "direkt beauftragt"          → W1_REQUEST
  *   fault report of the metering service without these words → W1_REQUEST (assumption: a fault is repaired without a quotation)
@@ -34,7 +34,10 @@ function processHints(text, { meteringFault = false } = {}) {
     if (/rechnungsplan|vertragsabrechnung|pauschale (ab)?rechnen|jahrespauschale|billing plan/.test(n)) {
         variant = 'W3_BILLING_PLAN';
         matched.push('Rechnungsplan');
-    } else if (/(service|wartungs|miet|geraetemiet)vertrag|vertragsfindung|im rahmen des vertrags|laut vertrag|aus dem vertrag|service contract/.test(n)) {
+    } else if (
+        /(service|wartungs|miet|geraetemiet)vertrag|vertragsfindung|im rahmen des vertrags|laut vertrag|aus dem vertrag|service contract/.test(n) &&
+        !/\b(ohne|kein|keinen) (\w+ )?\w*vertrag/.test(n)
+    ) {
         variant = 'W3_CONTRACT';
         matched.push('Vertrag');
     } else if (/(angebot|kostenvoranschlag|quotation)\b[^.]*\b(abgelehnt|ablehnen|lehnt)|lehnt[^.]*\b(angebot|kostenvoranschlag)|rejected/.test(n)) {

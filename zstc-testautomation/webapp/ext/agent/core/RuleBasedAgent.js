@@ -15,10 +15,10 @@ sap.ui.define(["./prompts", "./textMatching"], function (prompts, textMatching) 
 
     const LABEL = prompts.FIELD_LABELS;
 
-    /** way through the repair process named in an answer (same keywords as the analysis in the backend) */
+    /** way through the repair process named in an answer (same keywords as the analysis in the backend); [code, pattern, negation] */
     const WAY_WORDS = [
         ["W3_BILLING_PLAN", /rechnungsplan|vertragsabrechnung|pauschale|billing plan/],
-        ["W3_CONTRACT", /vertrag|vertragsfindung|contract/],
+        ["W3_CONTRACT", /vertrag|vertragsfindung|contract/, /\b(ohne|kein|keinen) (\w+ )?\w*vertrag/],
         ["W2_REJECTED", /(angebot|kostenvoranschlag)( \w+){0,6} (abgelehnt|ablehnen|lehnt)|lehnt( \w+){0,6} (angebot|kostenvoranschlag)|rejected/],
         ["W1_REQUEST", /ohne angebot|kein angebot|direkt beauftrag|without quotation/],
         ["W2_QUOTATION", /angebot|kostenvoranschlag|\bkva\b|quotation/]
@@ -44,7 +44,7 @@ sap.ui.define(["./prompts", "./textMatching"], function (prompts, textMatching) 
         const n = textMatching.normalize(text);
         const header = {};
         const way = WAY_WORDS.find(function (entry) {
-            return entry[1].test(n);
+            return entry[1].test(n) && !(entry[2] && entry[2].test(n));
         });
         if (way) {
             header.processVariant = way[0];
@@ -186,27 +186,21 @@ sap.ui.define(["./prompts", "./textMatching"], function (prompts, textMatching) 
                         " – Testschritte und erwarteter Nettowert neu ermittelt"
                 });
             }
-            if (Object.keys(patch).length === 0) {
-                await this.gateway.validateDraft(uuid);
-                let changedState = await this.session.refreshDraft(uuid);
-                this.session.step(this.validationStep(changedState));
-                const changedCorrections = [];
-                changedState = await this.autoCorrect(changedState, changedCorrections);
-                return this.report(changedState, masterData, changedCorrections);
+            if (Object.keys(patch).length) {
+                this.session.step({
+                    icon: "sap-icon://edit",
+                    text:
+                        "Antwort übernommen: " +
+                        Object.keys(patch)
+                            .filter(function (f) {
+                                return patch[f] !== null;
+                            })
+                            .map(function (f) {
+                                return (LABEL[f] || f) + " = " + (prompts.NUMERIC_FIELDS.indexOf(f) > -1 ? prompts.formatValue(f, patch[f]) : masterData.describe(f, patch[f]));
+                            })
+                            .join(", ")
+                });
             }
-            this.session.step({
-                icon: "sap-icon://edit",
-                text:
-                    "Antwort übernommen: " +
-                    Object.keys(patch)
-                        .filter(function (f) {
-                            return patch[f] !== null;
-                        })
-                        .map(function (f) {
-                            return (LABEL[f] || f) + " = " + (prompts.NUMERIC_FIELDS.indexOf(f) > -1 ? prompts.formatValue(f, patch[f]) : masterData.describe(f, patch[f]));
-                        })
-                        .join(", ")
-            });
             await this.gateway.validateDraft(uuid);
             let state = await this.session.refreshDraft(uuid);
             this.session.step(this.validationStep(state));

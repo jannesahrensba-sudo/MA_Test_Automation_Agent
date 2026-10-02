@@ -121,3 +121,23 @@ Das UI kennt nur die Facade-Namen. Die reale Basis wird im Backend verdrahtet. D
 | Document Flow | FPM Custom Section mit `sap.suite.ui.commons.ProcessFlow` | ✅P |
 | Status-Polling | Controller Extension der Object Page, `EditFlow.invokeAction` für `refreshExecution` | ✅P |
 | FLP-Sandbox (lokal) | `@sap-ux/preview-middleware`; real: SAP Fiori launchpad mit Semantic Object `ServiceTestCase`, Action `manage` | ✅P · Intent 🧪 |
+
+## 7. Prozessteams, Prozesse und Releases
+
+Konzept und Validierung: [prozessteams-releases.md](prozessteams-releases.md).
+
+| Mock | Real | Belegstufe |
+|---|---|---|
+| `ProcessTeam` + `TeamMember` (Rollen `PROCESS_OWNER`, `TEST_EXECUTOR`) | Teams im Responsibility Management: Teamkategorie = Geschäftsprozess, Teamtyp = Teilprozess, Mitgliedsfunktionen = Rollen; App „Manage Teams and Responsibilities“ | Konzept ✅S · eigene Kategorien/Funktionen ⚠ |
+| Rollenprüfung `requireRole` vor `approve`, `startExecution` und im Regressionslauf (Meldungen 302, 303) | Instanzberechtigung des RAP-BO (`authorization master ( instance )`) mit Berechtigungsobjekt bzw. Abfrage der Teamfunktion | 🧪 · Umsetzung ⚠ |
+| `BusinessProcess` + `ProcessStep` + `ProcessVariant` + `ProcessVersion` | eigenes Projekt-BO; fachlich abgeglichen mit Solution Process und Prozessablauf in SAP Cloud ALM bzw. SAP Signavio | 🧪 · Cloud-ALM-Begriffe ✅S |
+| `TestCaseStep`, `TestCaseVersion` (Snapshot, Inhalts-Hash, Freigabe je Version) | Kompositionen des Testfall-BO; Versionierung per Determination beim Aktivieren | 🧪 |
+| `Release` + `ReleaseScope` (Zwischentabelle Release × Prozessteam × Prozess) | eigenes BO; Abgleich mit Releases/Timeboxes und Testplänen in SAP Cloud ALM | 🧪 · Cloud ALM ✅S |
+| Release-Typen FPS/SPS/Release/Cloud-Release/HFC mit SAP-Terminen | Release-Kalender laut SAP-Release-Information (SAP for Me) | Zyklus ✅S · Termine ⚠ |
+| Actions `copyScopeFromPredecessor`, `startRegressionRun`, `refreshRegressionRun`; automatischer Lauf bei Status „In Test“ | RAP-Actions; Regressionslauf als Application Job oder Testplan-Ausführung über `CALM_TEST_AUTOMATION` | 🧪 / ⚠ |
+| Lesemodelle `ReleaseTestCase`, `ReleaseStepCoverage`, `RegressionRunItem` (mit stabilen, inhaltsbasierten Schlüsseln) | CDS-Views über Testfällen, Ausführungen und Scope | 🧪 |
+| `ServiceContractVH` (Vertragsfindung, SIM-9) | `API_SERVICE_CONTRACT_SRV`: `A_ServiceContract`, `A_ServiceContractItem`, `A_ServiceContrItemObjectList` | ✅P (VDM) · Findungslogik ✅S ([Service Contract Determination](https://help.sap.com/docs/SAP_S4HANA_ON-PREMISE/c9b5e9de6e674fb99fff88d72c352291/468ba0aa9ed7616ae10000000a1553f7.html)) |
+| Service Order mit Vertragsbezug | `A_ServiceOrder.ReferenceServiceContract` | ✅P (VDM) |
+| Rechnungsplan → Fakturaanforderung (Weg 3) | `A_SrvcContrItmBillgReqItem` (`API_SERVICE_CONTRACT_SRV`) | Entität ✅P (VDM) · Ablauf ⚠ |
+| FI-Beleg zur Faktura (SIM-11, Nummernkreis ab 1400000100) | `A_BillingDocument.AccountingDocument`; Lese-API für den Buchhaltungsbeleg offen. `API_JOURNALENTRYITEMBASIC_SRV` (`A_JournalEntryItemBasic`, Schlüssel `ID`) hat im VDM kein Feld `AccountingDocument` und eignet sich nicht für die Belegprüfung. | Feld ✅P · Lese-API ⚠ |
+| Wegerkennung `processHints` (Schlüsselwörter) | Teil der Extraktion hinter `ITestCaseExtractionService` (Sprachmodell) | 🧪 |
