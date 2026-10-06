@@ -1,6 +1,7 @@
 'use strict';
 /**
- * assignment — process assignment of a test case (process team → business process → process variant → end object).
+ * assignment — process assignment of a test case (process team → business process → process variant → section of the
+ * path from the start object to the end object).
  *
  *   ASSIGNED  team, process and pilot variant are set and consistent
  *   ASSUMED   consistent, but the team is responsible for none of the steps of the path (to be confirmed)
@@ -48,9 +49,12 @@ function assignmentOf(tc, model, teams) {
     if (variant.PilotScope !== catalog.PILOT) {
         return { status: ASSIGNMENT.OPEN, note: `Process variant ${tc.ProcessVariant} (${variant.VariantName}) is a later API extension, not part of the pilot.`, variant, path: [] };
     }
-    const { path, endObjectInPath } = catalog.truncate(catalog.variantPath(model.steps, variant.Variant), tc.EndObject);
+    const { path, endObjectInPath, startObjectInPath } = catalog.section(catalog.variantPath(model.steps, variant.Variant), tc.StartObject, tc.EndObject);
     if (!endObjectInPath) {
         return { status: ASSIGNMENT.OPEN, note: `End object ${tc.EndObject} is not part of variant ${variant.Variant}.`, variant, path };
+    }
+    if (!startObjectInPath) {
+        return { status: ASSIGNMENT.OPEN, note: `Start object ${tc.StartObject} is not part of variant ${variant.Variant} up to ${tc.EndObject}.`, variant, path };
     }
     const notes = [];
     const openSteps = path.filter((step) => step.TeamAssignment === ASSIGNMENT.OPEN).map((step) => step.StepID);

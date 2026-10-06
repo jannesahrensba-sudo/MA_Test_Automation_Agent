@@ -1,0 +1,14 @@
+[
+    {
+        "Code": "CREATED",
+        "Text": "Created by the run"
+    },
+    {
+        "Code": "DETERMINED",
+        "Text": "Determined (existing document)"
+    },
+    {
+        "Code": "TAKEN_OVER",
+        "Text": "Taken over from predecessor"
+    }
+]

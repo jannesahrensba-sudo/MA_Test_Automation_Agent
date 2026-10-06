@@ -4,9 +4,11 @@
  * implementation of ZUI_STC_TEST_CASE_O4): determinations, validations, feature control and the actions
  * analyze · validate · approve · startExecution · refreshExecution · cancelExecution · revalidate · applySuggestion.
  *
- * Process reference: every test case belongs to a process team and a business process; its process variant (path)
- * and end object ("run up to") define the test steps and the execution plan. Saved changes create a new version;
- * an approval is valid for exactly one version. Approval and execution check the team roles server-side.
+ * Process reference: every test case belongs to a process team and a business process; its process variant (path),
+ * start object ("start from", default: where its team enters the path) and end object ("run up to") define the test
+ * steps and the execution plan. A start without an own predecessor document (e.g. billing) takes the documents of the
+ * latest passed run of a predecessor test case over (handover between process teams). Saved changes create a new
+ * version; an approval is valid for exactly one version. Approval and execution check the team roles server-side.
  *
  * All functions work on a repository (mock server entity interfaces or in-memory) and are free of mock server APIs,
  * so they are unit-testable and run unchanged in the browser-hosted variant.
@@ -19,7 +21,24 @@ const { verify } = require('../verification/VerificationService');
 const numberRanges = require('../common/numberRanges');
 const pricing = require('../common/pricing');
 const clock = require('../common/clock');
-const { VALIDATION, APPROVAL, EXECUTION, RESULT, LIFECYCLE, ITEM_STATUS, STEP_STATUS, ASSIGNMENT, TEAM_ROLE, RELEASE_STATUS, RUN_TYPE, TEST_LEVEL, BO, BO_LABEL, criticalityOf } = require('../common/codes');
+const {
+    VALIDATION,
+    APPROVAL,
+    EXECUTION,
+    RESULT,
+    LIFECYCLE,
+    ITEM_STATUS,
+    STEP_STATUS,
+    ASSIGNMENT,
+    TEAM_ROLE,
+    RELEASE_STATUS,
+    RUN_TYPE,
+    TEST_LEVEL,
+    BO,
+    BO_LABEL,
+    DOCUMENT_ORIGIN,
+    criticalityOf
+} = require('../common/codes');
 const { CATEGORY, SEVERITY, sapMessage, MockServiceError } = require('../common/messages');
 const catalog = require('../process/processCatalog');
 const { assignmentOf } = require('../process/assignment');
@@ -60,7 +79,10 @@ const CONTROLLED_FIELDS = [
 ];
 const NUMERIC_FIELDS = new Set(['ServiceDuration', 'ServicePartQuantity', 'ExpectedNetAmount', 'NetAmountTolerance']);
 /** header fields of the process reference; a change re-derives the path, the test steps and the expectation */
-const PROCESS_FIELDS = ['ProcessTeam', 'BusinessProcess', 'ProcessVariant', 'EndObject'];
+const PROCESS_FIELDS = ['ProcessTeam', 'BusinessProcess', 'ProcessVariant', 'EndObject', 'StartObject', 'PredecessorTestCase'];
+/** results that hand documents over to a successor test case */
+const HANDOVER_RESULTS = new Set([RESULT.PASSED, RESULT.PASSED_WITH_WARNING]);
+const boLabel = (code) => BO_LABEL[code] || code || '';
 /** content of a test case version (changes of these fields create a new version) */
 const VERSIONED_FIELDS = [
     'ScenarioID',
@@ -71,6 +93,8 @@ const VERSIONED_FIELDS = [
     'BusinessProcess',
     'ProcessVariant',
     'EndObject',
+    'StartObject',
+    'PredecessorTestCase',
     'TestLevel',
     'BusinessOwner',
     'Preconditions',
@@ -169,7 +193,7 @@ async function pathContext(repo, tc) {
     const model = await processModel(repo, tc.BusinessProcess);
     const assignment = assignmentOf(tc, model, await knownTeams(repo));
     const usable = assignment.status !== ASSIGNMENT.OPEN && assignment.variant;
-    const plan = usable ? catalog.executionPlan(model.steps, assignment.variant.Variant, tc.EndObject) : [];
+    const plan = usable ? catalog.executionPlan(model.steps, assignment.variant.Variant, tc.EndObject, tc.StartObject) : [];
     const chainTypes = usable ? [...new Set(plan.map((step) => step.businessObjectType))] : undefined;
     return {
         model,
@@ -178,6 +202,8 @@ async function pathContext(repo, tc) {
         path: assignment.path,
         plan,
         chainTypes,
+        // document the run takes over from a predecessor test case ('' = the run creates its documents itself)
+        predecessorObject: usable ? catalog.requiredPredecessor(model.steps, assignment.variant.Variant, tc.StartObject, { fixedPrice: tc.ProcessProfile === 'FS_FIXPRICE' }) : '',
         needsContract: !!chainTypes && chainTypes.includes(BO.SERVICE_CONTRACT),
         billingPlan: !!chainTypes && chainTypes.includes(BO.SERVICE_CONTRACT) && !chainTypes.includes(BO.SERVICE_ORDER)
     };
@@ -240,7 +266,7 @@ async function regenerateSteps(repo, tc, context) {
         await repo.remove('TestCaseStep', { TestCaseStepUUID: row.TestCaseStepUUID, IsActiveEntity: row.IsActiveEntity });
     }
     const generated =
-        context.variant && context.assignment.status !== ASSIGNMENT.OPEN ? catalog.designSteps(context.model.steps, context.variant.Variant, tc.EndObject) : [];
+        context.variant && context.assignment.status !== ASSIGNMENT.OPEN ? catalog.designSteps(context.model.steps, context.variant.Variant, tc.EndObject, tc.StartObject) : [];
     for (const step of generated) {
         await repo.add('TestCaseStep', {
             TestCaseStepUUID: uuid(),
@@ -296,9 +322,26 @@ async function determineProcessReference(repo, keys, changed, user = CURRENT_USE
     }
     if (variant && model.process) {
         const possible = catalog.possibleEndObjects(model.steps, variant);
-        const endObject = patch.EndObject ?? tc.EndObject;
+        let endObject = patch.EndObject ?? tc.EndObject;
         if (!possible.includes(endObject)) {
-            patch.EndObject = catalog.defaultEndObject(model.steps, variant) || '';
+            endObject = catalog.defaultEndObject(model.steps, variant) || '';
+            patch.EndObject = endObject;
+        }
+        // start: where the team enters the path (default, and again when the team changes); kept when still on the path
+        const starts = catalog.possibleStartObjects(model.steps, variant, endObject);
+        const teamStart = catalog.defaultStartObject(model.steps, variant, team, endObject) || '';
+        const startObject = patch.StartObject ?? tc.StartObject;
+        if (!startObject || !starts.includes(startObject) || (changed.includes('ProcessTeam') && !changed.includes('StartObject'))) {
+            if (teamStart !== (startObject || '')) {
+                patch.StartObject = teamStart;
+            }
+        }
+        const predecessorObject = catalog.requiredPredecessor(model.steps, variant, patch.StartObject ?? startObject, { fixedPrice: tc.ProcessProfile === 'FS_FIXPRICE' });
+        if (predecessorObject !== (tc.PredecessorObject || '')) {
+            patch.PredecessorObject = predecessorObject;
+        }
+        if (!predecessorObject && tc.PredecessorTestCase) {
+            patch.PredecessorTestCase = '';
         }
     }
     if (team && (!tc.BusinessOwner || changed.includes('ProcessTeam'))) {
@@ -458,6 +501,9 @@ function initialTestCase(tc) {
         BusinessProcess: tc.BusinessProcess || '',
         ProcessVariant: tc.ProcessVariant || '',
         EndObject: tc.EndObject || '',
+        StartObject: tc.StartObject || '',
+        PredecessorTestCase: tc.PredecessorTestCase || '',
+        PredecessorObject: '',
         TestLevel: tc.TestLevel || '',
         BusinessOwner: tc.BusinessOwner || '',
         Preconditions: tc.Preconditions || '',
@@ -624,15 +670,26 @@ async function onProcessReferenceChanged(repo, keys, changed) {
     const requested = await getTestCase(repo, keys);
     const patch = await determineProcessReference(repo, keys, changed);
     const tc = await getTestCase(repo, keys);
-    // "run up to" is only possible on the way: a replaced end object is reported at the field (state message)
+    // "run up to" and "start from" are only possible on the way: replaced values are reported at the field (state messages)
     const messages = [];
     if (patch.EndObject !== undefined && requested.EndObject && patch.EndObject !== requested.EndObject) {
-        const label = (code) => BO_LABEL[code] || code;
         messages.push(
             sapMessage(
                 109,
-                `${label(requested.EndObject)} is not on way ${tc.ProcessVariant}: the run now goes up to ${label(tc.EndObject) || 'the end of the way'}.`,
+                `${boLabel(requested.EndObject)} is not on way ${tc.ProcessVariant}: the run now goes up to ${boLabel(tc.EndObject) || 'the end of the way'}.`,
                 { severity: SEVERITY.WARNING, target: 'EndObject', transition: false }
+            )
+        );
+    }
+    if (patch.StartObject !== undefined && requested.StartObject && patch.StartObject !== requested.StartObject) {
+        const teamChange = changed.includes('ProcessTeam') && !changed.includes('StartObject');
+        messages.push(
+            sapMessage(
+                114,
+                teamChange
+                    ? `Start from ${boLabel(tc.StartObject)}: this is where team ${tc.ProcessTeam} enters way ${tc.ProcessVariant}.`
+                    : `${boLabel(requested.StartObject)} is no start of way ${tc.ProcessVariant} up to ${boLabel(tc.EndObject)}: the run now starts with ${boLabel(tc.StartObject)}.`,
+                { severity: teamChange ? SEVERITY.INFO : SEVERITY.WARNING, target: 'StartObject', transition: false }
             )
         );
     }
@@ -647,6 +704,19 @@ async function onProcessReferenceChanged(repo, keys, changed) {
         }
         await repo.update('TestCaseData', tcKeys(tc), reset);
         await determineTestData(repo, { ...data, ...reset }, pools, Object.keys(reset), context);
+        // a new predecessor hands over its documents: the test data of this test case are those of the predecessor
+        if (changed.includes('PredecessorTestCase') && tc.PredecessorTestCase) {
+            const taken = await takeOverTestData(repo, tc);
+            if (taken) {
+                messages.push(
+                    sapMessage(915, `Test data taken over from predecessor ${taken.CaseID} (${taken.Title}): the run continues with its documents.`, {
+                        severity: SEVERITY.INFO,
+                        target: 'PredecessorTestCase',
+                        transition: false
+                    })
+                );
+            }
+        }
     }
     await repo.update('TestCase', tcKeys(tc), {
         ValidationStatus: VALIDATION.NOT_VALIDATED,
@@ -655,6 +725,177 @@ async function onProcessReferenceChanged(repo, keys, changed) {
         ChangedAt: clock.nowIso()
     });
     return patch;
+}
+
+/* ------------------------------------------------------------------------------------------------ */
+/* Predecessor test case: handover of documents between process teams                               */
+/* ------------------------------------------------------------------------------------------------ */
+/**
+ * Copies the test data of the predecessor test case (same customer, reference object, items and expectation): the run
+ * continues with the documents of the predecessor's run.
+ *
+ * @param {object} repo repository
+ * @param {object} tc TestCase entry (draft)
+ * @returns {Promise<object|undefined>} the predecessor (active) or undefined when it does not exist
+ */
+async function takeOverTestData(repo, tc) {
+    const predecessor = (await repo.find('TestCase', { CaseID: tc.PredecessorTestCase, IsActiveEntity: true }))[0];
+    if (!predecessor) {
+        return undefined;
+    }
+    const source = await getData(repo, predecessor);
+    const patch = Object.fromEntries([...CONTROLLED_FIELDS, 'SalesOrganizationOrgUnitID'].filter((f) => f in source).map((f) => [f, source[f]]));
+    await repo.update('TestCaseData', tcKeys(tc), patch);
+    return predecessor;
+}
+
+/**
+ * Active test cases of the same process whose run delivers the document the start needs. Approved test cases and
+ * test cases that end with that document (a real handover) come first.
+ *
+ * @param {object} repo repository
+ * @param {object} tc TestCase entry
+ * @param {string} objectType business object type of the document to take over
+ * @returns {Promise<object[]>} candidates {CaseID, Title, ApprovalStatus, EndObject, continuesBeyond, lastRun}
+ */
+async function predecessorCandidates(repo, tc, objectType) {
+    const model = await processModel(repo, tc.BusinessProcess);
+    const objectIndex = catalog.DOCUMENT_ORDER.indexOf(objectType);
+    const candidates = [];
+    for (const other of await repo.find('TestCase', { IsActiveEntity: true, BusinessProcess: tc.BusinessProcess })) {
+        if (other.TestCaseUUID === tc.TestCaseUUID || !other.CaseID || !other.ProcessVariant) {
+            continue;
+        }
+        const types = catalog.executionPlan(model.steps, other.ProcessVariant, other.EndObject, other.StartObject).map((step) => step.businessObjectType);
+        if (!types.includes(objectType)) {
+            continue;
+        }
+        const run = await latestHandoverRun(repo, other, objectType);
+        candidates.push({
+            CaseID: other.CaseID,
+            Title: other.Title,
+            ApprovalStatus: other.ApprovalStatus,
+            EndObject: other.EndObject,
+            continuesBeyond: types.some((type) => catalog.DOCUMENT_ORDER.indexOf(type) > objectIndex),
+            lastRun: run ? run.execution.ExternalExecutionID : ''
+        });
+    }
+    const rank = (c) => (c.ApprovalStatus === APPROVAL.APPROVED ? 0 : 2) + (c.continuesBeyond ? 1 : 0);
+    return candidates.sort((a, b) => rank(a) - rank(b) || a.CaseID.localeCompare(b.CaseID));
+}
+
+/**
+ * Latest passed run of a test case that delivered a document of the given type, with its documents up to that type.
+ * Runs of the same regression run, then of the same release are preferred.
+ *
+ * @param {object} repo repository
+ * @param {object} predecessor TestCase entry (active)
+ * @param {string} objectType business object type
+ * @param {object} [options] options
+ * @param {string} [options.releaseId] preferred release
+ * @param {string} [options.regressionRunUUID] preferred regression run
+ * @returns {Promise<{execution: object, documents: object[]}|undefined>} run
+ */
+async function latestHandoverRun(repo, predecessor, objectType, { releaseId, regressionRunUUID } = {}) {
+    const objectIndex = catalog.DOCUMENT_ORDER.indexOf(objectType);
+    const runs = [];
+    for (const execution of await repo.find('Execution', { TestCaseUUID: predecessor.TestCaseUUID, IsActiveEntity: true })) {
+        if (execution.Status !== EXECUTION.FINISHED || !HANDOVER_RESULTS.has(execution.FunctionalResult)) {
+            continue;
+        }
+        const documents = (await repo.find('DocumentReference', { ExecutionUUID: execution.ExecutionUUID, IsActiveEntity: true }))
+            .filter((d) => catalog.DOCUMENT_ORDER.indexOf(d.BusinessObjectType) <= objectIndex)
+            .sort((a, b) => catalog.DOCUMENT_ORDER.indexOf(a.BusinessObjectType) - catalog.DOCUMENT_ORDER.indexOf(b.BusinessObjectType));
+        if (documents.some((d) => d.BusinessObjectType === objectType)) {
+            runs.push({ execution, documents });
+        }
+    }
+    const rank = (run) => (regressionRunUUID && run.execution.RegressionRunUUID === regressionRunUUID ? 0 : 2) + (releaseId && run.execution.ReleaseID === releaseId ? 0 : 1);
+    runs.sort((a, b) => rank(a) - rank(b) || String(b.execution.StartedAt).localeCompare(String(a.execution.StartedAt)));
+    return runs[0];
+}
+
+/**
+ * Handover for a run: the predecessor test case and its latest passed run with the document the start needs.
+ *
+ * @param {object} repo repository
+ * @param {object} tc TestCase entry (active)
+ * @param {string} objectType business object type to take over
+ * @param {object} [options] options {releaseId, regressionRunUUID}
+ * @returns {Promise<{ok: boolean, message?: string, predecessor?: object, execution?: object, documents?: object[]}>} handover
+ */
+async function predecessorHandover(repo, tc, objectType, options = {}) {
+    if (!tc.PredecessorTestCase) {
+        return { ok: false, message: `Start from ${boLabel(tc.StartObject)} needs a predecessor test case that delivers the ${boLabel(objectType)}.` };
+    }
+    const predecessor = (await repo.find('TestCase', { CaseID: tc.PredecessorTestCase, IsActiveEntity: true }))[0];
+    if (!predecessor) {
+        return { ok: false, message: `Predecessor test case ${tc.PredecessorTestCase} does not exist.` };
+    }
+    const run = await latestHandoverRun(repo, predecessor, objectType, options);
+    if (!run) {
+        return {
+            ok: false,
+            predecessor,
+            message: `Predecessor ${predecessor.CaseID} has no passed run that delivered a ${boLabel(objectType)}. Run ${predecessor.CaseID} first – a regression run starts it before this test case.`
+        };
+    }
+    return { ok: true, predecessor, execution: run.execution, documents: run.documents };
+}
+
+/** Validation of the predecessor (rule R12): needed, existing, delivers the document; advisories as information */
+async function predecessorFindings(repo, tc, context) {
+    if (!context.predecessorObject) {
+        return [];
+    }
+    const object = boLabel(context.predecessorObject);
+    const item = (status, message, suggestions = [], resolved = '') => ({
+        BusinessObjectType: BO.TEST_CASE,
+        Category: 'RELATIONSHIP',
+        FieldName: 'PredecessorTestCase',
+        ProposedValue: tc.PredecessorTestCase || '',
+        ResolvedValue: resolved,
+        SuggestedValue: suggestions[0] || '',
+        SuggestedValues: suggestions.join(', '),
+        Source: 'USER',
+        RuleID: 'R12_PREDECESSOR',
+        ValidationStatus: status,
+        Criticality: criticalityOf(status),
+        ValidationMessage: message.slice(0, 255),
+        Severity: status,
+        target: 'PredecessorTestCase'
+    });
+    const candidates = await predecessorCandidates(repo, tc, context.predecessorObject);
+    const ids = candidates.map((c) => c.CaseID).slice(0, 5);
+    if (!tc.PredecessorTestCase) {
+        return [
+            item(
+                ITEM_STATUS.ERROR,
+                `Start from ${boLabel(tc.StartObject)} needs a predecessor test case that delivers the ${object}.${ids.length ? ` Suggested: ${ids.join(', ')}.` : ' No test case of the process delivers it yet.'}`,
+                ids
+            )
+        ];
+    }
+    const candidate = candidates.find((c) => c.CaseID === tc.PredecessorTestCase);
+    if (!candidate) {
+        return [item(ITEM_STATUS.ERROR, `${tc.PredecessorTestCase} cannot hand over: it is no active test case of ${tc.BusinessProcess} whose run delivers the ${object}.`, ids)];
+    }
+    const advice = [];
+    if (candidate.ApprovalStatus !== APPROVAL.APPROVED) {
+        advice.push('it is not approved yet, so it cannot run before this test case');
+    }
+    if (candidate.continuesBeyond) {
+        advice.push(`its own run continues after the ${object} (up to ${boLabel(candidate.EndObject)}); a handover predecessor ends with the ${object}`);
+    }
+    const runText = candidate.lastRun ? `latest passed run ${candidate.lastRun}` : 'no passed run yet – a regression run starts it first';
+    return [
+        item(
+            advice.length ? ITEM_STATUS.INFO : ITEM_STATUS.SUCCESS,
+            `Predecessor ${candidate.CaseID} hands over the ${object} (${runText})${advice.length ? `; note: ${advice.join('; ')}` : ''}.`,
+            [],
+            candidate.CaseID
+        )
+    ];
 }
 
 /** Content of a version: header fields, test data and test steps */
@@ -822,6 +1063,21 @@ async function validateTestCase(repo, keys, { asStateMessages = true } = {}) {
         requiredByVariant: context.needsContract ? ['ServiceContract'] : [],
         referenceDate: clock.nowIso().slice(0, 10)
     });
+    // rule R12: a start without an own predecessor document needs a predecessor test case that hands it over
+    const predecessorItems = await predecessorFindings(repo, tc, context);
+    if (predecessorItems.length) {
+        const rank = { ERROR: 0, WARNING: 1, INFO: 2, SUCCESS: 3 };
+        result.items = [...predecessorItems, ...result.items].sort((a, b) => rank[a.ValidationStatus] - rank[b.ValidationStatus]);
+        result.items.forEach((item, index) => {
+            item.Sequence = index + 1;
+        });
+        result.counts = {
+            error: result.items.filter((i) => i.ValidationStatus === ITEM_STATUS.ERROR).length,
+            warning: result.items.filter((i) => i.ValidationStatus === ITEM_STATUS.WARNING).length,
+            success: result.items.filter((i) => i.ValidationStatus === ITEM_STATUS.SUCCESS).length
+        };
+        result.overall = result.counts.error ? VALIDATION.INVALID : result.counts.warning ? VALIDATION.AMBIGUOUS : VALIDATION.VALID;
+    }
     await replaceValidationRows(repo, tc, result.items);
     const patch = { ValidationStatus: result.overall, ChangedAt: clock.nowIso() };
     if (result.overall !== VALIDATION.VALID && tc.ApprovalStatus === APPROVAL.APPROVED) {
@@ -893,6 +1149,9 @@ async function applyProcessHints(repo, tc) {
     if (hints.endObject && hints.endObject !== tc.EndObject) {
         patch.EndObject = hints.endObject;
     }
+    if (hints.startObject && hints.startObject !== tc.StartObject) {
+        patch.StartObject = hints.startObject;
+    }
     if (!Object.keys(patch).length) {
         return [];
     }
@@ -902,7 +1161,8 @@ async function applyProcessHints(repo, tc) {
     return [
         applied.ProcessTeam !== tc.ProcessTeam ? `team ${applied.ProcessTeam}` : '',
         applied.ProcessVariant !== tc.ProcessVariant ? `variant ${applied.ProcessVariant}` : '',
-        applied.EndObject !== tc.EndObject ? `run up to ${applied.EndObject}` : ''
+        applied.EndObject !== tc.EndObject ? `run up to ${applied.EndObject}` : '',
+        applied.StartObject !== tc.StartObject ? `start from ${applied.StartObject}` : ''
     ].filter(Boolean);
 }
 
@@ -1051,7 +1311,7 @@ async function releaseFor(repo, tc, releaseId) {
  * @param {string} [options.releaseId] release of a regression run
  * @returns {Promise<{ok: boolean, error?: MockServiceError, context?: object, release?: object, scope?: object}>} result
  */
-async function executionCheck(repo, tc, { user = CURRENT_USER, releaseId } = {}) {
+async function executionCheck(repo, tc, { user = CURRENT_USER, releaseId, regressionRunUUID } = {}) {
     const fail = (category, number, text, target) => ({ ok: false, error: new MockServiceError(category, number, text, target) });
     if (tc.ExecutionStatus === EXECUTION.RUNNING) {
         return fail(CATEGORY.EXECUTION_ERROR, 401, `Execution ${tc.ExternalExecutionID} is still running for this test case.`);
@@ -1080,7 +1340,15 @@ async function executionCheck(repo, tc, { user = CURRENT_USER, releaseId } = {})
     if (releaseId && (!release || !scope)) {
         return fail(CATEGORY.BUSINESS_ERROR, 209, `Team ${tc.ProcessTeam} with process ${tc.BusinessProcess} is not in the scope of release ${releaseId}.`);
     }
-    return { ok: true, context, release, scope };
+    // a start without an own predecessor document continues with the documents of the predecessor's latest passed run
+    let handover;
+    if (context.predecessorObject) {
+        handover = await predecessorHandover(repo, tc, context.predecessorObject, { releaseId: release?.ReleaseID, regressionRunUUID });
+        if (!handover.ok) {
+            return { ...fail(CATEGORY.BUSINESS_ERROR, 211, handover.message), waitFor: handover.predecessor };
+        }
+    }
+    return { ok: true, context, release, scope, handover };
 }
 
 /**
@@ -1098,11 +1366,11 @@ async function executionCheck(repo, tc, { user = CURRENT_USER, releaseId } = {})
  */
 async function startExecution(repo, keys, { user = CURRENT_USER, releaseId, runType = RUN_TYPE.SINGLE, regressionRunUUID = null } = {}) {
     const tc = await getTestCase(repo, keys);
-    const check = await executionCheck(repo, tc, { user, releaseId });
+    const check = await executionCheck(repo, tc, { user, releaseId, regressionRunUUID });
     if (!check.ok) {
         throw check.error;
     }
-    const { context, release } = check;
+    const { context, release, handover } = check;
     const profile = await getProfile(repo, tc.ProcessProfile);
     const providerCode = (profile && profile.ExecutionProvider) || 'MOCK';
     const provider = getProvider(providerCode, repo.tenantId);
@@ -1117,6 +1385,26 @@ async function startExecution(repo, keys, { user = CURRENT_USER, releaseId, runT
     // hand over the validated data set only (no technical draft fields), the plan of the path and the reference objects
     const dataset = Object.fromEntries([...CONTROLLED_FIELDS, 'SalesOrganizationOrgUnitID'].filter((f) => !isEmpty(data[f])).map((f) => [f, data[f]]));
     const { pools } = await loadPools(repo);
+    // documents taken over from the predecessor's run (only those the plan does not produce itself)
+    const handoverFrom = handover ? `${handover.predecessor.CaseID} · ${handover.execution.ExternalExecutionID}` : '';
+    const givenDocuments = handover
+        ? handover.documents
+              .filter((d) => !context.chainTypes.includes(d.BusinessObjectType))
+              .map((d) => ({
+                  businessObjectType: d.BusinessObjectType,
+                  documentId: d.DocumentID,
+                  processStepID: d.ProcessStepID || '',
+                  stepName: d.StepName || '',
+                  predecessorId: d.PredecessorDocumentID || '',
+                  lifecycleStatus: d.LifecycleStatus,
+                  netAmount: d.NetAmount,
+                  currency: d.TransactionCurrency,
+                  created: false,
+                  given: true,
+                  origin: handoverFrom,
+                  document: { DocumentID: d.DocumentID, SoldToParty: data.SoldToParty, LifecycleStatus: d.LifecycleStatus }
+              }))
+        : [];
     let externalExecutionId;
     try {
         ({ externalExecutionId } = provider.start(
@@ -1125,6 +1413,7 @@ async function startExecution(repo, keys, { user = CURRENT_USER, releaseId, runT
                 processProfile: tc.ProcessProfile,
                 variant: tc.ProcessVariant,
                 plan: context.plan,
+                givenDocuments,
                 serviceContract: pools.serviceContracts.find((c) => c.ServiceContract === data.ServiceContract),
                 referenceLocations: referenceLocations(pools, data)
             },
@@ -1162,6 +1451,8 @@ async function startExecution(repo, keys, { user = CURRENT_USER, releaseId, runT
         ProcessVersion: context.model.process?.ProcessVersion || 0,
         ProcessVariant: tc.ProcessVariant || '',
         EndObject: tc.EndObject || '',
+        StartObject: tc.StartObject || '',
+        PredecessorExecution: handoverFrom,
         RunType: runType,
         RegressionRunUUID: regressionRunUUID,
         ExecutedBy: user
@@ -1199,7 +1490,9 @@ async function startExecution(repo, keys, { user = CURRENT_USER, releaseId, runT
         LatestExecutionUUID: executionUUID,
         ChangedAt: now
     });
-    const releaseText = release ? ` for release ${release.ReleaseID}` : ' (no release in test for this team and process)';
+    const releaseText =
+        (release ? ` for release ${release.ReleaseID}` : ' (no release in test for this team and process)') +
+        (handover ? `, continuing with the ${boLabel(context.predecessorObject)} of ${handoverFrom}` : '');
     return {
         testCase: updated,
         executionUUID,
@@ -1253,9 +1546,11 @@ async function refreshExecution(repo, keys, { cancel = false } = {}) {
     // documents (only created ones; numbers are assigned when a step finishes)
     const docRows = await repo.find('DocumentReference', { ExecutionUUID: execution.ExecutionUUID, IsActiveEntity: true });
     for (const doc of documents) {
-        const sequence = status.steps.find((s) => s.businessObjectType === doc.businessObjectType)?.sequence;
+        const sequence = doc.given ? 0 : status.steps.find((s) => s.businessObjectType === doc.businessObjectType)?.sequence;
         const existing = docRows.find((r) => r.DocumentID === doc.documentId);
-        const creatingStep = status.steps.find((st) => st.processStepID && st.processStepID === doc.processStepID) || status.steps.find((st) => st.businessObjectType === doc.businessObjectType);
+        const creatingStep = doc.given
+            ? { processStepID: doc.processStepID, stepName: doc.stepName }
+            : status.steps.find((st) => st.processStepID && st.processStepID === doc.processStepID) || status.steps.find((st) => st.businessObjectType === doc.businessObjectType);
         const fields = {
             Sequence: sequence,
             BusinessObjectType: doc.businessObjectType,
@@ -1263,6 +1558,8 @@ async function refreshExecution(repo, keys, { cancel = false } = {}) {
             DocumentItem: '',
             ProcessStepID: creatingStep?.processStepID || '',
             StepName: creatingStep?.stepName || '',
+            DocumentOrigin: doc.given ? DOCUMENT_ORIGIN.TAKEN_OVER : doc.created === false ? DOCUMENT_ORIGIN.DETERMINED : DOCUMENT_ORIGIN.CREATED,
+            OriginReference: doc.given ? doc.origin : '',
             PredecessorDocumentID: doc.predecessorId,
             // successor documents (document flow), comma-separated: a service order can have a confirmation and a billing document request
             SuccessorDocumentID: documents
@@ -1339,7 +1636,9 @@ async function refreshExecution(repo, keys, { cancel = false } = {}) {
             ChangedAt: clock.nowIso()
         });
         const failed = verification.assertions.filter((a) => a.Result === 'FAILED').length;
-        const text = `Execution ${execution.ExternalExecutionID} ${status.status.toLowerCase()}: final result ${verification.finalResult} (${documents.length} documents, ${verification.assertions.length} assertions, ${failed} failed).`;
+        const created = documents.filter((d) => !d.given).length;
+        const takenOver = documents.length - created;
+        const text = `Execution ${execution.ExternalExecutionID} ${status.status.toLowerCase()}: final result ${verification.finalResult} (${created} documents${takenOver ? ` + ${takenOver} taken over` : ''}, ${verification.assertions.length} assertions, ${failed} failed).`;
         const severity =
             verification.finalResult === RESULT.PASSED ? SEVERITY.SUCCESS : verification.finalResult === RESULT.PASSED_WITH_WARNING ? SEVERITY.WARNING : SEVERITY.ERROR;
         messages.push(sapMessage(severity === SEVERITY.ERROR ? 403 : 907, text, { severity }));
@@ -1377,6 +1676,10 @@ async function applySuggestion(repo, validationKeys, selectedValue) {
     const tc = await repo.findOne('TestCase', { TestCaseUUID: row.TestCaseUUID, IsActiveEntity: row.IsActiveEntity });
     if (row.FieldName === 'ProcessProfile') {
         await repo.update('TestCase', tcKeys(tc), { ProcessProfile: value });
+    } else if (row.FieldName === 'PredecessorTestCase') {
+        // header field of the process reference: the predecessor hands over its documents and its test data
+        await repo.update('TestCase', tcKeys(tc), { PredecessorTestCase: value });
+        await onProcessReferenceChanged(repo, tcKeys(tc), ['PredecessorTestCase']);
     } else {
         const typed = NUMERIC_FIELDS.has(row.FieldName) ? Number(value) : value;
         await repo.update('TestCaseData', tcKeys(tc), { [row.FieldName]: typed });
@@ -1390,7 +1693,7 @@ async function applySuggestion(repo, validationKeys, selectedValue) {
         Criticality: criticalityOf(ITEM_STATUS.INFO),
         ValidationMessage: `Suggestion "${value}" applied to ${row.FieldName}. Run Validate again.`
     });
-    const target = row.FieldName === 'ProcessProfile' ? 'ProcessProfile' : `_TestCaseData/${row.FieldName}`;
+    const target = row.FieldName === 'ProcessProfile' || row.FieldName === 'PredecessorTestCase' ? row.FieldName : `_TestCaseData/${row.FieldName}`;
     await repo.update('TestCase', tcKeys(tc), {
         ValidationStatus: VALIDATION.NOT_VALIDATED,
         ApprovalStatus: tc.ApprovalStatus === APPROVAL.APPROVED ? APPROVAL.REVOKED : tc.ApprovalStatus,

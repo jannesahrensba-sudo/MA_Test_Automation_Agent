@@ -3,7 +3,9 @@
  * processCatalog — pure functions on the process model (process steps and variants of a business process).
  *
  * A process variant is a path through the process flow ("Weg"): every process step lists the variants it belongs to
- * (ProcessStep.Variants, comma-separated) and the sequence orders the path. From the path the backend derives
+ * (ProcessStep.Variants, comma-separated) and the sequence orders the path. A test case runs a section of the path:
+ * from its start object ("Start from", default: where its process team enters the path) up to its end object
+ * ("Run up to"). From the section the backend derives
  *   - the test steps of a test case (design time, like the activities/actions of a test case in SAP Cloud ALM),
  *   - the execution plan of the automated run (only steps with a business object, up to the selected end object),
  *   - handovers between process teams and the expected document chain.
@@ -37,6 +39,9 @@ const DOCUMENT_ABBREVIATION = {
 
 /** Default end object of a test case when nothing is selected: the billing document (golden path) */
 const DEFAULT_END_OBJECT = BO.BILLING_DOCUMENT;
+
+/** The FI step only reads the posting of a billing document created in the same run: no start object */
+const NO_START = new Set([BO.ACCOUNTING_DOCUMENT]);
 
 const AUTOMATION = Object.freeze({ AUTOMATED: 'AUTOMATED', DECISION: 'DECISION', MANUAL: 'MANUAL', PLANNED: 'PLANNED' });
 const PILOT = 'PILOT';
@@ -87,6 +92,28 @@ function truncate(path, endObject) {
     return { path: path.slice(0, last + 1), endObjectInPath: true };
 }
 
+/**
+ * Section of a path between start object and end object. Contract determination steps before the start stay in the
+ * section: they create no document, they check the precondition and provide the contract reference.
+ *
+ * @param {object[]} path design path of the variant
+ * @param {string} [startObject] business object type the run starts with
+ * @param {string} [endObject] business object type the run ends with
+ * @returns {{path: object[], endObjectInPath: boolean, startObjectInPath: boolean}} section
+ */
+function section(path, startObject, endObject) {
+    const { path: upToEnd, endObjectInPath } = truncate(path, endObject);
+    if (!startObject) {
+        return { path: upToEnd, endObjectInPath, startObjectInPath: true };
+    }
+    const first = upToEnd.findIndex((step) => step.BusinessObjectType === startObject);
+    if (first === -1) {
+        return { path: upToEnd, endObjectInPath, startObjectInPath: false };
+    }
+    const preconditions = upToEnd.slice(0, first).filter((step) => step.BusinessObjectType === BO.SERVICE_CONTRACT);
+    return { path: [...preconditions, ...upToEnd.slice(first)], endObjectInPath, startObjectInPath: true };
+}
+
 /** Business objects with documents along a path (unique, in path order) */
 function documentTypes(path) {
     const types = [];
@@ -131,6 +158,71 @@ function defaultEndObject(steps, variant) {
 }
 
 /**
+ * Objects a run of this variant can start with: the business objects of the automated plan up to the end object
+ * (without the FI check, which needs the billing document of the same run).
+ *
+ * @param {object[]} steps process steps
+ * @param {string} variant variant code
+ * @param {string} [endObject] end object
+ * @returns {string[]} business object types
+ */
+function possibleStartObjects(steps, variant, endObject) {
+    const types = [];
+    for (const step of executionPlan(steps, variant, endObject)) {
+        if (!NO_START.has(step.businessObjectType) && !types.includes(step.businessObjectType)) {
+            types.push(step.businessObjectType);
+        }
+    }
+    return types;
+}
+
+/**
+ * Default start object for a process team: the first automated step of the path the team is responsible for
+ * ("start of the process team"), e.g. the quotation for the quotation team; without such a step the start of the path.
+ *
+ * @param {object[]} steps process steps
+ * @param {string} variant variant code
+ * @param {string} team process team of the test case
+ * @param {string} [endObject] end object
+ * @returns {string|undefined} business object type
+ */
+function defaultStartObject(steps, variant, team, endObject) {
+    const possible = possibleStartObjects(steps, variant, endObject);
+    const own = executionPlan(steps, variant, endObject).find((step) => step.responsibleTeam === team && possible.includes(step.businessObjectType));
+    return own ? own.businessObjectType : possible[0];
+}
+
+/**
+ * Document a run needs from a predecessor when it starts with the given object. Service request, quotation, order and
+ * the contract can be created (determined) without a predecessor; a confirmation needs the order, a billing document
+ * request the confirmation (time and material), the order (fixed price) or — for the billing plan — only the contract,
+ * a billing document the billing document request.
+ *
+ * @param {object[]} steps process steps
+ * @param {string} variant variant code
+ * @param {string} startObject start object
+ * @param {object} [options] options
+ * @param {boolean} [options.fixedPrice] billing from the order (process profile with fixed price)
+ * @returns {string} business object type of the predecessor document, '' when none is needed
+ */
+function requiredPredecessor(steps, variant, startObject, { fixedPrice = false } = {}) {
+    switch (startObject) {
+        case BO.SERVICE_CONFIRMATION:
+            return BO.SERVICE_ORDER;
+        case BO.BILLING_DOC_REQUEST: {
+            if (!documentTypes(variantPath(steps, variant)).includes(BO.SERVICE_ORDER)) {
+                return '';
+            }
+            return fixedPrice ? BO.SERVICE_ORDER : BO.SERVICE_CONFIRMATION;
+        }
+        case BO.BILLING_DOCUMENT:
+            return BO.BILLING_DOC_REQUEST;
+        default:
+            return '';
+    }
+}
+
+/**
  * Handover flags along a path: a step is a handover when its responsible team differs from the team of the previous step
  * (an open team assignment counts as a different team).
  *
@@ -147,10 +239,11 @@ function handovers(path) {
  * @param {object[]} steps ProcessStep rows of the process
  * @param {string} variant variant code
  * @param {string} [endObject] run up to this business object
+ * @param {string} [startObject] start with this business object (section of the path)
  * @returns {object[]} plan steps {sequence, businessObjectType, expectedStatus, processStepID, stepName, responsibleTeam}
  */
-function executionPlan(steps, variant, endObject) {
-    const { path } = truncate(variantPath(steps, variant), endObject);
+function executionPlan(steps, variant, endObject, startObject) {
+    const { path } = section(variantPath(steps, variant), startObject, endObject);
     return path
         .filter((step) => step.BusinessObjectType && step.Automation === AUTOMATION.AUTOMATED && step.PilotScope === PILOT)
         .map((step, index) => ({
@@ -164,16 +257,17 @@ function executionPlan(steps, variant, endObject) {
 }
 
 /**
- * Test steps (design) of a test case: one step per process step of the path up to the end object, with the action
- * and expected result templates of the process step.
+ * Test steps (design) of a test case: one step per process step of its section of the path (start object up to end
+ * object), with the action and expected result templates of the process step.
  *
  * @param {object[]} steps ProcessStep rows of the process
  * @param {string} variant variant code
  * @param {string} [endObject] end object
+ * @param {string} [startObject] start object
  * @returns {object[]} test step drafts
  */
-function designSteps(steps, variant, endObject) {
-    const { path } = truncate(variantPath(steps, variant), endObject);
+function designSteps(steps, variant, endObject, startObject) {
+    const { path } = section(variantPath(steps, variant), startObject, endObject);
     const flags = handovers(path);
     return path.map((step, index) => ({
         StepNo: (index + 1) * 10,
@@ -223,16 +317,21 @@ module.exports = {
     DOCUMENT_ORDER,
     DOCUMENT_ABBREVIATION,
     DEFAULT_END_OBJECT,
+    NO_START,
     AUTOMATION,
     PILOT,
     variantsOf,
     variantPath,
     truncate,
+    section,
     documentTypes,
     documentPath,
     stepPath,
     possibleEndObjects,
     defaultEndObject,
+    possibleStartObjects,
+    defaultStartObject,
+    requiredPredecessor,
     handovers,
     executionPlan,
     designSteps,

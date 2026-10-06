@@ -332,7 +332,8 @@ async function refreshRelease(repo, state, release) {
 async function refreshRuns(repo, state) {
     for (const run of state.runs) {
         const items = await repo.find('RegressionRunItem', { RunUUID: run.RunUUID });
-        let running = 0;
+        // test cases waiting for their predecessor keep the run running
+        let running = items.filter((item) => item.Decision === 'WAITING').length;
         let passed = 0;
         let failed = 0;
         for (const item of items) {
@@ -436,8 +437,28 @@ async function refreshAssignments(repo, state) {
  *
  * @param {object} repo repository
  */
+/** Value help of the active test cases (selection of a predecessor test case) */
+async function refreshTestCaseValueHelp(repo, state) {
+    const rows = state.testCases
+        .filter((tc) => tc.CaseID)
+        .sort((a, b) => String(a.CaseID).localeCompare(String(b.CaseID)))
+        .map((tc) => ({
+            CaseID: tc.CaseID,
+            Title: tc.Title || '',
+            ProcessTeam: tc.ProcessTeam || '',
+            BusinessProcess: tc.BusinessProcess || '',
+            ProcessVariant: tc.ProcessVariant || '',
+            StartObject: tc.StartObject || '',
+            EndObject: tc.EndObject || '',
+            ApprovalStatus: tc.ApprovalStatus || '',
+            LatestResult: tc.FinalResult || ''
+        }));
+    await replaceRows(repo, 'TestCaseVH', 'CaseID', {}, rows);
+}
+
 async function refreshAll(repo) {
     const state = await loadState(repo);
+    await refreshTestCaseValueHelp(repo, state);
     await refreshAssignments(repo, state);
     await refreshRuns(repo, state);
     for (const release of state.releases) {

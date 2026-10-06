@@ -2,7 +2,8 @@
 /**
  * Seed definition of the process teams, business processes and releases (mock data, fictional).
  *
- * Process teams follow the currently known processes: repair, installation, quotation, meter reading.
+ * Process teams follow the currently known processes: repair, installation, quotation, meter reading — plus the team
+ * "New End to End Prozess", which owns billing and the transfer to accounting (FI) of the end-to-end process.
  * Only the service repair process is modeled in the mockup (pilot: standard service path, three ways from the process
  * picture). Warranty, requote, in-house repair and the solution quotation are later API extensions (not executable).
  * Team assignments that are not confirmed are marked ASSUMED (to be confirmed) or OPEN (no team known yet).
@@ -35,6 +36,13 @@ const TEAMS = [
         ProcessTeamName: 'Prozessteam Ablesung',
         ProcessArea: 'Messdienst – Ablesung',
         Description: 'Verantwortet die Ablesung (messdienstspezifisch). Prozessschritte und Abbildung im SAP-System noch offen.'
+    },
+    {
+        ProcessTeam: 'PT-E2E',
+        ProcessTeamName: 'Prozessteam New End to End Prozess',
+        ProcessArea: 'End-to-End – Fakturierung und FI',
+        Description:
+            'Verantwortet die Fakturierung (Fakturaanforderung, Faktura, Rechnungsplan) und die Übergabe an die Finanzbuchhaltung (FI-Beleg) im End-to-End-Prozess. Übernimmt im Reparaturprozess nach der Rückmeldung.'
     }
 ];
 
@@ -50,7 +58,10 @@ const MEMBERS = [
     ['PT-MONTAGE', 'MON_LEAD', 'PROCESS_OWNER', 'Teamleitung'],
     ['PT-MONTAGE', 'MON_TESTER', 'TEST_EXECUTOR', ''],
     ['PT-ABLESUNG', 'ABL_LEAD', 'PROCESS_OWNER', 'Teamleitung'],
-    ['PT-ABLESUNG', 'ABL_TESTER', 'TEST_EXECUTOR', '']
+    ['PT-ABLESUNG', 'ABL_TESTER', 'TEST_EXECUTOR', ''],
+    ['PT-E2E', 'E2E_LEAD', 'PROCESS_OWNER', 'Teamleitung'],
+    ['PT-E2E', 'E2E_TESTER', 'TEST_EXECUTOR', ''],
+    ['PT-E2E', 'DEMO_USER', 'TEST_EXECUTOR', 'Mockup-Benutzer: Ausführungsberechtigung für die Übergabe Reparatur → E2E']
 ];
 
 const REPAIR = 'SRV-REP';
@@ -97,14 +108,14 @@ const REPAIR_STEPS = [
         'Einsatz vor Ort durchführen (Techniker bzw. SAP FSM).', 'Einsatz durchgeführt; Ergebnis über die Rückmeldung geprüft.', 'FSM-Integration (A_ServiceOrder.FSMServiceCall) ⚠', 'Im Pilot nicht automatisiert.', 1],
     [80, 'REP-080', 'Service Confirmation (Aufwand) buchen', 'SERVICE_CONFIRMATION', 'Completed', 'PT-REPARATUR', 'ASSIGNED', [W1, W2, W3, 'WARRANTY', 'REQUOTE'], 'PILOT', 'AUTOMATED',
         'Service Confirmation mit Ist-Dauer und Ersatzteil buchen und abschließen.', 'Rückmeldung abgeschlossen; Ist-Dauer = Plan-Dauer.', 'A_ServiceConfirmation (API_SERVICE_CONFIRMATION_SRV)', '', 1],
-    [90, 'REP-090', 'Freigabe zur Fakturierung (Billing Document Request)', 'BILLING_DOC_REQUEST', 'Billed', '', 'OPEN', [W1, W2, W3, 'REQUOTE'], 'PILOT', 'AUTOMATED',
-        'Freigabe zur Fakturierung: Fakturaanforderung aus der Rückmeldung (Aufwand) bzw. dem Auftrag (Festpreis) erzeugen.', 'Fakturaanforderung zum Vorgänger mit dem erwarteten Nettowert.', 'A_BillingDocumentRequest (API_BILLING_DOCUMENT_REQUEST_SRV); App „Release for Billing“', 'Verantwortliches Prozessteam offen.', 1],
-    [95, 'REP-095', 'Rechnungsplan des Vertrags abrechnen (Billing Document Request)', 'BILLING_DOC_REQUEST', 'Billed', '', 'OPEN', [W3B], 'PILOT', 'AUTOMATED',
-        'Fällige Rechnungsplanposition des Servicevertrags abrechnen.', 'Fakturaanforderung über den Rechnungsplanbetrag des Vertrags.', 'A_SrvcContrItmBillgReqItem (API_SERVICE_CONTRACT_SRV)', 'Verantwortliches Prozessteam offen.', 2],
-    [100, 'REP-100', 'Faktura (SD) erzeugen', 'BILLING_DOCUMENT', 'Posted', '', 'OPEN', [W1, W2, W3, W3B, 'REQUOTE'], 'PILOT', 'AUTOMATED',
-        'Faktura aus der Fakturaanforderung erzeugen.', 'Faktura gebucht; Nettowert = erwarteter Nettowert ± Toleranz.', 'A_BillingDocument (API_BILLING_DOCUMENT_SRV)', 'Verantwortliches Prozessteam offen.', 1],
-    [110, 'REP-110', 'Buchhaltungsbeleg (FI) prüfen', 'ACCOUNTING_DOCUMENT', 'Posted', '', 'OPEN', [W1, W2, W3, W3B, 'REQUOTE'], 'PILOT', 'AUTOMATED',
-        'Übergabe der Faktura an die Buchhaltung prüfen.', 'Buchhaltungsbeleg zur Faktura vorhanden.', 'A_BillingDocument.AccountingDocument; Lese-API Journal Entry ⚠', 'Optionales Endobjekt; verantwortliches Prozessteam offen.', 1],
+    [90, 'REP-090', 'Freigabe zur Fakturierung (Billing Document Request)', 'BILLING_DOC_REQUEST', 'Billed', 'PT-E2E', 'ASSIGNED', [W1, W2, W3, 'REQUOTE'], 'PILOT', 'AUTOMATED',
+        'Freigabe zur Fakturierung: Fakturaanforderung aus der Rückmeldung (Aufwand) bzw. dem Auftrag (Festpreis) erzeugen.', 'Fakturaanforderung zum Vorgänger mit dem erwarteten Nettowert.', 'A_BillingDocumentRequest (API_BILLING_DOCUMENT_REQUEST_SRV); App „Release for Billing“', 'Übergabe an das Prozessteam New End to End Prozess.', 1],
+    [95, 'REP-095', 'Rechnungsplan des Vertrags abrechnen (Billing Document Request)', 'BILLING_DOC_REQUEST', 'Billed', 'PT-E2E', 'ASSIGNED', [W3B], 'PILOT', 'AUTOMATED',
+        'Fällige Rechnungsplanposition des Servicevertrags abrechnen.', 'Fakturaanforderung über den Rechnungsplanbetrag des Vertrags.', 'A_SrvcContrItmBillgReqItem (API_SERVICE_CONTRACT_SRV)', '', 2],
+    [100, 'REP-100', 'Faktura (SD) erzeugen', 'BILLING_DOCUMENT', 'Posted', 'PT-E2E', 'ASSIGNED', [W1, W2, W3, W3B, 'REQUOTE'], 'PILOT', 'AUTOMATED',
+        'Faktura aus der Fakturaanforderung erzeugen.', 'Faktura gebucht; Nettowert = erwarteter Nettowert ± Toleranz.', 'A_BillingDocument (API_BILLING_DOCUMENT_SRV)', '', 1],
+    [110, 'REP-110', 'Buchhaltungsbeleg (FI) prüfen', 'ACCOUNTING_DOCUMENT', 'Posted', 'PT-E2E', 'ASSIGNED', [W1, W2, W3, W3B, 'REQUOTE'], 'PILOT', 'AUTOMATED',
+        'Übergabe der Faktura an die Buchhaltung prüfen.', 'Buchhaltungsbeleg zur Faktura vorhanden.', 'A_BillingDocument.AccountingDocument; Lese-API Journal Entry ⚠', 'Optionales Endobjekt.', 1],
     [15, 'REP-200', 'Garantieprüfung', '', '', 'PT-REPARATUR', 'ASSUMED', ['WARRANTY'], 'LATER', 'PLANNED',
         '', '', 'Garantieabwicklung im Serviceauftrag ⚠ API zu prüfen', 'Spätere API-Erweiterung.', 2],
     [35, 'REP-210', 'Requote: Angebot überarbeiten und erneut senden', 'SERVICE_QUOTATION', '', 'PT-ANGEBOT', 'ASSUMED', ['REQUOTE'], 'LATER', 'PLANNED',
@@ -272,7 +283,8 @@ const SCOPES = [
     ['INT-2026.10', 'PT-ANGEBOT', REPAIR, 2, true, 'Übergabe Weg 2: Angebot und Kundenentscheidung'],
     ['INT-2026.10', 'PT-ANGEBOT', 'ANG', 1, false, 'Angebotsprozess noch nicht modelliert'],
     ['INT-2026.10', 'PT-MONTAGE', 'MON', 1, false, 'Montageprozess noch nicht modelliert'],
-    ['INT-2026.10', 'PT-ABLESUNG', 'ABL', 1, false, 'Ablesung noch nicht modelliert']
+    ['INT-2026.10', 'PT-ABLESUNG', 'ABL', 1, false, 'Ablesung noch nicht modelliert'],
+    ['INT-2026.10', 'PT-E2E', REPAIR, 2, true, 'Fakturierung und FI-Beleg: Übernahme nach der Rückmeldung']
 ];
 
 module.exports = { TEAMS, MEMBERS, PROCESSES, REPAIR, REPAIR_STEPS, REPAIR_VARIANTS, RELEASES, SCOPES };

@@ -5,7 +5,7 @@ const { MockExecutionProvider, getProvider } = require('../execution/MockExecuti
 const { setup, teardown, GOLDEN, GOLDEN_DOCUMENTS } = require('./helpers');
 
 function start(provider, data = GOLDEN, processProfile = 'FS_TM') {
-    return provider.start({ data, processProfile }, { caseId: 'STC-2026-000013', soldToParty: data.SoldToParty }).externalExecutionId;
+    return provider.start({ data, processProfile }, { caseId: 'STC-2026-000015', soldToParty: data.SoldToParty }).externalExecutionId;
 }
 
 test('the first run of a session creates exactly the golden document numbers (SIM-2)', (t) => {
@@ -13,7 +13,7 @@ test('the first run of a session creates exactly the golden document numbers (SI
     t.after(() => teardown(tenantId));
     const provider = new MockExecutionProvider({ tenantId });
     const id = start(provider);
-    assert.match(id, /^MOCK-20260929-0005$/);
+    assert.match(id, /^MOCK-20260929-0007$/);
     assert.equal(provider.getStatus(id).status, 'RUNNING');
     assert.deepEqual(provider.getCreatedDocuments(id), [], 'no documents before the steps ran');
 

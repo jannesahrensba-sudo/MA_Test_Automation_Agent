@@ -119,5 +119,38 @@
         "HasActiveEntity": false,
         "HasDraftEntity": false,
         "DraftAdministrativeData": null
+    },
+    {
+        "MemberUUID": "5c1e7d40-0012-4b2a-8f31-000000000012",
+        "ProcessTeam": "PT-E2E",
+        "UserID": "E2E_LEAD",
+        "TeamRole": "PROCESS_OWNER",
+        "Note": "Teamleitung",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null
+    },
+    {
+        "MemberUUID": "5c1e7d40-0013-4b2a-8f31-000000000013",
+        "ProcessTeam": "PT-E2E",
+        "UserID": "E2E_TESTER",
+        "TeamRole": "TEST_EXECUTOR",
+        "Note": "",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null
+    },
+    {
+        "MemberUUID": "5c1e7d40-0014-4b2a-8f31-000000000014",
+        "ProcessTeam": "PT-E2E",
+        "UserID": "DEMO_USER",
+        "TeamRole": "TEST_EXECUTOR",
+        "Note": "Mockup-Benutzer: Ausführungsberechtigung für die Übergabe Reparatur → E2E",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null
     }
 ]

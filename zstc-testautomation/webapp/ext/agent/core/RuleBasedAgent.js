@@ -34,15 +34,35 @@ sap.ui.define(["./prompts", "./textMatching"], function (prompts, textMatching) 
         ["SERVICE_REQUEST", /bis (zum |zur )?(service request|anfrage)\b/]
     ];
 
+    /** start object of the run ("ab …") named in an answer; the phrase is removed before the way is detected */
+    const START_WORDS = [
+        ["SERVICE_QUOTATION", /\bab (dem |einem )?(angebot|kostenvoranschlag|quote)\b|direkt (mit dem |vom |beim )?(angebot|quote)\b|vom quote\b/],
+        ["SERVICE_ORDER", /\bab (dem )?(service ?)?auftrag\b|direkt (mit dem |vom )?(service ?)?auftrag\b/],
+        ["SERVICE_CONFIRMATION", /\bab (der )?rueckmeldung\b/],
+        ["BILLING_DOC_REQUEST", /\bab (der )?(fakturaanforderung|fakturierung|abrechnung)\b/],
+        ["BILLING_DOCUMENT", /\bab (der )?faktura\b/],
+        ["SERVICE_REQUEST", /\bab (dem |der )?(service request|meldung|anfrage|anfang)\b|von anfang an/]
+    ];
+
+    /** header fields that a follow-up question asks for (findings on the process reference instead of the test data) */
+    const HEADER_QUESTIONS = { PredecessorTestCase: "predecessorTestCase" };
+
     /**
-     * Process reference named in an answer: way (process variant) and end object.
+     * Process reference named in an answer: start object, way (process variant) and end object.
      *
      * @param {string} text answer of the user
-     * @returns {{processVariant?: string, endObject?: string}} header changes
+     * @returns {{startObject?: string, processVariant?: string, endObject?: string}} header changes
      */
     function processChoice(text) {
-        const n = textMatching.normalize(text);
+        let n = textMatching.normalize(text);
         const header = {};
+        const start = START_WORDS.find(function (entry) {
+            return entry[1].test(n);
+        });
+        if (start) {
+            header.startObject = start[0];
+            n = n.replace(start[1], " ");
+        }
         const way = WAY_WORDS.find(function (entry) {
             return entry[1].test(n) && !(entry[2] && entry[2].test(n));
         });
@@ -134,13 +154,24 @@ sap.ui.define(["./prompts", "./textMatching"], function (prompts, textMatching) 
             if (header.endObject === current.endObject) {
                 delete header.endObject;
             }
+            if (header.startObject === "SERVICE_QUOTATION" && !header.processVariant && ["W2_QUOTATION", "W2_REJECTED"].indexOf(current.variant) === -1) {
+                // a start with the quotation needs a way with a quotation
+                header.processVariant = "W2_QUOTATION";
+            }
+            if (header.startObject === current.start) {
+                delete header.startObject;
+            }
             const patch = {};
             for (const question of this.openQuestions) {
                 const ranked = textMatching.rank(question.candidates, text, function (c) {
                     return c.id + " " + c.text;
                 });
                 if (ranked.length === 1 || (ranked.length > 1 && ranked[0].score > ranked[1].score)) {
-                    patch[question.field] = ranked[0].entry.id;
+                    if (HEADER_QUESTIONS[question.field]) {
+                        header[HEADER_QUESTIONS[question.field]] = ranked[0].entry.id;
+                    } else {
+                        patch[question.field] = ranked[0].entry.id;
+                    }
                 }
             }
             // explicit changes: duration, priority
@@ -179,7 +210,9 @@ sap.ui.define(["./prompts", "./textMatching"], function (prompts, textMatching) 
                         "Prozessbezug geändert: " +
                         [
                             header.processVariant ? "Weg " + masterData.describe("ProcessVariant", changed.testCase.ProcessVariant) : "",
-                            header.endObject || header.processVariant ? "Lauf bis " + masterData.describe("EndObject", changed.testCase.EndObject) : ""
+                            header.startObject || header.processVariant ? "Start ab " + masterData.describe("StartObject", changed.testCase.StartObject) : "",
+                            header.endObject || header.processVariant ? "Lauf bis " + masterData.describe("EndObject", changed.testCase.EndObject) : "",
+                            header.predecessorTestCase ? "Vorgänger " + masterData.describe("PredecessorTestCase", changed.testCase.PredecessorTestCase) + " (Belege und Testdaten übernommen)" : ""
                         ]
                             .filter(Boolean)
                             .join(", ") +
@@ -285,7 +318,16 @@ sap.ui.define(["./prompts", "./textMatching"], function (prompts, textMatching) 
                         (process.team ? masterData.describe("ProcessTeam", process.team) : "Team offen") +
                         " · " +
                         (process.variant ? masterData.describe("ProcessVariant", process.variant) : "Weg offen") +
+                        (process.start ? " · Start ab " + masterData.describe("StartObject", process.start) : "") +
                         (process.endObject ? " · Lauf bis " + masterData.describe("EndObject", process.endObject) : "")
+                );
+            }
+            if (process.takesOver) {
+                lines.push(
+                    "- Übergabe: " +
+                        (process.predecessor ? masterData.describe("PredecessorTestCase", process.predecessor) : "Vorgänger-Testfall offen") +
+                        " liefert " +
+                        masterData.describe("EndObject", process.takesOver)
                 );
             }
             if (process.assignment && process.assignment !== "ASSIGNED") {
@@ -351,7 +393,9 @@ sap.ui.define(["./prompts", "./textMatching"], function (prompts, textMatching) 
             } else {
                 lines.push("");
                 lines.push("Bitte prüfen Sie den Entwurf rechts und bestätigen Sie mit **Übernehmen & starten**: Der Testfall wird gespeichert, freigegeben und die Ausführung in der App gestartet.");
-                lines.push("Anderer Weg oder Endpunkt? Schreiben Sie z. B. „mit Angebot“, „Angebot wird abgelehnt“, „über den Wartungsvertrag“ oder „nur bis zum Auftrag“.");
+                lines.push(
+                    "Anderer Weg, Start oder Endpunkt? Schreiben Sie z. B. „mit Angebot“, „Angebot wird abgelehnt“, „über den Wartungsvertrag“, „direkt ab dem Angebot“ oder „nur bis zum Auftrag“."
+                );
             }
             return lines.join("\n");
         }

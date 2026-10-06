@@ -64,11 +64,11 @@ test('rule-based agent: German heat cost allocator report → valid draft → sa
     const md = await gateway.masterData();
     assert.deepEqual(
         prompts.processRows(session.draft.process, md.describe).map((row) => row.label),
-        ['Prozessteam', 'Weg', 'Lauf bis', 'Teststufe', 'Zuordnung']
+        ['Prozessteam', 'Weg', 'Start ab', 'Lauf bis', 'Teststufe', 'Zuordnung']
     );
     const submitted = await session.submit();
-    assert.equal(submitted.caseId, 'STC-2026-000013');
-    assert.match(submitted.externalExecutionId, /^MOCK-\d{8}-0005$/);
+    assert.equal(submitted.caseId, 'STC-2026-000015');
+    assert.match(submitted.externalExecutionId, /^MOCK-\d{8}-0007$/);
     assert.deepEqual(gateway.calls.map((c) => c[0]).slice(-3), ['save', 'approve', 'start']);
     assert.match((await session.send('Noch etwas?')).text, /bereits übernommen/);
 });
@@ -118,6 +118,36 @@ test('rule-based agent: way and end object from the answer — quotation rejecte
     assert.match((await session.send('Danke!')).text, /keinem offenen Punkt zuordnen/);
 });
 
+test('rule-based agent: start directly with the quotation; the end-to-end team names its predecessor in the answer', async (t) => {
+    const { repo, tenantId } = setup();
+    t.after(() => teardown(tenantId));
+    const { session, steps } = newSession(repo);
+    await session.send(TEXT_HKV);
+    const fromQuote = await session.send('Bitte direkt ab dem Angebot starten.');
+    assert.equal(session.draft.process.start, 'SERVICE_QUOTATION', fromQuote.text);
+    assert.equal(session.draft.process.variant, 'W2_QUOTATION', 'a start with the quotation needs a way with a quotation');
+    assert.equal(session.draft.validation.status, 'VALID', fromQuote.text);
+    assert.match(fromQuote.text, /Start ab Angebot/);
+    assert.ok(steps.some((st) => /Start ab Angebot/.test(st.text)));
+
+    // team New End to End Prozess: billing starts with the billing document request and needs a predecessor
+    const other = newSession(repo);
+    const first = await other.session.send(
+        'Prozessteam New End to End: die Rückmeldung zum Heizkostenverteiler in der Küche (Musterstraße 12, EG links, Schneider) fakturieren bis zum FI-Beleg. Gemeldet von Petra Wagner.'
+    );
+    const process = other.session.draft.process;
+    assert.deepEqual([process.team, process.start, process.endObject, process.takesOver], ['PT-E2E', 'BILLING_DOC_REQUEST', 'ACCOUNTING_DOCUMENT', 'SERVICE_CONFIRMATION'], first.text);
+    assert.match(first.text, /Vorgänger-Testfall/);
+    assert.match(first.text, /STC-2026-000013/);
+    const answered = await other.session.send('Vorgänger ist STC-2026-000013.');
+    assert.equal(other.session.draft.process.predecessor, 'STC-2026-000013', answered.text);
+    assert.equal(other.session.draft.values.ServiceReferenceEquipment, 'HKV-0815-012', 'test data of the predecessor');
+    assert.equal(other.session.draft.validation.status, 'VALID', answered.text);
+    assert.match(answered.text, /Übergabe: STC-2026-000013 · Übergabe an E2E/);
+    // approval is checked server-side: DEMO_USER is only test executor in the end-to-end team
+    await assert.rejects(other.session.submit(), /process owner .* in process team PT-E2E is missing/);
+});
+
 test('rule-based agent: maintenance contract → way 3 with contract determination, saved, approved and started', async (t) => {
     const { repo, tenantId } = setup();
     t.after(() => teardown(tenantId));
@@ -131,7 +161,7 @@ test('rule-based agent: maintenance contract → way 3 with contract determinati
     assert.equal(session.draft.validation.status, 'VALID', answer.text);
     assert.match(answer.text, /Servicevertrag: 4100000001 · RWM-Service Musterstraße 12/);
     const submitted = await session.submit();
-    assert.equal(submitted.caseId, 'STC-2026-000013');
+    assert.equal(submitted.caseId, 'STC-2026-000015');
     assert.deepEqual(gateway.calls.map((c) => c[0]).slice(-3), ['save', 'approve', 'start']);
     const execution = (await repo.find('Execution', { IsActiveEntity: true })).find((e) => e.ExternalExecutionID === submitted.externalExecutionId);
     assert.equal(execution.ProcessVariant, 'W3_CONTRACT');

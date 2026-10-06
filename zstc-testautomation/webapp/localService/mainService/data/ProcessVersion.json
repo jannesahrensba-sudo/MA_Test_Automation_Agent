@@ -8,7 +8,7 @@
         "VersionNote": "Erstmodellierung: Wege 1 und 2 (Service Request, Angebot), Faktura und FI-Beleg.",
         "StepCount": 11,
         "VariantCount": 3,
-        "ContentHash": "db5d7e6d"
+        "ContentHash": "8b617574"
     },
     {
         "ProcessVersionUUID": "9e3f4c30-0002-4a5b-9c6d-000000000002",
@@ -19,7 +19,7 @@
         "VersionNote": "Weg 3 ergänzt (Vertragsfindung, Rechnungsplan); spätere Erweiterungen Garantie, Requote, In-House Repair, Solution Quotation erfasst.",
         "StepCount": 17,
         "VariantCount": 9,
-        "ContentHash": "f801e1a0"
+        "ContentHash": "b544f47e"
     },
     {
         "ProcessVersionUUID": "9e3f4c30-0003-4a5b-9c6d-000000000003",

@@ -123,7 +123,7 @@ test('metering golden path: German report → analyze → validate → save → 
     assert.equal(result.overall, 'VALID', JSON.stringify(result.items.filter((i) => i.ValidationStatus !== 'SUCCESS')));
 
     const active = await activate(repo, draft);
-    assert.equal((await repo.findOne('TestCase', active)).CaseID, 'STC-2026-000013');
+    assert.equal((await repo.findOne('TestCase', active)).CaseID, 'STC-2026-000015');
     await service.approve(repo, active);
     await service.startExecution(repo, active);
     tick(15000);

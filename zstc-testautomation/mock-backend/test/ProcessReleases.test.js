@@ -247,8 +247,8 @@ test('release: copy scope from the predecessor, regression run with skip reasons
     const keys = { ReleaseID: 'S4-2025-FPS02', IsActiveEntity: true };
     await assert.rejects(releaseService.startRegressionRun(repo, keys), (error) => error.number === 251, 'only releases in test');
     const copied = await releaseService.copyScopeFromPredecessor(repo, keys);
-    assert.match(copied.messages[0].message, /5 scope entries copied from INT-2026.10/);
-    assert.equal((await repo.find('ReleaseScope', { ReleaseID: 'S4-2025-FPS02', IsActiveEntity: true })).length, 5);
+    assert.match(copied.messages[0].message, /6 scope entries copied from INT-2026.10/);
+    assert.equal((await repo.find('ReleaseScope', { ReleaseID: 'S4-2025-FPS02', IsActiveEntity: true })).length, 6);
 
     // test start of FPS02 with "Regression at Test Start": the regression run starts automatically
     await repo.update('Release', keys, { ReleaseStatus: 'IN_TEST' });
@@ -265,11 +265,27 @@ test('release: copy scope from the predecessor, regression run with skip reasons
     assert.match(byCase['STC-2026-000012'].Reason, /test executor/, 'no execution authorization in the quotation team');
     assert.match(byCase['STC-2026-000004'].Reason, /Approve the test case/, 'version 2 is not approved');
     assert.match(byCase['STC-2026-000009'].Reason, /invalid/i);
+    // handover within the run: the end-to-end team waits for the confirmation of the repair team's run
+    assert.equal(byCase['STC-2026-000013'].Decision, 'STARTED');
+    assert.equal(byCase['STC-2026-000014'].Decision, 'WAITING');
+    assert.match(byCase['STC-2026-000014'].Reason, /Waits for predecessor STC-2026-000013/);
 
     tick(60000);
+    const first = await releaseService.refreshRegressionRun(repo, keys);
+    assert.equal(first.messages.length, 0, 'the waiting test case runs now');
+    const dependent = (await repo.find('RegressionRunItem', { RunUUID: release.LatestRunUUID })).find((i) => i.CaseID === 'STC-2026-000014');
+    assert.equal(dependent.Decision, 'STARTED');
+    tick(60000);
     const refreshed = await releaseService.refreshRegressionRun(repo, keys);
-    // started: STC-1, 7, 8, 10, 11 · skipped: STC-3, 6 (not validated), 4 (version 2), 5, 9 (invalid), 12 (role)
-    assert.match(refreshed.messages[0].message, /finished: 5 passed, 0 failed, 6 skipped/);
+    // started: STC-1, 7, 8, 10, 11, 13, 14 · skipped: STC-3, 6 (not validated), 4 (version 2), 5, 9 (invalid), 12 (role)
+    assert.match(refreshed.messages[0].message, /finished: 7 passed, 0 failed, 6 skipped/);
+    const handover = await repo.findOne('Execution', { ExecutionUUID: dependent.ExecutionUUID, IsActiveEntity: true });
+    const predecessorRun = await repo.findOne('Execution', {
+        ExecutionUUID: (await repo.find('RegressionRunItem', { RunUUID: release.LatestRunUUID })).find((i) => i.CaseID === 'STC-2026-000013').ExecutionUUID,
+        IsActiveEntity: true
+    });
+    assert.equal(handover.PredecessorExecution, `STC-2026-000013 · ${predecessorRun.ExternalExecutionID}`, 'documents of the same regression run');
+    assert.equal(handover.FunctionalResult, 'PASSED');
     const done = await repo.findOne('Release', keys);
     assert.equal(done.LatestRunStatus, 'FINISHED');
     assert.equal(done.PassRate, 100);
@@ -333,4 +349,73 @@ test('"run up to" outside the way is replaced by the end of the way and reported
     const kept = await repo.findOne('TestCase', draft);
     assert.equal(kept.EndObject, 'SERVICE_ORDER');
     assert.deepEqual(kept.SAP__Messages, []);
+});
+
+test('start from: default by the team, predecessor test case hands over its documents (rule R12)', async (t) => {
+    const { repo, tenantId, tick } = setup();
+    t.after(() => teardown(tenantId));
+    // the quotation team starts directly with the quotation: its own sub-process, no handover
+    const quote = await createDraft(repo);
+    await repo.update('TestCase', quote, { ProcessTeam: 'PT-ANGEBOT' });
+    await service.onProcessReferenceChanged(repo, quote, ['ProcessTeam']);
+    let tc = await repo.findOne('TestCase', quote);
+    assert.equal(tc.StartObject, 'SERVICE_QUOTATION');
+    assert.equal(tc.PredecessorObject, '');
+    assert.equal(tc.SAP__Messages[0].code, 'ZSTC_TA/114', 'information: start where the team enters the path');
+    const steps = (await repo.find('TestCaseStep', quote)).sort((a, b) => a.StepNo - b.StepNo).map((s) => s.ProcessStepID);
+    assert.equal(steps[0], 'REP-030');
+    // a start that is not on the way is replaced and reported at the field
+    await repo.update('TestCase', quote, { ProcessVariant: 'W1_REQUEST', StartObject: 'SERVICE_QUOTATION' });
+    await service.onProcessReferenceChanged(repo, quote, ['ProcessVariant', 'StartObject']);
+    tc = await repo.findOne('TestCase', quote);
+    assert.equal(tc.StartObject, 'SERVICE_REQUEST');
+    assert.match(tc.SAP__Messages.find((m) => m.target === 'StartObject').message, /Service Quotation is no start of way W1_REQUEST/);
+
+    // the end-to-end team starts with billing: it needs the confirmation of a predecessor test case
+    const billing = await createDraft(repo);
+    await repo.update('TestCase', billing, { ProcessTeam: 'PT-E2E', ProcessVariant: 'W1_REQUEST', EndObject: 'ACCOUNTING_DOCUMENT' });
+    await service.onProcessReferenceChanged(repo, billing, ['ProcessTeam', 'ProcessVariant', 'EndObject']);
+    tc = await repo.findOne('TestCase', billing);
+    assert.equal(tc.StartObject, 'BILLING_DOC_REQUEST');
+    assert.equal(tc.PredecessorObject, 'SERVICE_CONFIRMATION');
+    assert.equal(tc.TestLevel, 'SUB_PROCESS');
+    let validation = await service.validateTestCase(repo, billing);
+    const finding = (await repo.find('ValidationResult', billing)).find((r) => r.RuleID === 'R12_PREDECESSOR');
+    assert.equal(finding.ValidationStatus, 'ERROR');
+    assert.equal(finding.SuggestedValue, 'STC-2026-000013', 'approved predecessor that ends with the confirmation first');
+    assert.equal(validation.result.overall, 'INVALID');
+    // applying the suggestion takes the test data of the predecessor over
+    await service.applySuggestion(repo, { ValidationUUID: finding.ValidationUUID, IsActiveEntity: false });
+    tc = await repo.findOne('TestCase', billing);
+    assert.equal(tc.PredecessorTestCase, 'STC-2026-000013');
+    assert.equal((await repo.findOne('TestCaseData', billing)).ServiceReferenceEquipment, 'HKV-0815-012');
+    validation = await service.validateTestCase(repo, billing);
+    assert.equal(validation.result.overall, 'VALID');
+    assert.match((await repo.find('ValidationResult', billing)).find((r) => r.RuleID === 'R12_PREDECESSOR').ValidationMessage, /latest passed run MOCK-20260929-0005/);
+
+    // a run continues with the documents of the predecessor's latest passed run
+    const active = await activate(repo, billing);
+    await repo.update('TestCase', active, { ProcessTeam: 'PT-E2E' });
+    await service.approve(repo, active, 'E2E_LEAD');
+    const started = await service.startExecution(repo, active, { user: 'E2E_TESTER' });
+    assert.match(started.messages[0].message, /continuing with the Service Confirmation of STC-2026-000013 · MOCK-20260929-0005/);
+    tick(20000);
+    const finished = await service.refreshExecution(repo, active);
+    assert.equal(finished.testCase.FinalResult, 'PASSED');
+    const documents = await repo.find('DocumentReference', { ExecutionUUID: started.testCase.LatestExecutionUUID });
+    const origin = Object.fromEntries(documents.map((d) => [d.BusinessObjectType, d.DocumentOrigin]));
+    assert.equal(origin.SERVICE_CONFIRMATION, 'TAKEN_OVER');
+    assert.equal(origin.BILLING_DOC_REQUEST, 'CREATED');
+    const request = documents.find((d) => d.BusinessObjectType === 'BILLING_DOC_REQUEST');
+    assert.equal(request.PredecessorDocumentID, '8999999996', 'billing request refers to the confirmation of the predecessor');
+    const flow = (await repo.find('TestAssertion', { ExecutionUUID: started.testCase.LatestExecutionUUID })).find((a) => a.Field === 'DocumentFlow');
+    assert.equal(flow.Result, 'PASSED');
+    assert.match(flow.ExpectedValue, /^\(SR → SO → SC\) → BDR → BD → FI$/);
+
+    // without a passed run of the predecessor the start is refused (message 211)
+    const other = await repo.findOne('TestCase', active);
+    await repo.update('TestCase', active, { PredecessorTestCase: 'STC-2026-000010' });
+    const check = await service.executionCheck(repo, { ...other, PredecessorTestCase: 'STC-2026-000010' }, { user: 'E2E_TESTER' });
+    assert.equal(check.ok, false);
+    assert.equal(check.error.number, 211);
 });

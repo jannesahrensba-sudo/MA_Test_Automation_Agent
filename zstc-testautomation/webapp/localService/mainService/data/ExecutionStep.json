@@ -123,7 +123,7 @@
         "Message": "10000011 created.",
         "ProcessStepID": "REP-090",
         "StepName": "Freigabe zur Fakturierung (Billing Document Request)",
-        "ResponsibleTeam": ""
+        "ResponsibleTeam": "PT-E2E"
     },
     {
         "StepUUID": "9e3f4c30-0044-4a5b-9c6d-000000000044",
@@ -144,7 +144,7 @@
         "Message": "90000114 created.",
         "ProcessStepID": "REP-100",
         "StepName": "Faktura (SD) erzeugen",
-        "ResponsibleTeam": ""
+        "ResponsibleTeam": "PT-E2E"
     },
     {
         "StepUUID": "9e3f4c30-0133-4a5b-9c6d-000000000133",
@@ -228,7 +228,7 @@
         "Message": "10000010 created.",
         "ProcessStepID": "REP-090",
         "StepName": "Freigabe zur Fakturierung (Billing Document Request)",
-        "ResponsibleTeam": ""
+        "ResponsibleTeam": "PT-E2E"
     },
     {
         "StepUUID": "9e3f4c30-0137-4a5b-9c6d-000000000137",
@@ -249,7 +249,7 @@
         "Message": "90000113 created.",
         "ProcessStepID": "REP-100",
         "StepName": "Faktura (SD) erzeugen",
-        "ResponsibleTeam": ""
+        "ResponsibleTeam": "PT-E2E"
     },
     {
         "StepUUID": "9e3f4c30-0232-4a5b-9c6d-000000000232",
@@ -333,7 +333,7 @@
         "Message": "10000009 created.",
         "ProcessStepID": "REP-090",
         "StepName": "Freigabe zur Fakturierung (Billing Document Request)",
-        "ResponsibleTeam": ""
+        "ResponsibleTeam": "PT-E2E"
     },
     {
         "StepUUID": "9e3f4c30-0236-4a5b-9c6d-000000000236",
@@ -354,7 +354,7 @@
         "Message": "90000112 created.",
         "ProcessStepID": "REP-100",
         "StepName": "Faktura (SD) erzeugen",
-        "ResponsibleTeam": ""
+        "ResponsibleTeam": "PT-E2E"
     },
     {
         "StepUUID": "9e3f4c30-0237-4a5b-9c6d-000000000237",
@@ -375,7 +375,7 @@
         "Message": "1400000097 posted.",
         "ProcessStepID": "REP-110",
         "StepName": "Buchhaltungsbeleg (FI) prüfen",
-        "ResponsibleTeam": ""
+        "ResponsibleTeam": "PT-E2E"
     },
     {
         "StepUUID": "9e3f4c30-0291-4a5b-9c6d-000000000291",
@@ -439,5 +439,131 @@
         "ProcessStepID": "REP-041",
         "StepName": "Kunde lehnt das Angebot ab (Prozessende)",
         "ResponsibleTeam": "PT-ANGEBOT"
+    },
+    {
+        "StepUUID": "9e3f4c30-0427-4a5b-9c6d-000000000427",
+        "ExecutionUUID": "9e3f4c30-0426-4a5b-9c6d-000000000426",
+        "TestCaseUUID": "6f1c2a10-0013-4c3e-9a51-000000000013",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 1,
+        "BusinessObjectType": "SERVICE_REQUEST",
+        "ExpectedStatus": "Completed",
+        "ActualStatus": "Completed",
+        "ExecutionStatus": "DONE",
+        "Criticality": 3,
+        "StartedAt": "2026-09-29T08:16:00.000Z",
+        "FinishedAt": "2026-09-29T08:16:02.000Z",
+        "Message": "8000000005 created.",
+        "ProcessStepID": "REP-010",
+        "StepName": "Kundenanliegen als Service Request erfassen",
+        "ResponsibleTeam": "PT-REPARATUR"
+    },
+    {
+        "StepUUID": "9e3f4c30-0428-4a5b-9c6d-000000000428",
+        "ExecutionUUID": "9e3f4c30-0426-4a5b-9c6d-000000000426",
+        "TestCaseUUID": "6f1c2a10-0013-4c3e-9a51-000000000013",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 2,
+        "BusinessObjectType": "SERVICE_ORDER",
+        "ExpectedStatus": "Completed",
+        "ActualStatus": "Completed",
+        "ExecutionStatus": "DONE",
+        "Criticality": 3,
+        "StartedAt": "2026-09-29T08:16:02.000Z",
+        "FinishedAt": "2026-09-29T08:16:04.000Z",
+        "Message": "8000000024 created.",
+        "ProcessStepID": "REP-060",
+        "StepName": "Service Order anlegen (aus Request, Angebot oder Vertrag)",
+        "ResponsibleTeam": "PT-REPARATUR"
+    },
+    {
+        "StepUUID": "9e3f4c30-0429-4a5b-9c6d-000000000429",
+        "ExecutionUUID": "9e3f4c30-0426-4a5b-9c6d-000000000426",
+        "TestCaseUUID": "6f1c2a10-0013-4c3e-9a51-000000000013",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 3,
+        "BusinessObjectType": "SERVICE_CONFIRMATION",
+        "ExpectedStatus": "Completed",
+        "ActualStatus": "Completed",
+        "ExecutionStatus": "DONE",
+        "Criticality": 3,
+        "StartedAt": "2026-09-29T08:16:04.000Z",
+        "FinishedAt": "2026-09-29T08:16:06.000Z",
+        "Message": "8999999996 created.",
+        "ProcessStepID": "REP-080",
+        "StepName": "Service Confirmation (Aufwand) buchen",
+        "ResponsibleTeam": "PT-REPARATUR"
+    },
+    {
+        "StepUUID": "9e3f4c30-0475-4a5b-9c6d-000000000475",
+        "ExecutionUUID": "9e3f4c30-0474-4a5b-9c6d-000000000474",
+        "TestCaseUUID": "6f1c2a10-0014-4c3e-9a51-000000000014",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 1,
+        "BusinessObjectType": "BILLING_DOC_REQUEST",
+        "ExpectedStatus": "Billed",
+        "ActualStatus": "Billed",
+        "ExecutionStatus": "DONE",
+        "Criticality": 3,
+        "StartedAt": "2026-09-29T09:16:00.000Z",
+        "FinishedAt": "2026-09-29T09:16:02.000Z",
+        "Message": "10000008 created.",
+        "ProcessStepID": "REP-090",
+        "StepName": "Freigabe zur Fakturierung (Billing Document Request)",
+        "ResponsibleTeam": "PT-E2E"
+    },
+    {
+        "StepUUID": "9e3f4c30-0476-4a5b-9c6d-000000000476",
+        "ExecutionUUID": "9e3f4c30-0474-4a5b-9c6d-000000000474",
+        "TestCaseUUID": "6f1c2a10-0014-4c3e-9a51-000000000014",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 2,
+        "BusinessObjectType": "BILLING_DOCUMENT",
+        "ExpectedStatus": "Posted",
+        "ActualStatus": "Posted",
+        "ExecutionStatus": "DONE",
+        "Criticality": 3,
+        "StartedAt": "2026-09-29T09:16:02.000Z",
+        "FinishedAt": "2026-09-29T09:16:04.000Z",
+        "Message": "90000111 created.",
+        "ProcessStepID": "REP-100",
+        "StepName": "Faktura (SD) erzeugen",
+        "ResponsibleTeam": "PT-E2E"
+    },
+    {
+        "StepUUID": "9e3f4c30-0477-4a5b-9c6d-000000000477",
+        "ExecutionUUID": "9e3f4c30-0474-4a5b-9c6d-000000000474",
+        "TestCaseUUID": "6f1c2a10-0014-4c3e-9a51-000000000014",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 3,
+        "BusinessObjectType": "ACCOUNTING_DOCUMENT",
+        "ExpectedStatus": "Posted",
+        "ActualStatus": "Posted",
+        "ExecutionStatus": "DONE",
+        "Criticality": 3,
+        "StartedAt": "2026-09-29T09:16:04.000Z",
+        "FinishedAt": "2026-09-29T09:16:06.000Z",
+        "Message": "1400000096 posted.",
+        "ProcessStepID": "REP-110",
+        "StepName": "Buchhaltungsbeleg (FI) prüfen",
+        "ResponsibleTeam": "PT-E2E"
     }
 ]

@@ -50,11 +50,19 @@ function createMemoryGateway(repo) {
         processes: repo.data.BusinessProcessVH,
         variants: repo.data.ProcessVariantVH,
         releases: repo.data.ReleaseVH,
-        serviceContracts: repo.data.ServiceContractVH
+        serviceContracts: repo.data.ServiceContractVH,
+        testCases: repo.data.TestCaseVH
     };
     const masterData = createMasterData(pools);
     /** header fields of the process reference (TestCaseGateway.HEADER_FIELDS) */
-    const HEADER_FIELDS = { processTeam: 'ProcessTeam', processVariant: 'ProcessVariant', endObject: 'EndObject', preconditions: 'Preconditions' };
+    const HEADER_FIELDS = {
+        processTeam: 'ProcessTeam',
+        processVariant: 'ProcessVariant',
+        endObject: 'EndObject',
+        startObject: 'StartObject',
+        preconditions: 'Preconditions',
+        predecessorTestCase: 'PredecessorTestCase'
+    };
     const draftKeys = (uuid) => ({ TestCaseUUID: uuid, IsActiveEntity: false });
     const activeKeys = (uuid) => ({ TestCaseUUID: uuid, IsActiveEntity: true });
     const calls = [];
@@ -85,18 +93,21 @@ function createMemoryGateway(repo) {
                 await repo.update('TestCase', draftKeys(uuid), { Title: header.title });
             }
             // process reference first, as in the OData PATCH (TestCase.js: onAfterUpdateEntry → onProcessReferenceChanged)
-            const headerPatch = {};
-            for (const [key, property] of Object.entries(HEADER_FIELDS)) {
-                if (header && header[key] !== undefined && header[key] !== null) {
-                    headerPatch[property] = header[key];
+            // two PATCH requests like the gateway: first the process reference, then the predecessor (depends on the start)
+            for (const keys of [Object.keys(HEADER_FIELDS).filter((key) => key !== 'predecessorTestCase'), ['predecessorTestCase']]) {
+                const headerPatch = {};
+                for (const key of keys) {
+                    if (header && header[key] !== undefined && header[key] !== null) {
+                        headerPatch[HEADER_FIELDS[key]] = header[key];
+                    }
                 }
-            }
-            if (Object.keys(headerPatch).length) {
-                const stored = await repo.findOne('TestCase', draftKeys(uuid));
-                const changed = service.PROCESS_FIELDS.filter((field) => field in headerPatch && String(stored[field] ?? '') !== String(headerPatch[field]));
-                await repo.update('TestCase', draftKeys(uuid), headerPatch);
-                if (changed.length) {
-                    await service.onProcessReferenceChanged(repo, draftKeys(uuid), changed);
+                if (Object.keys(headerPatch).length) {
+                    const stored = await repo.findOne('TestCase', draftKeys(uuid));
+                    const changed = service.PROCESS_FIELDS.filter((field) => field in headerPatch && String(stored[field] ?? '') !== String(headerPatch[field]));
+                    await repo.update('TestCase', draftKeys(uuid), headerPatch);
+                    if (changed.length) {
+                        await service.onProcessReferenceChanged(repo, draftKeys(uuid), changed);
+                    }
                 }
             }
             if (fields && Object.keys(fields).length) {

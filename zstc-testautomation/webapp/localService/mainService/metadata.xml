@@ -59,6 +59,9 @@
                 <Property Name="BusinessProcess" Type="Edm.String" MaxLength="20"/>
                 <Property Name="ProcessVariant" Type="Edm.String" MaxLength="20"/>
                 <Property Name="EndObject" Type="Edm.String" MaxLength="30"/>
+                <Property Name="StartObject" Type="Edm.String" MaxLength="30"/>
+                <Property Name="PredecessorTestCase" Type="Edm.String" MaxLength="20"/>
+                <Property Name="PredecessorObject" Type="Edm.String" MaxLength="30"/>
                 <Property Name="TestLevel" Type="Edm.String" MaxLength="20"/>
                 <Property Name="BusinessOwner" Type="Edm.String" MaxLength="12"/>
                 <Property Name="Preconditions" Type="Edm.String" MaxLength="1000"/>
@@ -99,6 +102,15 @@
                 </NavigationProperty>
                 <NavigationProperty Name="_EndObject" Type="com.sap.gateway.srvd.zui_stc_test_case.v0001.EndObjectVHType">
                     <ReferentialConstraint Property="EndObject" ReferencedProperty="Code"/>
+                </NavigationProperty>
+                <NavigationProperty Name="_StartObject" Type="com.sap.gateway.srvd.zui_stc_test_case.v0001.EndObjectVHType">
+                    <ReferentialConstraint Property="StartObject" ReferencedProperty="Code"/>
+                </NavigationProperty>
+                <NavigationProperty Name="_PredecessorObject" Type="com.sap.gateway.srvd.zui_stc_test_case.v0001.EndObjectVHType">
+                    <ReferentialConstraint Property="PredecessorObject" ReferencedProperty="Code"/>
+                </NavigationProperty>
+                <NavigationProperty Name="_PredecessorTestCase" Type="com.sap.gateway.srvd.zui_stc_test_case.v0001.TestCaseVHType">
+                    <ReferentialConstraint Property="PredecessorTestCase" ReferencedProperty="CaseID"/>
                 </NavigationProperty>
                 <NavigationProperty Name="_TestLevel" Type="com.sap.gateway.srvd.zui_stc_test_case.v0001.TestLevelVHType">
                     <ReferentialConstraint Property="TestLevel" ReferencedProperty="Code"/>
@@ -306,6 +318,8 @@
                 <Property Name="ProcessVersion" Type="Edm.Int16"/>
                 <Property Name="ProcessVariant" Type="Edm.String" MaxLength="20"/>
                 <Property Name="EndObject" Type="Edm.String" MaxLength="30"/>
+                <Property Name="StartObject" Type="Edm.String" MaxLength="30"/>
+                <Property Name="PredecessorExecution" Type="Edm.String" MaxLength="60"/>
                 <Property Name="RunType" Type="Edm.String" MaxLength="20"/>
                 <Property Name="RegressionRunUUID" Type="Edm.Guid"/>
                 <Property Name="ExecutedBy" Type="Edm.String" MaxLength="12"/>
@@ -320,6 +334,9 @@
                 </NavigationProperty>
                 <NavigationProperty Name="_EndObject" Type="com.sap.gateway.srvd.zui_stc_test_case.v0001.EndObjectVHType">
                     <ReferentialConstraint Property="EndObject" ReferencedProperty="Code"/>
+                </NavigationProperty>
+                <NavigationProperty Name="_StartObject" Type="com.sap.gateway.srvd.zui_stc_test_case.v0001.EndObjectVHType">
+                    <ReferentialConstraint Property="StartObject" ReferencedProperty="Code"/>
                 </NavigationProperty>
                 <NavigationProperty Name="_RunType" Type="com.sap.gateway.srvd.zui_stc_test_case.v0001.RunTypeVHType">
                     <ReferentialConstraint Property="RunType" ReferencedProperty="Code"/>
@@ -408,11 +425,16 @@
                 <Property Name="Criticality" Type="Edm.Byte"/>
                 <Property Name="ProcessStepID" Type="Edm.String" MaxLength="20"/>
                 <Property Name="StepName" Type="Edm.String" MaxLength="80"/>
+                <Property Name="DocumentOrigin" Type="Edm.String" MaxLength="20"/>
+                <Property Name="OriginReference" Type="Edm.String" MaxLength="60"/>
                 <Property Name="IsActiveEntity" Type="Edm.Boolean" Nullable="false"/>
                 <Property Name="HasActiveEntity" Type="Edm.Boolean" Nullable="false"/>
                 <Property Name="HasDraftEntity" Type="Edm.Boolean" Nullable="false"/>
                 <NavigationProperty Name="_Execution" Type="com.sap.gateway.srvd.zui_stc_test_case.v0001.ExecutionType" Partner="_DocumentReference" Nullable="false">
                     <ReferentialConstraint Property="ExecutionUUID" ReferencedProperty="ExecutionUUID"/>
+                </NavigationProperty>
+                <NavigationProperty Name="_DocumentOrigin" Type="com.sap.gateway.srvd.zui_stc_test_case.v0001.DocumentOriginVHType">
+                    <ReferentialConstraint Property="DocumentOrigin" ReferencedProperty="Code"/>
                 </NavigationProperty>
                 <NavigationProperty Name="_BusinessObjectType" Type="com.sap.gateway.srvd.zui_stc_test_case.v0001.BusinessObjectTypeVHType">
                     <ReferentialConstraint Property="BusinessObjectType" ReferencedProperty="Code"/>
@@ -1191,6 +1213,20 @@
                 <Property Name="ProcessTeamName" Type="Edm.String" MaxLength="60"/>
                 <Property Name="ProcessArea" Type="Edm.String" MaxLength="40"/>
             </EntityType>
+            <EntityType Name="TestCaseVHType">
+                <Key>
+                    <PropertyRef Name="CaseID"/>
+                </Key>
+                <Property Name="CaseID" Type="Edm.String" Nullable="false" MaxLength="20"/>
+                <Property Name="Title" Type="Edm.String" MaxLength="80"/>
+                <Property Name="ProcessTeam" Type="Edm.String" MaxLength="20"/>
+                <Property Name="BusinessProcess" Type="Edm.String" MaxLength="20"/>
+                <Property Name="ProcessVariant" Type="Edm.String" MaxLength="20"/>
+                <Property Name="StartObject" Type="Edm.String" MaxLength="30"/>
+                <Property Name="EndObject" Type="Edm.String" MaxLength="30"/>
+                <Property Name="ApprovalStatus" Type="Edm.String" MaxLength="20"/>
+                <Property Name="LatestResult" Type="Edm.String" MaxLength="25"/>
+            </EntityType>
             <EntityType Name="UserVHType">
                 <Key>
                     <PropertyRef Name="UserID"/>
@@ -1425,6 +1461,13 @@
                 <Property Name="Code" Type="Edm.String" Nullable="false" MaxLength="30"/>
                 <Property Name="Text" Type="Edm.String" MaxLength="40"/>
             </EntityType>
+            <EntityType Name="DocumentOriginVHType">
+                <Key>
+                    <PropertyRef Name="Code"/>
+                </Key>
+                <Property Name="Code" Type="Edm.String" Nullable="false" MaxLength="30"/>
+                <Property Name="Text" Type="Edm.String" MaxLength="40"/>
+            </EntityType>
             <EntityType Name="I_DraftAdministrativeDataType">
                 <Key>
                     <PropertyRef Name="DraftUUID"/>
@@ -1638,6 +1681,9 @@
                     <NavigationPropertyBinding Path="_BusinessProcess" Target="BusinessProcessVH"/>
                     <NavigationPropertyBinding Path="_ProcessVariant" Target="ProcessVariantVH"/>
                     <NavigationPropertyBinding Path="_EndObject" Target="EndObjectVH"/>
+                    <NavigationPropertyBinding Path="_StartObject" Target="EndObjectVH"/>
+                    <NavigationPropertyBinding Path="_PredecessorObject" Target="EndObjectVH"/>
+                    <NavigationPropertyBinding Path="_PredecessorTestCase" Target="TestCaseVH"/>
                     <NavigationPropertyBinding Path="_TestLevel" Target="TestLevelVH"/>
                     <NavigationPropertyBinding Path="_BusinessOwner" Target="UserVH"/>
                     <NavigationPropertyBinding Path="_AssignmentStatus" Target="AssignmentStatusVH"/>
@@ -1689,6 +1735,7 @@
                     <NavigationPropertyBinding Path="_TestCase" Target="TestCase"/>
                     <NavigationPropertyBinding Path="_Release" Target="ReleaseVH"/>
                     <NavigationPropertyBinding Path="_EndObject" Target="EndObjectVH"/>
+                    <NavigationPropertyBinding Path="_StartObject" Target="EndObjectVH"/>
                     <NavigationPropertyBinding Path="_RunType" Target="RunTypeVH"/>
                     <NavigationPropertyBinding Path="_ExecutionStep" Target="ExecutionStep"/>
                     <NavigationPropertyBinding Path="_DocumentReference" Target="DocumentReference"/>
@@ -1709,6 +1756,7 @@
                 </EntitySet>
                 <EntitySet Name="DocumentReference" EntityType="com.sap.gateway.srvd.zui_stc_test_case.v0001.DocumentReferenceType">
                     <NavigationPropertyBinding Path="_Execution" Target="Execution"/>
+                    <NavigationPropertyBinding Path="_DocumentOrigin" Target="DocumentOriginVH"/>
                     <NavigationPropertyBinding Path="_BusinessObjectType" Target="BusinessObjectTypeVH"/>
                     <NavigationPropertyBinding Path="_Status" Target="ValidationItemStatusVH"/>
                     <NavigationPropertyBinding Path="DraftAdministrativeData" Target="I_DraftAdministrativeData"/>
@@ -1854,6 +1902,7 @@
                 <EntitySet Name="TestCaseFieldVH" EntityType="com.sap.gateway.srvd.zui_stc_test_case.v0001.TestCaseFieldVHType"/>
                 <EntitySet Name="ServiceContractVH" EntityType="com.sap.gateway.srvd.zui_stc_test_case.v0001.ServiceContractVHType"/>
                 <EntitySet Name="ProcessTeamVH" EntityType="com.sap.gateway.srvd.zui_stc_test_case.v0001.ProcessTeamVHType"/>
+                <EntitySet Name="TestCaseVH" EntityType="com.sap.gateway.srvd.zui_stc_test_case.v0001.TestCaseVHType"/>
                 <EntitySet Name="UserVH" EntityType="com.sap.gateway.srvd.zui_stc_test_case.v0001.UserVHType"/>
                 <EntitySet Name="TeamMemberVH" EntityType="com.sap.gateway.srvd.zui_stc_test_case.v0001.TeamMemberVHType"/>
                 <EntitySet Name="BusinessProcessVH" EntityType="com.sap.gateway.srvd.zui_stc_test_case.v0001.BusinessProcessVHType"/>
@@ -1884,6 +1933,7 @@
                 <EntitySet Name="CoverageStatusVH" EntityType="com.sap.gateway.srvd.zui_stc_test_case.v0001.CoverageStatusVHType"/>
                 <EntitySet Name="RunDecisionVH" EntityType="com.sap.gateway.srvd.zui_stc_test_case.v0001.RunDecisionVHType"/>
                 <EntitySet Name="EndObjectVH" EntityType="com.sap.gateway.srvd.zui_stc_test_case.v0001.EndObjectVHType"/>
+                <EntitySet Name="DocumentOriginVH" EntityType="com.sap.gateway.srvd.zui_stc_test_case.v0001.DocumentOriginVHType"/>
                 <EntitySet Name="I_DraftAdministrativeData" EntityType="com.sap.gateway.srvd.zui_stc_test_case.v0001.I_DraftAdministrativeDataType"/>
             </EntityContainer>
             <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.TestCaseType/TestCaseUUID">
@@ -2150,6 +2200,84 @@
                     </Record>
                 </Annotation>
                 <Annotation Term="SAP__common.ValueListWithFixedValues" Bool="true"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.TestCaseType/StartObject">
+                <Annotation Term="SAP__common.Label" String="Start from"/>
+                <Annotation Term="SAP__common.Text" Path="_StartObject/Text">
+                    <Annotation Term="SAP__UI.TextArrangement" EnumMember="SAP__UI.TextArrangementType/TextOnly"/>
+                </Annotation>
+                <Annotation Term="SAP__common.ValueList">
+                    <Record Type="SAP__common.ValueListType">
+                        <PropertyValue Property="Label" String="Start from"/>
+                        <PropertyValue Property="CollectionPath" String="EndObjectVH"/>
+                        <PropertyValue Property="SearchSupported" Bool="false"/>
+                        <PropertyValue Property="Parameters">
+                            <Collection>
+                                <Record Type="SAP__common.ValueListParameterInOut">
+                                    <PropertyValue Property="LocalDataProperty" PropertyPath="StartObject"/>
+                                    <PropertyValue Property="ValueListProperty" String="Code"/>
+                                </Record>
+                                <Record Type="SAP__common.ValueListParameterDisplayOnly">
+                                    <PropertyValue Property="ValueListProperty" String="Text"/>
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+                <Annotation Term="SAP__common.ValueListWithFixedValues" Bool="true"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.TestCaseType/PredecessorTestCase">
+                <Annotation Term="SAP__common.Label" String="Predecessor Test Case"/>
+                <Annotation Term="SAP__common.Text" Path="_PredecessorTestCase/Title">
+                    <Annotation Term="SAP__UI.TextArrangement" EnumMember="SAP__UI.TextArrangementType/TextLast"/>
+                </Annotation>
+                <Annotation Term="SAP__common.ValueList">
+                    <Record Type="SAP__common.ValueListType">
+                        <PropertyValue Property="Label" String="Predecessor Test Case"/>
+                        <PropertyValue Property="CollectionPath" String="TestCaseVH"/>
+                        <PropertyValue Property="SearchSupported" Bool="true"/>
+                        <PropertyValue Property="Parameters">
+                            <Collection>
+                                <Record Type="SAP__common.ValueListParameterInOut">
+                                    <PropertyValue Property="LocalDataProperty" PropertyPath="PredecessorTestCase"/>
+                                    <PropertyValue Property="ValueListProperty" String="CaseID"/>
+                                </Record>
+                                <Record Type="SAP__common.ValueListParameterIn">
+                                    <PropertyValue Property="LocalDataProperty" PropertyPath="BusinessProcess"/>
+                                    <PropertyValue Property="ValueListProperty" String="BusinessProcess"/>
+                                </Record>
+                                <Record Type="SAP__common.ValueListParameterDisplayOnly">
+                                    <PropertyValue Property="ValueListProperty" String="Title"/>
+                                </Record>
+                                <Record Type="SAP__common.ValueListParameterDisplayOnly">
+                                    <PropertyValue Property="ValueListProperty" String="ProcessTeam"/>
+                                </Record>
+                                <Record Type="SAP__common.ValueListParameterDisplayOnly">
+                                    <PropertyValue Property="ValueListProperty" String="ProcessVariant"/>
+                                </Record>
+                                <Record Type="SAP__common.ValueListParameterDisplayOnly">
+                                    <PropertyValue Property="ValueListProperty" String="StartObject"/>
+                                </Record>
+                                <Record Type="SAP__common.ValueListParameterDisplayOnly">
+                                    <PropertyValue Property="ValueListProperty" String="EndObject"/>
+                                </Record>
+                                <Record Type="SAP__common.ValueListParameterDisplayOnly">
+                                    <PropertyValue Property="ValueListProperty" String="ApprovalStatus"/>
+                                </Record>
+                                <Record Type="SAP__common.ValueListParameterDisplayOnly">
+                                    <PropertyValue Property="ValueListProperty" String="LatestResult"/>
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.TestCaseType/PredecessorObject">
+                <Annotation Term="SAP__common.Label" String="Takes Over"/>
+                <Annotation Term="SAP__common.Text" Path="_PredecessorObject/Text">
+                    <Annotation Term="SAP__UI.TextArrangement" EnumMember="SAP__UI.TextArrangementType/TextOnly"/>
+                </Annotation>
+                <Annotation Term="SAP__core.Computed" Bool="true"/>
             </Annotations>
             <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.TestCaseType/TestLevel">
                 <Annotation Term="SAP__common.Label" String="Test Level"/>
@@ -3003,6 +3131,17 @@
                 </Annotation>
                 <Annotation Term="SAP__core.Computed" Bool="true"/>
             </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.ExecutionType/StartObject">
+                <Annotation Term="SAP__common.Label" String="Start from"/>
+                <Annotation Term="SAP__common.Text" Path="_StartObject/Text">
+                    <Annotation Term="SAP__UI.TextArrangement" EnumMember="SAP__UI.TextArrangementType/TextOnly"/>
+                </Annotation>
+                <Annotation Term="SAP__core.Computed" Bool="true"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.ExecutionType/PredecessorExecution">
+                <Annotation Term="SAP__common.Label" String="Taken Over From"/>
+                <Annotation Term="SAP__core.Computed" Bool="true"/>
+            </Annotations>
             <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.ExecutionType/RunType">
                 <Annotation Term="SAP__common.Label" String="Run Type"/>
                 <Annotation Term="SAP__common.Text" Path="_RunType/Text">
@@ -3199,6 +3338,17 @@
             </Annotations>
             <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.DocumentReferenceType/StepName">
                 <Annotation Term="SAP__common.Label" String="Process Step Name"/>
+                <Annotation Term="SAP__core.Computed" Bool="true"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.DocumentReferenceType/DocumentOrigin">
+                <Annotation Term="SAP__common.Label" String="Origin"/>
+                <Annotation Term="SAP__common.Text" Path="_DocumentOrigin/Text">
+                    <Annotation Term="SAP__UI.TextArrangement" EnumMember="SAP__UI.TextArrangementType/TextOnly"/>
+                </Annotation>
+                <Annotation Term="SAP__core.Computed" Bool="true"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.DocumentReferenceType/OriginReference">
+                <Annotation Term="SAP__common.Label" String="Taken Over From"/>
                 <Annotation Term="SAP__core.Computed" Bool="true"/>
             </Annotations>
             <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.DocumentReferenceType/IsActiveEntity">
@@ -5201,6 +5351,36 @@
             <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.ProcessTeamVHType/ProcessArea">
                 <Annotation Term="SAP__common.Label" String="Process Area"/>
             </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.TestCaseVHType/CaseID">
+                <Annotation Term="SAP__common.Label" String="Test Case"/>
+                <Annotation Term="SAP__common.Text" Path="Title">
+                    <Annotation Term="SAP__UI.TextArrangement" EnumMember="SAP__UI.TextArrangementType/TextFirst"/>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.TestCaseVHType/Title">
+                <Annotation Term="SAP__common.Label" String="Title"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.TestCaseVHType/ProcessTeam">
+                <Annotation Term="SAP__common.Label" String="Process Team"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.TestCaseVHType/BusinessProcess">
+                <Annotation Term="SAP__common.Label" String="Process"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.TestCaseVHType/ProcessVariant">
+                <Annotation Term="SAP__common.Label" String="Process Variant"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.TestCaseVHType/StartObject">
+                <Annotation Term="SAP__common.Label" String="Start from"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.TestCaseVHType/EndObject">
+                <Annotation Term="SAP__common.Label" String="Run up to"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.TestCaseVHType/ApprovalStatus">
+                <Annotation Term="SAP__common.Label" String="Approval"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.TestCaseVHType/LatestResult">
+                <Annotation Term="SAP__common.Label" String="Latest Result"/>
+            </Annotations>
             <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.UserVHType/UserID">
                 <Annotation Term="SAP__common.Label" String="User"/>
                 <Annotation Term="SAP__common.Text" Path="UserName">
@@ -5529,6 +5709,15 @@
                 </Annotation>
             </Annotations>
             <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.EndObjectVHType/Text">
+                <Annotation Term="SAP__common.Label" String="Description"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.DocumentOriginVHType/Code">
+                <Annotation Term="SAP__common.Label" String="Document Origin"/>
+                <Annotation Term="SAP__common.Text" Path="Text">
+                    <Annotation Term="SAP__UI.TextArrangement" EnumMember="SAP__UI.TextArrangementType/TextOnly"/>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.DocumentOriginVHType/Text">
                 <Annotation Term="SAP__common.Label" String="Description"/>
             </Annotations>
             <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.I_DraftAdministrativeDataType/DraftUUID">
@@ -6974,6 +7163,28 @@
                     </Record>
                 </Annotation>
             </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.Container/TestCaseVH">
+                <Annotation Term="SAP__capabilities.SearchRestrictions">
+                    <Record Type="SAP__capabilities.SearchRestrictionsType">
+                        <PropertyValue Property="Searchable" Bool="true"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="SAP__capabilities.InsertRestrictions">
+                    <Record Type="SAP__capabilities.InsertRestrictionsType">
+                        <PropertyValue Property="Insertable" Bool="false"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="SAP__capabilities.UpdateRestrictions">
+                    <Record Type="SAP__capabilities.UpdateRestrictionsType">
+                        <PropertyValue Property="Updatable" Bool="false"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="SAP__capabilities.DeleteRestrictions">
+                    <Record Type="SAP__capabilities.DeleteRestrictionsType">
+                        <PropertyValue Property="Deletable" Bool="false"/>
+                    </Record>
+                </Annotation>
+            </Annotations>
             <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.Container/UserVH">
                 <Annotation Term="SAP__capabilities.SearchRestrictions">
                     <Record Type="SAP__capabilities.SearchRestrictionsType">
@@ -7634,6 +7845,28 @@
                     </Record>
                 </Annotation>
             </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.Container/DocumentOriginVH">
+                <Annotation Term="SAP__capabilities.SearchRestrictions">
+                    <Record Type="SAP__capabilities.SearchRestrictionsType">
+                        <PropertyValue Property="Searchable" Bool="false"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="SAP__capabilities.InsertRestrictions">
+                    <Record Type="SAP__capabilities.InsertRestrictionsType">
+                        <PropertyValue Property="Insertable" Bool="false"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="SAP__capabilities.UpdateRestrictions">
+                    <Record Type="SAP__capabilities.UpdateRestrictionsType">
+                        <PropertyValue Property="Updatable" Bool="false"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="SAP__capabilities.DeleteRestrictions">
+                    <Record Type="SAP__capabilities.DeleteRestrictionsType">
+                        <PropertyValue Property="Deletable" Bool="false"/>
+                    </Record>
+                </Annotation>
+            </Annotations>
             <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.Container/I_DraftAdministrativeData">
                 <Annotation Term="SAP__capabilities.SearchRestrictions">
                     <Record Type="SAP__capabilities.SearchRestrictionsType">
@@ -7770,6 +8003,9 @@
                                 </Record>
                                 <Record Type="SAP__UI.DataField">
                                     <PropertyValue Property="Value" Path="ProcessVariant"/>
+                                </Record>
+                                <Record Type="SAP__UI.DataField">
+                                    <PropertyValue Property="Value" Path="StartObject"/>
                                 </Record>
                                 <Record Type="SAP__UI.DataField">
                                     <PropertyValue Property="Value" Path="Version"/>
@@ -7992,7 +8228,16 @@
                                     <PropertyValue Property="Value" Path="ProcessVariant"/>
                                 </Record>
                                 <Record Type="SAP__UI.DataField">
+                                    <PropertyValue Property="Value" Path="StartObject"/>
+                                </Record>
+                                <Record Type="SAP__UI.DataField">
                                     <PropertyValue Property="Value" Path="EndObject"/>
+                                </Record>
+                                <Record Type="SAP__UI.DataField">
+                                    <PropertyValue Property="Value" Path="PredecessorTestCase"/>
+                                </Record>
+                                <Record Type="SAP__UI.DataField">
+                                    <PropertyValue Property="Value" Path="PredecessorObject"/>
                                 </Record>
                                 <Record Type="SAP__UI.DataField">
                                     <PropertyValue Property="Value" Path="TestLevel"/>
@@ -8073,6 +8318,14 @@
                                 <Record Type="SAP__UI.DataField">
                                     <PropertyValue Property="Value" Path="_LatestExecution/RunType"/>
                                     <PropertyValue Property="Label" String="Run Type"/>
+                                </Record>
+                                <Record Type="SAP__UI.DataField">
+                                    <PropertyValue Property="Value" Path="_LatestExecution/StartObject"/>
+                                    <PropertyValue Property="Label" String="Start from"/>
+                                </Record>
+                                <Record Type="SAP__UI.DataField">
+                                    <PropertyValue Property="Value" Path="_LatestExecution/PredecessorExecution"/>
+                                    <PropertyValue Property="Label" String="Taken Over From"/>
                                 </Record>
                                 <Record Type="SAP__UI.DataField">
                                     <PropertyValue Property="Value" Path="_LatestExecution/ExecutionProvider"/>
@@ -8371,6 +8624,8 @@
                                 <PropertyPath>BusinessProcess</PropertyPath>
                                 <PropertyPath>ProcessVariant</PropertyPath>
                                 <PropertyPath>EndObject</PropertyPath>
+                                <PropertyPath>StartObject</PropertyPath>
+                                <PropertyPath>PredecessorTestCase</PropertyPath>
                             </Collection>
                         </PropertyValue>
                         <PropertyValue Property="TargetProperties">
@@ -8379,6 +8634,10 @@
                                 <String>BusinessProcess</String>
                                 <String>ProcessVariant</String>
                                 <String>EndObject</String>
+                                <String>StartObject</String>
+                                <String>PredecessorTestCase</String>
+                                <String>PredecessorObject</String>
+                                <String>TestLevel</String>
                                 <String>BusinessOwner</String>
                                 <String>ProcessVersion</String>
                                 <String>AssignmentStatus</String>
@@ -8870,6 +9129,12 @@
                         </Record>
                         <Record Type="SAP__UI.DataField">
                             <PropertyValue Property="Value" Path="NetAmount"/>
+                        </Record>
+                        <Record Type="SAP__UI.DataField">
+                            <PropertyValue Property="Value" Path="DocumentOrigin"/>
+                        </Record>
+                        <Record Type="SAP__UI.DataField">
+                            <PropertyValue Property="Value" Path="OriginReference"/>
                         </Record>
                         <Record Type="SAP__UI.DataField">
                             <PropertyValue Property="Value" Path="ValidationStatus"/>

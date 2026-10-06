@@ -8,8 +8,8 @@
         "ModelingCriticality": 3,
         "StepCount": 17,
         "VariantCount": 9,
-        "TestCaseCount": 11,
-        "ContentHash": "f801e1a0",
+        "TestCaseCount": 13,
+        "ContentHash": "b544f47e",
         "SAP__Messages": [],
         "__EntityControl": {
             "Updatable": true,

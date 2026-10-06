@@ -18,5 +18,10 @@
         "ProcessTeam": "PT-ABLESUNG",
         "ProcessTeamName": "Prozessteam Ablesung",
         "ProcessArea": "Messdienst – Ablesung"
+    },
+    {
+        "ProcessTeam": "PT-E2E",
+        "ProcessTeamName": "Prozessteam New End to End Prozess",
+        "ProcessArea": "End-to-End – Fakturierung und FI"
     }
 ]

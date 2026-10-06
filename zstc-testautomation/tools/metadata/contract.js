@@ -223,6 +223,23 @@ const valueHelps = [
         ]
     },
     {
+        // active test cases as predecessors: a test case that starts later in the path takes over their documents
+        name: 'TestCaseVH',
+        realBasis: 'projection of the active test cases of the project BO (no SAP object)',
+        keys: ['CaseID'],
+        props: [
+            str('CaseID', 20, 'Test Case', { text: 'Title', textArrangement: 'TextFirst' }),
+            str('Title', 80, 'Title'),
+            str('ProcessTeam', 20, 'Process Team'),
+            str('BusinessProcess', 20, 'Process'),
+            str('ProcessVariant', 20, 'Process Variant'),
+            str('StartObject', 30, 'Start from'),
+            str('EndObject', 30, 'Run up to'),
+            str('ApprovalStatus', 20, 'Approval'),
+            str('LatestResult', 25, 'Latest Result')
+        ]
+    },
+    {
         name: 'UserVH',
         realBasis: 'I_BusinessUserVH (to verify)',
         keys: ['UserID'],
@@ -322,7 +339,8 @@ const codeListNames = [
     ['RunTypeVH', 'Run Type', 30],
     ['CoverageStatusVH', 'Coverage', 30],
     ['RunDecisionVH', 'Decision', 20],
-    ['EndObjectVH', 'End Object', 40]
+    ['EndObjectVH', 'End Object', 40],
+    ['DocumentOriginVH', 'Document Origin', 40]
 ];
 const codeLists = codeListNames.map(([name, label, textLength]) => ({
     name,
@@ -435,7 +453,21 @@ const entities = [
                 valueList: { collection: 'ProcessVariantVH', key: 'Variant', display: ['VariantName', 'PilotScope'], in: [['BusinessProcess', 'ProcessID']] }
             }),
             code('EndObject', 30, 'Run up to', 'EndObjectVH'),
-            // derived from the path (handover to another team → E2E), never entered
+            // start of the run: by default where the process team enters the path (e.g. the quotation for the quotation team)
+            code('StartObject', 30, 'Start from', 'EndObjectVH'),
+            // a start without an own predecessor document (e.g. billing) takes the documents of a predecessor test case over
+            str('PredecessorTestCase', 20, 'Predecessor Test Case', {
+                text: '_PredecessorTestCase/Title',
+                textArrangement: 'TextLast',
+                valueList: {
+                    collection: 'TestCaseVH',
+                    key: 'CaseID',
+                    display: ['Title', 'ProcessTeam', 'ProcessVariant', 'StartObject', 'EndObject', 'ApprovalStatus', 'LatestResult'],
+                    in: [['BusinessProcess', 'BusinessProcess']]
+                }
+            }),
+            code('PredecessorObject', 30, 'Takes Over', 'EndObjectVH', { computed: true }),
+            // derived from the section of the path (handover to another team → E2E), never entered
             code('TestLevel', 20, 'Test Level', 'TestLevelVH', { computed: true }),
             str('BusinessOwner', 12, 'Business Owner', {
                 text: '_BusinessOwner/UserName',
@@ -474,6 +506,9 @@ const entities = [
                 ]
             },
             codeNav('EndObject', 'EndObjectVH'),
+            codeNav('StartObject', 'EndObjectVH'),
+            codeNav('PredecessorObject', 'EndObjectVH'),
+            textNav('_PredecessorTestCase', 'TestCaseVH', 'PredecessorTestCase', 'CaseID'),
             codeNav('TestLevel', 'TestLevelVH'),
             textNav('_BusinessOwner', 'UserVH', 'BusinessOwner', 'UserID'),
             codeNav('AssignmentStatus', 'AssignmentStatusVH'),
@@ -716,6 +751,8 @@ const entities = [
             int16('ProcessVersion', 'Process Version', { computed: true }),
             str('ProcessVariant', 20, 'Process Variant', { computed: true }),
             code('EndObject', 30, 'Run up to', 'EndObjectVH', { computed: true }),
+            code('StartObject', 30, 'Start from', 'EndObjectVH', { computed: true }),
+            str('PredecessorExecution', 60, 'Taken Over From', { computed: true }),
             code('RunType', 20, 'Run Type', 'RunTypeVH', { computed: true }),
             guid('RegressionRunUUID', 'Regression Run', { computed: true, hidden: true }),
             str('ExecutedBy', 12, 'Executed By', { computed: true })
@@ -724,6 +761,7 @@ const entities = [
             { name: '_TestCase', target: 'TestCase', partner: '_Execution', nullable: false, constraints: [['TestCaseUUID', 'TestCaseUUID']] },
             textNav('_Release', 'ReleaseVH', 'ReleaseID', 'ReleaseID'),
             codeNav('EndObject', 'EndObjectVH'),
+            codeNav('StartObject', 'EndObjectVH'),
             codeNav('RunType', 'RunTypeVH'),
             { name: '_ExecutionStep', target: 'ExecutionStep', collection: true, partner: '_Execution', constraints: [['ExecutionUUID', 'ExecutionUUID']], cascade: true },
             { name: '_DocumentReference', target: 'DocumentReference', collection: true, partner: '_Execution', constraints: [['ExecutionUUID', 'ExecutionUUID']], cascade: true },
@@ -784,10 +822,14 @@ const entities = [
             str('ValidationStatus', 10, 'Check', { computed: true, text: '_Status/Text', textArrangement: 'TextOnly' }),
             crit('Criticality'),
             str('ProcessStepID', 20, 'Process Step', { computed: true, text: 'StepName', textArrangement: 'TextFirst' }),
-            str('StepName', 80, 'Process Step Name', { computed: true })
+            str('StepName', 80, 'Process Step Name', { computed: true }),
+            // created by this run, determined (existing contract) or taken over from the run of a predecessor test case
+            code('DocumentOrigin', 20, 'Origin', 'DocumentOriginVH', { computed: true }),
+            str('OriginReference', 60, 'Taken Over From', { computed: true })
         ],
         navs: [
             { name: '_Execution', target: 'Execution', partner: '_DocumentReference', nullable: false, constraints: [['ExecutionUUID', 'ExecutionUUID']] },
+            codeNav('DocumentOrigin', 'DocumentOriginVH'),
             textNav('_BusinessObjectType', 'BusinessObjectTypeVH', 'BusinessObjectType', 'Code'),
             textNav('_Status', 'ValidationItemStatusVH', 'ValidationStatus', 'Code')
         ]
@@ -1495,7 +1537,7 @@ const annotations = {
         ['SAP__UI.FieldGroup', fieldGroup(undefined, [df('ScenarioID'), df('ProcessProfile'), df('CreatedBy'), df('CreatedAt')]), 'HeaderInfo'],
         [
             'SAP__UI.FieldGroup',
-            fieldGroup(undefined, [df('ProcessTeam'), df('ProcessVariant'), df('Version'), dfCrit('AssignmentStatus', 'AssignmentCriticality')]),
+            fieldGroup(undefined, [df('ProcessTeam'), df('ProcessVariant'), df('StartObject'), df('Version'), dfCrit('AssignmentStatus', 'AssignmentCriticality')]),
             'HeaderProcess'
         ],
         [
@@ -1553,7 +1595,10 @@ const annotations = {
                 df('ProcessTeam'),
                 df('BusinessProcess'),
                 df('ProcessVariant'),
+                df('StartObject'),
                 df('EndObject'),
+                df('PredecessorTestCase'),
+                df('PredecessorObject'),
                 df('TestLevel'),
                 df('BusinessOwner'),
                 df('ProcessVersion'),
@@ -1572,6 +1617,8 @@ const annotations = {
                 df('_LatestExecution/ReleaseID', 'Release'),
                 df('_LatestExecution/TestCaseVersion', 'Test Case Version'),
                 df('_LatestExecution/RunType', 'Run Type'),
+                df('_LatestExecution/StartObject', 'Start from'),
+                df('_LatestExecution/PredecessorExecution', 'Taken Over From'),
                 df('_LatestExecution/ExecutionProvider', 'Execution Provider'),
                 df('ExecutionStatus'),
                 df('_LatestExecution/ProgressPercent', 'Progress (%)'),
@@ -1644,13 +1691,17 @@ const annotations = {
         [
             'SAP__common.SideEffects',
             V.rec('SAP__common.SideEffectsType', {
-                SourceProperties: V.coll(['ProcessTeam', 'BusinessProcess', 'ProcessVariant', 'EndObject'].map(V.propPath)),
+                SourceProperties: V.coll(['ProcessTeam', 'BusinessProcess', 'ProcessVariant', 'EndObject', 'StartObject', 'PredecessorTestCase'].map(V.propPath)),
                 TargetProperties: V.coll(
                     [
                         'ProcessTeam',
                         'BusinessProcess',
                         'ProcessVariant',
                         'EndObject',
+                        'StartObject',
+                        'PredecessorTestCase',
+                        'PredecessorObject',
+                        'TestLevel',
                         'BusinessOwner',
                         'ProcessVersion',
                         'AssignmentStatus',
@@ -1800,6 +1851,8 @@ const annotations = {
                 df('PredecessorDocumentID'),
                 df('LifecycleStatus'),
                 df('NetAmount'),
+                df('DocumentOrigin'),
+                df('OriginReference'),
                 dfCrit('ValidationStatus', 'Criticality', 'Check')
             ])
         ],

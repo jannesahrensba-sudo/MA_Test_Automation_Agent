@@ -35,6 +35,8 @@ sap.ui.define([], function () {
         BusinessProcess: "Prozess",
         ProcessVariant: "Weg",
         EndObject: "Lauf bis",
+        StartObject: "Start ab",
+        PredecessorTestCase: "Vorgänger-Testfall",
         Preconditions: "Voraussetzungen"
     };
 
@@ -49,7 +51,8 @@ sap.ui.define([], function () {
         R8_CONTACT_CUSTOMER: "Meldender ist kein Ansprechpartner des Kunden",
         R9_DATE_RANGE: "Zeitraum inkonsistent",
         R10_DEVICE_TYPE: "passt nicht zum Gerätetyp",
-        R11_CONTRACT: "Servicevertrag ungültig oder deckt das Gerät nicht ab"
+        R11_CONTRACT: "Servicevertrag ungültig oder deckt das Gerät nicht ab",
+        R12_PREDECESSOR: "Start braucht einen Vorgänger-Testfall, der den Vorgängerbeleg liefert"
     };
     const ASSIGNMENT = { ASSIGNED: "zugeordnet", ASSUMED: "Annahme – zu bestätigen", OPEN: "offen" };
     const TEST_LEVEL = { SUB_PROCESS: "Teilprozess (ein Team)", E2E: "End-to-End (teamübergreifend)" };
@@ -171,6 +174,8 @@ sap.ui.define([], function () {
             "- Jeder Testfall gehört zu einem Prozessteam und einem Weg durch den Prozess (prozessvariante). Ohne Angabe belegt das Backend das Team des Benutzers und den Standardweg vor.",
             "- Weg wählen: Angebot oder Kostenvoranschlag → W2_QUOTATION; Angebot wird abgelehnt → W2_REJECTED; Wartungs-, Service- oder Mietvertrag → W3_CONTRACT (das Backend ermittelt den Servicevertrag, sonst stammdaten_suchen mit Typ servicevertrag); Abrechnung über den Rechnungsplan eines Vertrags → W3_BILLING_PLAN; Störung ohne Angebot → W1_REQUEST.",
             "- bis_objekt nur setzen, wenn der Nutzer sagt, bis wohin getestet wird, z. B. „bis zum Auftrag“ → SERVICE_ORDER, „bis zur Rückmeldung“ → SERVICE_CONFIRMATION, „mit Buchhaltungsbeleg“ → ACCOUNTING_DOCUMENT. Standard ist die Faktura.",
+            "- start_objekt nur setzen, wenn der Nutzer sagt, ab wo getestet wird, z. B. „direkt ab dem Angebot“ → SERVICE_QUOTATION. Ohne Angabe startet der Lauf dort, wo das Prozessteam in den Weg einsteigt (Team Angebot: Angebot, Team New End to End Prozess: Fakturaanforderung).",
+            "- Startet der Lauf mit Rückmeldung, Fakturaanforderung oder Faktura, braucht er einen Vorgänger-Testfall (Befund R12): Er übergibt seine Belege und Testdaten. Nimm einen Vorschlag des Befunds als vorgaenger_testfall, bei mehreren frag nach.",
             "- prozessteam nur setzen, wenn der Nutzer ein Team nennt. Garantie, Requote und In-House Repair sind spätere Erweiterungen und nicht ausführbar.",
             "- Die Ausführung gehört automatisch zum Release im Test des Teams" + (releases ? " (zurzeit " + releases + ")" : "") + ". Freigabe und Start prüfen die Rollen im Prozessteam serverseitig.",
             "Prozessteams:",
@@ -219,8 +224,17 @@ sap.ui.define([], function () {
             { label: FIELD_LABELS.ProcessTeam, value: process.team ? describe("ProcessTeam", process.team) : "offen" },
             { label: FIELD_LABELS.ProcessVariant, value: process.variant ? describe("ProcessVariant", process.variant) : "offen" }
         ];
+        if (process.start) {
+            rows.push({ label: FIELD_LABELS.StartObject, value: describe("StartObject", process.start) });
+        }
         if (process.endObject) {
             rows.push({ label: FIELD_LABELS.EndObject, value: describe("EndObject", process.endObject) });
+        }
+        if (process.takesOver) {
+            rows.push({
+                label: FIELD_LABELS.PredecessorTestCase,
+                value: (process.predecessor ? describe("PredecessorTestCase", process.predecessor) : "offen") + " – übernimmt " + describe("EndObject", process.takesOver)
+            });
         }
         if (process.level) {
             rows.push({ label: "Teststufe", value: TEST_LEVEL[process.level] || process.level });
@@ -249,7 +263,9 @@ sap.ui.define([], function () {
         ];
         if (draft.process) {
             lines.push(
-                "Prozessbezug: Team " + (draft.process.team || "offen") + ", Weg " + (draft.process.variant || "offen") + ", Lauf bis " + (draft.process.endObject || "-") +
+                "Prozessbezug: Team " + (draft.process.team || "offen") + ", Weg " + (draft.process.variant || "offen") + ", Start ab " + (draft.process.start || "-") +
+                    ", Lauf bis " + (draft.process.endObject || "-") +
+                    (draft.process.takesOver ? ", Vorgänger " + (draft.process.predecessor || "offen") + " übernimmt " + draft.process.takesOver : "") +
                     ", Zuordnung " + (ASSIGNMENT[draft.process.assignment] || draft.process.assignment || "-") + (draft.process.note ? " (" + draft.process.note + ")" : "")
             );
         }

@@ -213,22 +213,36 @@ function verify({ data, documents, readDocument, steps, executionStatus, technic
         }
     }
 
-    // Document flow: all documents of the plan with consistent predecessors
+    // Document flow: all documents of the plan with consistent predecessors; documents taken over from a predecessor
+    // test case open the flow (in brackets) and may be the predecessor of the first document of this run
     const expectedTypes = [];
     for (const step of steps) {
         if (!expectedTypes.includes(step.businessObjectType)) {
             expectedTypes.push(step.businessObjectType);
         }
     }
-    const expectedFlow = expectedTypes.map((type) => DOCUMENT_ABBREVIATION[type] || type).join(' → ');
+    const given = documents.filter((d) => d.given);
+    const runDocuments = documents.filter((d) => !d.given);
+    const givenIds = new Set(given.map((d) => d.documentId));
+    const givenFlow = given.length ? `(${given.map((d) => DOCUMENT_ABBREVIATION[d.businessObjectType] || d.businessObjectType).join(' → ')}) → ` : '';
+    const expectedFlow = givenFlow + expectedTypes.map((type) => DOCUMENT_ABBREVIATION[type] || type).join(' → ');
     const chainOk =
-        documents.length === expectedTypes.length &&
-        documents.every((d, i) => i === 0 || d.predecessorId === documents[i - 1].documentId || (d.businessObjectType === BO.BILLING_DOC_REQUEST && d.predecessorId));
-    const actualFlow = documents.map((d) => d.documentId).join(' → ');
+        runDocuments.length === expectedTypes.length &&
+        runDocuments.every(
+            (d, i) =>
+                (i === 0 && !given.length) ||
+                d.predecessorId === runDocuments[i - 1]?.documentId ||
+                givenIds.has(d.predecessorId) ||
+                d.businessObjectType === BO.SERVICE_CONTRACT ||
+                (d.businessObjectType === BO.BILLING_DOC_REQUEST && d.predecessorId)
+        );
+    const actualFlow = (given.length ? `(${given.map((d) => d.documentId).join(' → ')}) → ` : '') + runDocuments.map((d) => d.documentId).join(' → ');
     const lastStep = steps[steps.length - 1];
     b.add(lastStep ? lastStep.businessObjectType : BO.BILLING_DOCUMENT, 'DocumentFlow', expectedFlow, actualFlow, {
-        result: documents.length === 0 ? ASSERTION.NOT_EVALUATED : chainOk ? ASSERTION.PASSED : ASSERTION.FAILED,
-        message: chainOk ? 'Document flow is complete and consistent.' : `Document flow incomplete: ${documents.length} of ${expectedTypes.length} documents.`,
+        result: runDocuments.length === 0 ? ASSERTION.NOT_EVALUATED : chainOk ? ASSERTION.PASSED : ASSERTION.FAILED,
+        message: chainOk
+            ? `Document flow is complete and consistent${given.length ? ` (continues with ${given.length} document${given.length > 1 ? 's' : ''} of the predecessor)` : ''}.`
+            : `Document flow incomplete: ${runDocuments.length} of ${expectedTypes.length} documents.`,
         step: lastStep
     });
 

@@ -12,8 +12,8 @@
 const clock = require('./clock');
 
 const START = Object.freeze({
-    CASE: 13, // STC-<year>-000001..000012 are seed test cases
-    EXECUTION: 5, // MOCK-<date>-0001..0004 are used by the seed executions
+    CASE: 15, // STC-<year>-000001..000014 are seed test cases
+    EXECUTION: 7, // MOCK-<date>-0001..0006 are used by the seed executions
     SERVICE_REQUEST: 8000000010,
     QUOTATION_ORDER: 8000000030,
     SERVICE_CONFIRMATION: 9000000000,

@@ -13,7 +13,10 @@
 const testCases = require('./TestCaseService');
 const traceability = require('./TraceabilityService');
 const { isEmpty } = require('../validation/ValidationEngine');
-const { RELEASE_STATUS, EXECUTION, RUN_TYPE, RUN_DECISION, VALIDATION, criticalityOf } = require('../common/codes');
+const { RELEASE_STATUS, EXECUTION, RESULT, RUN_TYPE, RUN_DECISION, VALIDATION, criticalityOf } = require('../common/codes');
+
+/** results of a predecessor run that hand its documents over to the waiting test case */
+const HANDOVER_RESULTS = new Set([RESULT.PASSED, RESULT.PASSED_WITH_WARNING]);
 const { CATEGORY, SEVERITY, sapMessage, MockServiceError } = require('../common/messages');
 const clock = require('../common/clock');
 const { newUUID: uuid } = require('../common/uuid');
@@ -254,7 +257,9 @@ async function nextRunId(repo, releaseId) {
 
 /**
  * Regression run: all test cases of the regression-relevant scope; each one passes the same server-side checks as a
- * single run (valid, approved version, assignment, execution authorization) or is skipped with the reason.
+ * single run (valid, approved version, assignment, execution authorization) or is skipped with the reason. A test case
+ * that continues with the documents of a predecessor test case of the same run waits until the predecessor passed
+ * (handover between process teams within the run) and is started by refreshRegressionRun.
  *
  * @param {object} repo repository
  * @param {object} keys release keys (active)
@@ -283,7 +288,9 @@ async function startRegressionRun(repo, keys, { user = CURRENT_USER, trigger = '
     const now = clock.nowIso();
     let started = 0;
     let skipped = 0;
+    let waiting = 0;
     let sequence = 0;
+    const candidateIds = new Set(candidates.map((tc) => tc.CaseID));
     for (const tc of candidates) {
         sequence++;
         const item = {
@@ -303,13 +310,28 @@ async function startRegressionRun(repo, keys, { user = CURRENT_USER, trigger = '
             ResultCriticality: 0
         };
         let reason = '';
+        let waitFor = '';
         if (tc.ValidationStatus !== VALIDATION.VALID) {
             reason = `Test data ${String(tc.ValidationStatus).toLowerCase().replace('_', ' ')}: validate the test case first.`;
         } else {
-            const check = await testCases.executionCheck(repo, tc, { user, releaseId: release.ReleaseID });
-            if (!check.ok) {
+            const check = await testCases.executionCheck(repo, tc, { user, releaseId: release.ReleaseID, regressionRunUUID: runUUID });
+            const dependent = tc.PredecessorTestCase && candidateIds.has(tc.PredecessorTestCase) && (check.ok || check.error.number === 211);
+            if (dependent) {
+                // the predecessor runs in this regression run: wait for its fresh documents
+                waitFor = tc.PredecessorTestCase;
+            } else if (!check.ok) {
                 reason = check.error.message;
             }
+        }
+        if (waitFor) {
+            waiting++;
+            Object.assign(item, {
+                Decision: RUN_DECISION.WAITING,
+                DecisionCriticality: criticalityOf(RUN_DECISION.WAITING),
+                Reason: `Waits for predecessor ${waitFor} in this run (handover of its documents).`
+            });
+            await repo.add('RegressionRunItem', item);
+            continue;
         }
         if (!reason) {
             try {
@@ -339,7 +361,7 @@ async function startRegressionRun(repo, keys, { user = CURRENT_USER, trigger = '
         }
         await repo.add('RegressionRunItem', item);
     }
-    const status = started ? EXECUTION.RUNNING : EXECUTION.FINISHED;
+    const status = started || waiting ? EXECUTION.RUNNING : EXECUTION.FINISHED;
     const run = {
         RunUUID: runUUID,
         RunID: runId,
@@ -349,11 +371,11 @@ async function startRegressionRun(repo, keys, { user = CURRENT_USER, trigger = '
         Trigger: trigger,
         StartedAt: now,
         StartedBy: user,
-        FinishedAt: started ? null : now,
+        FinishedAt: started || waiting ? null : now,
         CandidateCount: candidates.length,
         StartedCount: started,
         SkippedCount: skipped,
-        RunningCount: started,
+        RunningCount: started + waiting,
         PassedCount: 0,
         FailedCount: 0,
         PassRate: 0,
@@ -368,8 +390,8 @@ async function startRegressionRun(repo, keys, { user = CURRENT_USER, trigger = '
         messages: [
             sapMessage(
                 911,
-                `Regression run ${runId} for ${release.ReleaseID}: ${started} of ${candidates.length} test cases started, ${skipped} skipped (reasons in the run items). Results refresh automatically.`,
-                { severity: started ? SEVERITY.SUCCESS : SEVERITY.WARNING }
+                `Regression run ${runId} for ${release.ReleaseID}: ${started} of ${candidates.length} test cases started${waiting ? `, ${waiting} waiting for their predecessor` : ''}, ${skipped} skipped (reasons in the run items). Results refresh automatically.`,
+                { severity: started || waiting ? SEVERITY.SUCCESS : SEVERITY.WARNING }
             )
         ]
     };
@@ -405,6 +427,7 @@ async function refreshRegressionRun(repo, keys) {
             await testCases.syncDerived(repo, item.TestCaseUUID);
         }
     }
+    await startWaitingItems(repo, release, items);
     await traceability.refreshAll(repo);
     await syncDerived(repo, release.ReleaseID);
     const updated = await getRelease(repo, keys);
@@ -420,6 +443,72 @@ async function refreshRegressionRun(repo, keys) {
         );
     }
     return { release: updated, messages };
+}
+
+/**
+ * Starts the test cases of a regression run that wait for their predecessor once it passed; a failed or skipped
+ * predecessor hands nothing over, so the waiting test case is skipped with the reason.
+ *
+ * @param {object} repo repository
+ * @param {object} release release (active)
+ * @param {object[]} items run items of the latest regression run
+ */
+async function startWaitingItems(repo, release, items) {
+    let changed = false;
+    const run = items.length ? await repo.findOne('RegressionRun', { RunUUID: items[0].RunUUID }) : undefined;
+    for (const item of items.filter((i) => i.Decision === RUN_DECISION.WAITING)) {
+        const tc = await repo.findOne('TestCase', { TestCaseUUID: item.TestCaseUUID, IsActiveEntity: true });
+        const predecessor = items.find((i) => i.CaseID === tc?.PredecessorTestCase);
+        const predecessorRun = predecessor?.ExecutionUUID ? await repo.findOne('Execution', { ExecutionUUID: predecessor.ExecutionUUID, IsActiveEntity: true }) : undefined;
+        let decision;
+        let reason = '';
+        let execution;
+        if (!tc || !predecessor || predecessor.Decision === RUN_DECISION.SKIPPED) {
+            decision = RUN_DECISION.SKIPPED;
+            reason = `Predecessor ${tc?.PredecessorTestCase || ''} was skipped in this run: nothing to take over.`;
+        } else if (predecessor.Decision === RUN_DECISION.WAITING || !predecessorRun || predecessorRun.Status === EXECUTION.RUNNING) {
+            continue;
+        } else if (!HANDOVER_RESULTS.has(predecessorRun.FunctionalResult)) {
+            decision = RUN_DECISION.SKIPPED;
+            reason = `Predecessor ${predecessor.CaseID} ended with ${predecessorRun.FunctionalResult || predecessorRun.Status}: nothing to take over.`;
+        } else {
+            try {
+                const result = await testCases.startExecution(
+                    repo,
+                    { TestCaseUUID: tc.TestCaseUUID, IsActiveEntity: true },
+                    { user: run?.StartedBy || CURRENT_USER, releaseId: release.ReleaseID, runType: RUN_TYPE.REGRESSION, regressionRunUUID: item.RunUUID }
+                );
+                await testCases.syncDerived(repo, tc.TestCaseUUID);
+                execution = await repo.findOne('Execution', { ExecutionUUID: result.executionUUID, IsActiveEntity: true });
+                decision = RUN_DECISION.STARTED;
+            } catch (error) {
+                decision = RUN_DECISION.SKIPPED;
+                reason = error.message;
+            }
+        }
+        const patch = { Decision: decision, DecisionCriticality: criticalityOf(decision), Reason: reason.slice(0, 255) };
+        if (execution) {
+            Object.assign(patch, {
+                ExecutionUUID: execution.ExecutionUUID,
+                ExternalExecutionID: execution.ExternalExecutionID,
+                ExecutionStatus: execution.Status,
+                ResultCriticality: criticalityOf(execution.Status)
+            });
+        }
+        await repo.update('RegressionRunItem', { RunItemUUID: item.RunItemUUID }, patch);
+        Object.assign(item, patch);
+        changed = true;
+    }
+    if (changed && run) {
+        await repo.update(
+            'RegressionRun',
+            { RunUUID: run.RunUUID },
+            {
+                StartedCount: items.filter((i) => i.Decision === RUN_DECISION.STARTED).length,
+                SkippedCount: items.filter((i) => i.Decision === RUN_DECISION.SKIPPED).length
+            }
+        );
+    }
 }
 
 /**

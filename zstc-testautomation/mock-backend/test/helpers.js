@@ -89,8 +89,8 @@ const GOLDEN = Object.freeze({
 
 const GOLDEN_DOCUMENTS = ['8000000010', '8000000030', '8000000031', '9000000000', '10000012', '90000115'];
 /** next Case ID and external execution ID after the seed data */
-const NEXT_CASE_ID = 'STC-2026-000013';
-const NEXT_EXECUTION_NO = '0005';
+const NEXT_CASE_ID = 'STC-2026-000015';
+const NEXT_EXECUTION_NO = '0007';
 
 let uuidCounter = 0;
 const newUuid = () => `00000000-0000-4000-8000-${String(++uuidCounter).padStart(12, '0')}`;

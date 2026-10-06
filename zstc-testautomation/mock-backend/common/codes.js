@@ -44,7 +44,9 @@ const COVERAGE = Object.freeze({
     LATER: 'LATER'
 });
 const RUN_TYPE = Object.freeze({ SINGLE: 'SINGLE', REGRESSION: 'REGRESSION' });
-const RUN_DECISION = Object.freeze({ STARTED: 'STARTED', SKIPPED: 'SKIPPED' });
+const RUN_DECISION = Object.freeze({ STARTED: 'STARTED', SKIPPED: 'SKIPPED', WAITING: 'WAITING' });
+/** origin of a document in a run: created by the run, determined (existing, e.g. the contract) or taken over from a predecessor test case */
+const DOCUMENT_ORIGIN = Object.freeze({ CREATED: 'CREATED', DETERMINED: 'DETERMINED', TAKEN_OVER: 'TAKEN_OVER' });
 const TEST_LEVEL = Object.freeze({ SUB_PROCESS: 'SUB_PROCESS', E2E: 'E2E' });
 
 const BO = Object.freeze({
@@ -107,6 +109,7 @@ const CRITICALITY_BY_CODE = {
     IN_EXECUTION: CRITICALITY.INFORMATION,
     IN_TEST: CRITICALITY.INFORMATION,
     IN_PROGRESS: CRITICALITY.INFORMATION,
+    WAITING: CRITICALITY.INFORMATION,
     INFO: CRITICALITY.INFORMATION
 };
 
@@ -147,6 +150,7 @@ module.exports = {
     COVERAGE,
     RUN_TYPE,
     RUN_DECISION,
+    DOCUMENT_ORIGIN,
     TEST_LEVEL,
     BO,
     BO_LABEL,

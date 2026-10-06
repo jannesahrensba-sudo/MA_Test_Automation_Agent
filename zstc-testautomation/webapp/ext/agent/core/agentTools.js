@@ -13,6 +13,8 @@ sap.ui.define(["./prompts"], function (prompts) {
     const MAX_DESCRIPTION = 40;
     const VARIANTS = ["W1_REQUEST", "W2_QUOTATION", "W2_REJECTED", "W3_CONTRACT", "W3_BILLING_PLAN"];
     const END_OBJECTS = ["SERVICE_REQUEST", "SERVICE_QUOTATION", "SERVICE_ORDER", "SERVICE_CONFIRMATION", "BILLING_DOC_REQUEST", "BILLING_DOCUMENT", "ACCOUNTING_DOCUMENT"];
+    /** start objects: the FI check needs the billing document of the same run; the contract is determined, not started with */
+    const START_OBJECTS = ["SERVICE_CONTRACT", "SERVICE_REQUEST", "SERVICE_QUOTATION", "SERVICE_ORDER", "SERVICE_CONFIRMATION", "BILLING_DOC_REQUEST", "BILLING_DOCUMENT"];
 
     /** header fields of the process reference from the tool input; unknown codes are reported, not sent */
     function normalizeProcess(input, notes) {
@@ -31,6 +33,22 @@ sap.ui.define(["./prompts"], function (prompts) {
                 header.endObject = endObject;
             } else {
                 notes.push("Unbekanntes Endobjekt " + endObject + " ignoriert.");
+            }
+        }
+        const startObject = asString(input && input.start_objekt).toUpperCase();
+        if (startObject) {
+            if (START_OBJECTS.indexOf(startObject) > -1) {
+                header.startObject = startObject;
+            } else {
+                notes.push("Unbekanntes Startobjekt " + startObject + " ignoriert.");
+            }
+        }
+        const predecessor = asString(input && input.vorgaenger_testfall).toUpperCase();
+        if (predecessor) {
+            if (/^STC-\d{4}-\d{6}$/.test(predecessor)) {
+                header.predecessorTestCase = predecessor;
+            } else {
+                notes.push("Vorgänger-Testfall " + predecessor + " ignoriert: erwartet wird eine Case ID wie STC-2026-000013.");
             }
         }
         const team = asString(input && input.prozessteam).toUpperCase();
@@ -99,6 +117,9 @@ sap.ui.define(["./prompts"], function (prompts) {
                 team: process.team ? describe("ProcessTeam", process.team) : "offen",
                 weg: process.variant ? describe("ProcessVariant", process.variant) : "offen",
                 bis: process.endObject ? describe("EndObject", process.endObject) : "",
+                start: process.start ? describe("StartObject", process.start) : "",
+                vorgaenger: process.predecessor ? describe("PredecessorTestCase", process.predecessor) : "",
+                uebernimmt: process.takesOver ? describe("EndObject", process.takesOver) : "",
                 teststufe: prompts.TEST_LEVEL[process.level] || process.level || "",
                 zuordnung: prompts.ASSIGNMENT[process.assignment] || process.assignment || "",
                 hinweis: process.note || ""
@@ -180,9 +201,9 @@ sap.ui.define(["./prompts"], function (prompts) {
             name: "testfall_entwurf_erfassen",
             description:
                 "Legt beim ersten Aufruf den Testfall-Entwurf an, sonst aktualisiert es ihn. Danach laufen die Ableitungen des Backends (Kunde, Gerätetyp, " +
-                "Serviceorganisation, Vorbelegungen des Prozessprofils, erwarteter Nettowert aus der Mock-Preisliste) und die Validierung (R1–R10). " +
-                "Liefert alle aktuellen Werte, den Prozessbezug (Team, Weg, Lauf bis), den Validierungsstatus und die Befunde mit Vorschlägen. " +
-                "Nur gesicherte Felder angeben; leere Felder weglassen. Der Prozessbezug (prozessvariante, bis_objekt, prozessteam) leitet die Testschritte ab " +
+                "Serviceorganisation, Vorbelegungen des Prozessprofils, erwarteter Nettowert aus der Mock-Preisliste) und die Validierung (R1–R12). " +
+                "Liefert alle aktuellen Werte, den Prozessbezug (Team, Weg, Start ab, Lauf bis, Vorgänger), den Validierungsstatus und die Befunde mit Vorschlägen. " +
+                "Nur gesicherte Felder angeben; leere Felder weglassen. Der Prozessbezug (prozessvariante, start_objekt, bis_objekt, prozessteam, vorgaenger_testfall) leitet die Testschritte ab " +
                 "und legt fest, welche Belege erwartet werden. Freigabe und Start der Ausführung sind nicht Teil dieses Tools.",
             inputSchema: {
                 type: "object",
@@ -191,7 +212,17 @@ sap.ui.define(["./prompts"], function (prompts) {
                     titel: { type: "string", description: "kurzer Titel des Testfalls, höchstens 80 Zeichen" },
                     prozessvariante: { type: "string", enum: VARIANTS, description: "Weg durch den Reparaturprozess" },
                     bis_objekt: { type: "string", enum: END_OBJECTS, description: "Lauf bis zu diesem Beleg; nur wenn der Nutzer es nennt" },
-                    prozessteam: { type: "string", description: "Prozessteam, nur wenn genannt, z. B. PT-REPARATUR oder PT-ANGEBOT" },
+                    start_objekt: {
+                        type: "string",
+                        enum: START_OBJECTS,
+                        description: "Start ab diesem Beleg; nur wenn der Nutzer es nennt (z. B. „direkt ab dem Angebot“). Ohne Angabe startet der Lauf dort, wo das Prozessteam in den Weg einsteigt."
+                    },
+                    vorgaenger_testfall: {
+                        type: "string",
+                        description:
+                            "Case ID des Vorgänger-Testfalls, dessen Belege übernommen werden. Nur nötig, wenn der Start einen Vorgängerbeleg braucht (Rückmeldung, Fakturaanforderung, Faktura; Befund R12) – Kandidaten aus den Vorschlägen des Befunds."
+                    },
+                    prozessteam: { type: "string", description: "Prozessteam, nur wenn genannt, z. B. PT-REPARATUR, PT-ANGEBOT oder PT-E2E (New End to End Prozess: Fakturierung und FI)" },
                     voraussetzungen: { type: "string", description: "Voraussetzungen und Übergaben, nur wenn genannt" },
                     felder: {
                         type: "object",
@@ -247,7 +278,15 @@ sap.ui.define(["./prompts"], function (prompts) {
                             }
                         });
                         const uuid = await gateway.createDraft({ processProfile: profile, title: title || draft.title, text: session.originalText });
-                        const carriedHeader = draft.process ? { processTeam: draft.process.team, processVariant: draft.process.variant, endObject: draft.process.endObject } : {};
+                        const carriedHeader = draft.process
+                            ? {
+                                  processTeam: draft.process.team,
+                                  processVariant: draft.process.variant,
+                                  endObject: draft.process.endObject,
+                                  startObject: draft.process.start,
+                                  predecessorTestCase: draft.process.predecessor || undefined
+                              }
+                            : {};
                         await gateway.updateDraft(uuid, Object.assign(carriedHeader, header), Object.assign(carried, fields));
                         await gateway.discardDraft(draft.uuid).catch(function () {});
                         session.step({ icon: "sap-icon://switch-views", text: "Prozessprofil gewechselt: neuer Entwurf mit Profil " + profile });
@@ -291,5 +330,13 @@ sap.ui.define(["./prompts"], function (prompts) {
         return [search, capture];
     }
 
-    return { createTools: createTools, normalizeFields: normalizeFields, normalizeProcess: normalizeProcess, summarizeDraft: summarizeDraft, VARIANTS: VARIANTS, END_OBJECTS: END_OBJECTS };
+    return {
+        createTools: createTools,
+        normalizeFields: normalizeFields,
+        normalizeProcess: normalizeProcess,
+        summarizeDraft: summarizeDraft,
+        VARIANTS: VARIANTS,
+        END_OBJECTS: END_OBJECTS,
+        START_OBJECTS: START_OBJECTS
+    };
 });

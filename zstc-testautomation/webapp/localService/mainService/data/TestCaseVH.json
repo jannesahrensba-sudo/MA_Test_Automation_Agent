@@ -1,0 +1,156 @@
+[
+    {
+        "CaseID": "STC-2026-000001",
+        "Title": "Reference run: cooling repair, time & material",
+        "ProcessTeam": "PT-REPARATUR",
+        "BusinessProcess": "SRV-REP",
+        "ProcessVariant": "W2_QUOTATION",
+        "StartObject": "SERVICE_REQUEST",
+        "EndObject": "BILLING_DOCUMENT",
+        "ApprovalStatus": "APPROVED",
+        "LatestResult": "PASSED"
+    },
+    {
+        "CaseID": "STC-2026-000002",
+        "Title": "Wrong equipment for the functional location",
+        "ProcessTeam": "",
+        "BusinessProcess": "",
+        "ProcessVariant": "",
+        "StartObject": "",
+        "EndObject": "",
+        "ApprovalStatus": "NOT_APPROVED",
+        "LatestResult": ""
+    },
+    {
+        "CaseID": "STC-2026-000003",
+        "Title": "Golden case: system cooling partially failed",
+        "ProcessTeam": "PT-REPARATUR",
+        "BusinessProcess": "SRV-REP",
+        "ProcessVariant": "W2_QUOTATION",
+        "StartObject": "SERVICE_REQUEST",
+        "EndObject": "BILLING_DOCUMENT",
+        "ApprovalStatus": "NOT_APPROVED",
+        "LatestResult": ""
+    },
+    {
+        "CaseID": "STC-2026-000004",
+        "Title": "Referenzlauf: Heizkostenverteiler mit Fehleranzeige getauscht",
+        "ProcessTeam": "PT-REPARATUR",
+        "BusinessProcess": "SRV-REP",
+        "ProcessVariant": "W1_REQUEST",
+        "StartObject": "SERVICE_REQUEST",
+        "EndObject": "BILLING_DOCUMENT",
+        "ApprovalStatus": "REVOKED",
+        "LatestResult": "PASSED"
+    },
+    {
+        "CaseID": "STC-2026-000005",
+        "Title": "Falsches Ersatzteil für den Rauchwarnmelder",
+        "ProcessTeam": "PT-REPARATUR",
+        "BusinessProcess": "SRV-REP",
+        "ProcessVariant": "W1_REQUEST",
+        "StartObject": "SERVICE_REQUEST",
+        "EndObject": "BILLING_DOCUMENT",
+        "ApprovalStatus": "NOT_APPROVED",
+        "LatestResult": ""
+    },
+    {
+        "CaseID": "STC-2026-000006",
+        "Title": "Golden Case Messdienst: Rauchwarnmelder piept",
+        "ProcessTeam": "PT-REPARATUR",
+        "BusinessProcess": "SRV-REP",
+        "ProcessVariant": "W2_QUOTATION",
+        "StartObject": "SERVICE_REQUEST",
+        "EndObject": "BILLING_DOCUMENT",
+        "ApprovalStatus": "NOT_APPROVED",
+        "LatestResult": ""
+    },
+    {
+        "CaseID": "STC-2026-000007",
+        "Title": "Weg 1 bis FI: Warmwasserzähler ohne Anzeige",
+        "ProcessTeam": "PT-REPARATUR",
+        "BusinessProcess": "SRV-REP",
+        "ProcessVariant": "W1_REQUEST",
+        "StartObject": "SERVICE_REQUEST",
+        "EndObject": "ACCOUNTING_DOCUMENT",
+        "ApprovalStatus": "APPROVED",
+        "LatestResult": "PASSED"
+    },
+    {
+        "CaseID": "STC-2026-000008",
+        "Title": "Weg 2 abgelehnt: Angebot für Rauchwarnmelder-Tausch",
+        "ProcessTeam": "PT-REPARATUR",
+        "BusinessProcess": "SRV-REP",
+        "ProcessVariant": "W2_REJECTED",
+        "StartObject": "SERVICE_REQUEST",
+        "EndObject": "SERVICE_QUOTATION",
+        "ApprovalStatus": "APPROVED",
+        "LatestResult": "PASSED"
+    },
+    {
+        "CaseID": "STC-2026-000009",
+        "Title": "Weg 3 negativ: Gerätemietvertrag abgelaufen",
+        "ProcessTeam": "PT-REPARATUR",
+        "BusinessProcess": "SRV-REP",
+        "ProcessVariant": "W3_CONTRACT",
+        "StartObject": "SERVICE_CONTRACT",
+        "EndObject": "BILLING_DOCUMENT",
+        "ApprovalStatus": "NOT_APPROVED",
+        "LatestResult": ""
+    },
+    {
+        "CaseID": "STC-2026-000010",
+        "Title": "Weg 3: Rauchwarnmelder-Tausch aus dem Servicevertrag",
+        "ProcessTeam": "PT-REPARATUR",
+        "BusinessProcess": "SRV-REP",
+        "ProcessVariant": "W3_CONTRACT",
+        "StartObject": "SERVICE_CONTRACT",
+        "EndObject": "BILLING_DOCUMENT",
+        "ApprovalStatus": "APPROVED",
+        "LatestResult": ""
+    },
+    {
+        "CaseID": "STC-2026-000011",
+        "Title": "Weg 3: Vertragsabrechnung RWM-Service (Rechnungsplan)",
+        "ProcessTeam": "PT-REPARATUR",
+        "BusinessProcess": "SRV-REP",
+        "ProcessVariant": "W3_BILLING_PLAN",
+        "StartObject": "SERVICE_CONTRACT",
+        "EndObject": "BILLING_DOCUMENT",
+        "ApprovalStatus": "APPROVED",
+        "LatestResult": ""
+    },
+    {
+        "CaseID": "STC-2026-000012",
+        "Title": "Teilprozess Angebot: Angebot bis zur Kundenannahme",
+        "ProcessTeam": "PT-ANGEBOT",
+        "BusinessProcess": "SRV-REP",
+        "ProcessVariant": "W2_QUOTATION",
+        "StartObject": "SERVICE_QUOTATION",
+        "EndObject": "SERVICE_QUOTATION",
+        "ApprovalStatus": "APPROVED",
+        "LatestResult": ""
+    },
+    {
+        "CaseID": "STC-2026-000013",
+        "Title": "Übergabe an E2E: HKV-Tausch bis zur Rückmeldung",
+        "ProcessTeam": "PT-REPARATUR",
+        "BusinessProcess": "SRV-REP",
+        "ProcessVariant": "W1_REQUEST",
+        "StartObject": "SERVICE_REQUEST",
+        "EndObject": "SERVICE_CONFIRMATION",
+        "ApprovalStatus": "APPROVED",
+        "LatestResult": "PASSED"
+    },
+    {
+        "CaseID": "STC-2026-000014",
+        "Title": "E2E-Team: Rückmeldung fakturieren bis zum FI-Beleg",
+        "ProcessTeam": "PT-E2E",
+        "BusinessProcess": "SRV-REP",
+        "ProcessVariant": "W1_REQUEST",
+        "StartObject": "BILLING_DOC_REQUEST",
+        "EndObject": "ACCOUNTING_DOCUMENT",
+        "ApprovalStatus": "APPROVED",
+        "LatestResult": "PASSED"
+    }
+]

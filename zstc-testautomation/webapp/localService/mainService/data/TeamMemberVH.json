@@ -64,5 +64,23 @@
         "UserID": "ABL_TESTER",
         "UserName": "Tester Ablesung (Mock)",
         "TeamRole": "TEST_EXECUTOR"
+    },
+    {
+        "ProcessTeam": "PT-E2E",
+        "UserID": "E2E_LEAD",
+        "UserName": "Teamleitung New End to End Prozess (Mock)",
+        "TeamRole": "PROCESS_OWNER"
+    },
+    {
+        "ProcessTeam": "PT-E2E",
+        "UserID": "E2E_TESTER",
+        "UserName": "Tester New End to End Prozess (Mock)",
+        "TeamRole": "TEST_EXECUTOR"
+    },
+    {
+        "ProcessTeam": "PT-E2E",
+        "UserID": "DEMO_USER",
+        "UserName": "Demo-Benutzer (Mockup)",
+        "TeamRole": "TEST_EXECUTOR"
     }
 ]

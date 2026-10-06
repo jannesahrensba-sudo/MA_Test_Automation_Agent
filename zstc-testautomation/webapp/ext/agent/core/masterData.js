@@ -13,6 +13,7 @@ sap.ui.define(["./textMatching"], function (textMatching) {
     const DEVICE_TYPE_LABEL = { "MD-HKV": "Heizkostenverteiler", "MD-RWM": "Rauchwarnmelder", "MD-WZ": "Wasserzähler" };
     /** German names of the end objects ("Lauf bis") */
     const END_OBJECT_LABEL = {
+        SERVICE_CONTRACT: "Servicevertrag (Vertragsfindung)",
         SERVICE_REQUEST: "Service Request",
         SERVICE_QUOTATION: "Angebot",
         SERVICE_ORDER: "Serviceauftrag",
@@ -235,8 +236,12 @@ sap.ui.define(["./textMatching"], function (textMatching) {
                     text = (find(pools.variants, "Variant") || {}).VariantName;
                     break;
                 case "EndObject":
-                    // the German name is enough ("bis Faktura")
+                case "StartObject":
+                    // the German name is enough ("bis Faktura", "ab Angebot")
                     return END_OBJECT_LABEL[id] || String(id);
+                case "PredecessorTestCase":
+                    text = (find(pools.testCases, "CaseID") || {}).Title;
+                    break;
                 case "ServiceContract":
                     text = (find(pools.serviceContracts, "ServiceContract") || {}).ServiceContractDescription;
                     break;

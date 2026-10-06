@@ -19,6 +19,7 @@ sap.ui.define(["sap/ui/model/Sorter", "./core/masterData"], function (Sorter, ma
         processes: ["BusinessProcessVH", "ProcessID,ProcessName,OwnerTeam,ProcessVersion,PilotScope"],
         variants: ["ProcessVariantVH", "ProcessID,Variant,VariantName,PilotScope,IsDefault"],
         releases: ["ReleaseVH", "ReleaseID,ReleaseName,ReleaseType,ReleaseStatus,TestStartDate,TestEndDate"],
+        testCases: ["TestCaseVH", "CaseID,Title,ProcessTeam,BusinessProcess,ProcessVariant,StartObject,EndObject,ApprovalStatus,LatestResult"],
         serviceContracts: [
             "ServiceContractVH",
             "ServiceContract,ServiceContractDescription,SoldToParty,ServiceRefFunctionalLocation,ServiceContractStartDate,ServiceContractEndDate,ServiceContractIsReleased,BillingPlanNetAmount"
@@ -26,9 +27,18 @@ sap.ui.define(["sap/ui/model/Sorter", "./core/masterData"], function (Sorter, ma
     };
 
     /** header fields of the process reference: key of the tool/session → property of TestCase */
-    const HEADER_FIELDS = { processTeam: "ProcessTeam", processVariant: "ProcessVariant", endObject: "EndObject", preconditions: "Preconditions" };
+    const HEADER_FIELDS = {
+        processTeam: "ProcessTeam",
+        processVariant: "ProcessVariant",
+        endObject: "EndObject",
+        startObject: "StartObject",
+        preconditions: "Preconditions",
+        // sent last: whether a predecessor is needed depends on the start object
+        predecessorTestCase: "PredecessorTestCase"
+    };
     const HEADER_SELECT = "TestCaseUUID,IsActiveEntity,CaseID,Title,ProcessProfile,ValidationStatus,ApprovalStatus,ExecutionStatus,FinalResult," +
-        "ProcessTeam,BusinessProcess,ProcessVariant,EndObject,TestLevel,AssignmentStatus,AssignmentNote,Version,Preconditions";
+        "ProcessTeam,BusinessProcess,ProcessVariant,EndObject,StartObject,PredecessorTestCase,PredecessorObject,TestLevel,AssignmentStatus,AssignmentNote,Version,Preconditions," +
+        "LatestExecutionUUID,ExternalExecutionID";
 
     const DATA_FIELDS = [
         "ServiceRequestType",
@@ -200,11 +210,19 @@ sap.ui.define(["sap/ui/model/Sorter", "./core/masterData"], function (Sorter, ma
                     if (header.title) {
                         headerPatches.push(context.setProperty("Title", header.title));
                     }
-                    headerChanges.forEach(function (key) {
-                        headerPatches.push(context.setProperty(HEADER_FIELDS[key], header[key]));
-                    });
+                    headerChanges
+                        .filter(function (key) {
+                            return key !== "predecessorTestCase";
+                        })
+                        .forEach(function (key) {
+                            headerPatches.push(context.setProperty(HEADER_FIELDS[key], header[key]));
+                        });
                     // the process reference is determined before the test data changes (own request)
                     await Promise.all(headerPatches);
+                    if (headerChanges.indexOf("predecessorTestCase") > -1) {
+                        // after the start object: the predecessor hands over its documents and test data
+                        await context.setProperty("PredecessorTestCase", header.predecessorTestCase);
+                    }
                 }
                 const names = Object.keys(fields || {});
                 if (names.length) {

@@ -3,8 +3,8 @@
  * MockExecutionProvider — MOCK implementation of ITestExecutionProvider.
  *
  * It does NOT call any SAP test automation. It simulates an asynchronous run:
- *   start() hands over the validated data set (incl. the execution plan of the process variant) and returns an
- *   external execution ID ("MOCK-<date>-<no>"),
+ *   start() hands over the validated data set (incl. the execution plan of the process variant and the documents taken
+ *   over from a predecessor test case) and returns an external execution ID ("MOCK-<date>-<no>"),
  *   getStatus() advances the run by elapsed time (SIM-1: one plan step every stepDurationMs),
  *   each finished step creates (or changes) one document in MockS4ServiceChain, getCreatedDocuments() returns the numbers.
  *
@@ -40,7 +40,7 @@ class MockExecutionProvider extends ITestExecutionProvider {
     /**
      * MOCK — real to be clarified (F-8): (1) external start and (2) test data handover.
      *
-     * @param {object} validatedDataset {data, processProfile, plan?, serviceContract?, referenceLocations?}
+     * @param {object} validatedDataset {data, processProfile, plan?, givenDocuments?, serviceContract?, referenceLocations?}
      * @param {object} correlation {caseId, soldToParty}
      * @returns {{externalExecutionId: string}} external ID
      */
@@ -49,6 +49,8 @@ class MockExecutionProvider extends ITestExecutionProvider {
         const startedAt = clock.now();
         const plan = validatedDataset.plan && validatedDataset.plan.length ? validatedDataset.plan : CHAIN;
         const at = new Date(startedAt).toISOString();
+        // documents of the predecessor's run: the chain continues with them (no new numbers, nothing created)
+        const given = (validatedDataset.givenDocuments || []).map((d) => ({ ...d, document: { ...d.document } }));
         this.runs.set(externalExecutionId, {
             externalExecutionId,
             dataset: validatedDataset,
@@ -57,11 +59,12 @@ class MockExecutionProvider extends ITestExecutionProvider {
             plan,
             status: EXECUTION.RUNNING,
             blocked: false,
-            documents: [],
+            documents: given,
             steps: plan.map((step) => ({ ...step, status: STEP_STATUS.PLANNED, actualStatus: '', startedAt: null, finishedAt: null, message: '' })),
             log: [
                 `${at} MOCK start: external execution ${externalExecutionId} for ${correlation.caseId} (provider MockExecutionProvider, no SAP test automation called)`,
                 `${at} MOCK test data handover: ${Object.keys(validatedDataset.data).length} fields, process profile ${validatedDataset.processProfile}`,
+                ...given.map((d) => `${at} MOCK takes over ${d.businessObjectType} ${d.documentId} from ${d.origin} (predecessor test case, no new document)`),
                 `${at} MOCK plan: ${plan.map((step) => step.processStepID || step.businessObjectType).join(' → ')}${validatedDataset.variant ? ` (variant ${validatedDataset.variant})` : ''}`
             ]
         });

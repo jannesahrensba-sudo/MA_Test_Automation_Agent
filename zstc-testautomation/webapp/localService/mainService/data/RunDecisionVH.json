@@ -6,5 +6,9 @@
     {
         "Code": "SKIPPED",
         "Text": "Skipped"
+    },
+    {
+        "Code": "WAITING",
+        "Text": "Waiting for predecessor"
     }
 ]

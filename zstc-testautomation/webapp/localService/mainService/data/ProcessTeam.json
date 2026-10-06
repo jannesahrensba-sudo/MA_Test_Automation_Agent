@@ -12,8 +12,8 @@
         "ProcessOwnerCount": 3,
         "TestExecutorCount": 2,
         "ResponsibleStepCount": 8,
-        "TestCaseCount": 10,
-        "OpenAssignmentCount": 12,
+        "TestCaseCount": 11,
+        "OpenAssignmentCount": 8,
         "SAP__Messages": [],
         "__EntityControl": {
             "Updatable": true,
@@ -76,6 +76,27 @@
         "TestExecutorCount": 1,
         "ResponsibleStepCount": 0,
         "TestCaseCount": 0,
+        "OpenAssignmentCount": 0,
+        "SAP__Messages": [],
+        "__EntityControl": {
+            "Updatable": true,
+            "Deletable": false
+        }
+    },
+    {
+        "ProcessTeam": "PT-E2E",
+        "ProcessTeamName": "Prozessteam New End to End Prozess",
+        "ProcessArea": "End-to-End – Fakturierung und FI",
+        "Description": "Verantwortet die Fakturierung (Fakturaanforderung, Faktura, Rechnungsplan) und die Übergabe an die Finanzbuchhaltung (FI-Beleg) im End-to-End-Prozess. Übernimmt im Reparaturprozess nach der Rückmeldung.",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "IsActive": true,
+        "ProcessOwnerCount": 1,
+        "TestExecutorCount": 2,
+        "ResponsibleStepCount": 4,
+        "TestCaseCount": 1,
         "OpenAssignmentCount": 0,
         "SAP__Messages": [],
         "__EntityControl": {

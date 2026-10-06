@@ -14,22 +14,41 @@
  */
 const { normalize } = require('./germanMetering');
 
+const START_RULES = [
+    ['SERVICE_QUOTATION', /\bab (dem |einem )?(angebot|kostenvoranschlag|quote)\b|direkt (mit dem |vom |beim )?(angebot|quote)\b|vom quote\b/],
+    ['SERVICE_ORDER', /\bab (dem )?(service ?)?auftrag\b|direkt (mit dem |vom )?(service ?)?auftrag\b/],
+    ['SERVICE_CONFIRMATION', /\bab (der )?rueckmeldung\b/],
+    ['BILLING_DOC_REQUEST', /\bab (der )?(fakturaanforderung|fakturierung|abrechnung)\b/],
+    ['BILLING_DOCUMENT', /\bab (der )?faktura\b/]
+];
+
 const TEAMS = [
     ['PT-ANGEBOT', /(prozess)?team angebot|angebotsteam/],
     ['PT-MONTAGE', /(prozess)?team montage|montageteam/],
     ['PT-ABLESUNG', /(prozess)?team ablesung|ableseteam/],
-    ['PT-REPARATUR', /(prozess)?team reparatur|reparaturteam/]
+    ['PT-REPARATUR', /(prozess)?team reparatur|reparaturteam/],
+    ['PT-E2E', /(prozess)?team (new )?end ?to ?end|new end ?to ?end|e2e[- ]?team|team e2e|fakturierungsteam/]
 ];
 
 /**
  * @param {string} text scenario description
  * @param {object} [options] options
  * @param {boolean} [options.meteringFault] the text is a fault report of the metering service (germanMetering found a device)
- * @returns {{variant?: string, endObject?: string, team?: string, matched: string[]}} hints
+ * @returns {{variant?: string, endObject?: string, startObject?: string, team?: string, matched: string[]}} hints
  */
 function processHints(text, { meteringFault = false } = {}) {
-    const n = normalize(text);
+    let n = normalize(text);
     const matched = [];
+    // start ("direkt ab dem Angebot"): detected first and removed, so that it does not decide the way
+    let startObject;
+    for (const [code, pattern] of START_RULES) {
+        if (pattern.test(n)) {
+            startObject = code;
+            matched.push(`ab ${code}`);
+            n = n.replace(pattern, ' ');
+            break;
+        }
+    }
     let variant;
     if (/rechnungsplan|vertragsabrechnung|pauschale (ab)?rechnen|jahrespauschale|billing plan/.test(n)) {
         variant = 'W3_BILLING_PLAN';
@@ -52,6 +71,12 @@ function processHints(text, { meteringFault = false } = {}) {
     } else if (meteringFault) {
         variant = 'W1_REQUEST';
         matched.push('Störungsmeldung ohne Angebot');
+    }
+    if (startObject === 'SERVICE_QUOTATION' && (!variant || variant === 'W1_REQUEST')) {
+        // a start with the quotation implies a way with a quotation
+        variant = 'W2_QUOTATION';
+        matched.splice(matched.indexOf('Störungsmeldung ohne Angebot') >>> 0, matched.includes('Störungsmeldung ohne Angebot') ? 1 : 0);
+        matched.push('Start mit Angebot');
     }
     let endObject;
     if (/\bbis (zum |zur |zu )?(buchhaltungsbeleg|fi\b|buchung)|buchhaltungsbeleg|fi-beleg|accounting document/.test(n)) {
@@ -76,7 +101,7 @@ function processHints(text, { meteringFault = false } = {}) {
     if (team) {
         matched.push(team);
     }
-    return { variant, endObject, team, matched };
+    return { variant, endObject, startObject, team, matched };
 }
 
 module.exports = { processHints };

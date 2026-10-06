@@ -93,7 +93,8 @@ const GENERATED_SETS = [
     'BusinessProcessVH',
     'ProcessVariantVH',
     'ProcessStepVH',
-    'ReleaseVH'
+    'ReleaseVH',
+    'TestCaseVH'
 ];
 
 /* ------------------------------------------------------------------------------------------------ */
@@ -503,9 +504,9 @@ const CASES = [
         uuid: '6f1c2a10-0012-4c3e-9a51-000000000012',
         CaseID: 'STC-2026-000012',
         ScenarioID: 'MD-ANG-W2',
-        Title: 'Team Angebot: Angebot bis zur Kundenannahme',
+        Title: 'Teilprozess Angebot: Angebot bis zur Kundenannahme',
         Description:
-            'Abschnitt des Prozessteams Angebot im Reparaturprozess (Weg 2): Der Lauf legt den Service Request an (Team Reparatur, Übergabe), dann das Angebot, und bucht die Annahme durch den Kunden (Endobjekt Service Quotation). Wegen der Übergabe ein E2E-Test.',
+            'Teilprozess des Prozessteams Angebot im Reparaturprozess (Weg 2): Der Lauf startet direkt mit dem Angebot (Startpunkt des Teams), legt es an und bucht die Annahme durch den Kunden (Endobjekt Service Quotation).',
         NaturalLanguageInput: '',
         ProcessProfile: 'MD_HKV_STOER',
         process: { team: 'PT-ANGEBOT', variant: 'W2_QUOTATION', endObject: 'SERVICE_QUOTATION' },
@@ -521,6 +522,68 @@ const CASES = [
         },
         createdAt: '2026-09-28T15:00:00Z',
         run: 'approve'
+    },
+    {
+        // handover between process teams: repair runs up to the confirmation, the end-to-end team bills it
+        uuid: '6f1c2a10-0013-4c3e-9a51-000000000013',
+        CaseID: 'STC-2026-000013',
+        ScenarioID: 'MD-REP-W1-UEB',
+        Title: 'Übergabe an E2E: HKV-Tausch bis zur Rückmeldung',
+        Description:
+            'Teilprozess des Prozessteams Reparatur (Weg 1): Störung am Heizkostenverteiler in der Küche, Auftrag und Rückmeldung. Der Lauf endet mit der Rückmeldung; die Fakturierung übernimmt das Prozessteam New End to End Prozess (Vorgänger für STC-2026-000014).',
+        NaturalLanguageInput: '',
+        ProcessProfile: 'MD_HKV_STOER',
+        process: { team: 'PT-REPARATUR', variant: 'W1_REQUEST', endObject: 'SERVICE_CONFIRMATION' },
+        preconditions: 'Gerät HKV-0815-012 ist in der Nutzeinheit NE 01 eingebaut; der Bewohner ist über den Termin informiert.',
+        data: {
+            ...METERING_HKV_DATA,
+            ServiceRequestDescription: 'HKV Küche: Fehleranzeige',
+            ServiceRefFunctionalLocation: 'LG-0815-NE01',
+            ServiceReferenceEquipment: 'HKV-0815-012'
+        },
+        createdAt: '2026-09-29T08:00:00Z',
+        run: 'execute',
+        numbers: {
+            EXECUTION: 5,
+            SERVICE_REQUEST: 8000000005,
+            QUOTATION_ORDER: 8000000024,
+            SERVICE_CONFIRMATION: 8999999996,
+            BILLING_DOC_REQUEST: 10000008,
+            BILLING_DOCUMENT: 90000111,
+            ACCOUNTING_DOCUMENT: 1400000096
+        }
+    },
+    {
+        uuid: '6f1c2a10-0014-4c3e-9a51-000000000014',
+        CaseID: 'STC-2026-000014',
+        ScenarioID: 'MD-E2E-W1-FAKT',
+        Title: 'E2E-Team: Rückmeldung fakturieren bis zum FI-Beleg',
+        Description:
+            'Teilprozess des Prozessteams New End to End Prozess: Der Lauf startet mit der Fakturaanforderung (Startpunkt des Teams), übernimmt die Rückmeldung aus dem letzten bestandenen Lauf von STC-2026-000013 und prüft Faktura und Buchhaltungsbeleg.',
+        NaturalLanguageInput: '',
+        ProcessProfile: 'MD_HKV_STOER',
+        process: { team: 'PT-E2E', variant: 'W1_REQUEST', endObject: 'ACCOUNTING_DOCUMENT', predecessor: 'STC-2026-000013' },
+        preconditions: 'Übergabe vom Prozessteam Reparatur: Rückmeldung aus STC-2026-000013 abgeschlossen und fakturierbar.',
+        data: {
+            ...METERING_HKV_DATA,
+            ServiceRequestDescription: 'HKV Küche: Fehleranzeige',
+            ServiceRefFunctionalLocation: 'LG-0815-NE01',
+            ServiceReferenceEquipment: 'HKV-0815-012'
+        },
+        createdBy: 'E2E_TESTER',
+        approvedBy: 'E2E_LEAD',
+        executedBy: 'E2E_TESTER',
+        createdAt: '2026-09-29T09:00:00Z',
+        run: 'execute',
+        numbers: {
+            EXECUTION: 6,
+            SERVICE_REQUEST: 8000000004,
+            QUOTATION_ORDER: 8000000023,
+            SERVICE_CONFIRMATION: 8999999995,
+            BILLING_DOC_REQUEST: 10000008,
+            BILLING_DOCUMENT: 90000111,
+            ACCOUNTING_DOCUMENT: 1400000096
+        }
     }
 ];
 
@@ -727,6 +790,8 @@ async function main() {
                     BusinessProcess: seed.process ? catalog.REPAIR : '',
                     ProcessVariant: seed.process?.variant,
                     EndObject: seed.process?.endObject,
+                    StartObject: seed.process?.start,
+                    PredecessorTestCase: seed.process?.predecessor,
                     Preconditions: seed.preconditions
                 }),
                 CreatedBy: createdBy,
@@ -766,7 +831,7 @@ async function main() {
             if (seed.run === 'execute') {
                 numberRanges.setNext(TENANT, seed.numbers || DEFAULT_SEED_NUMBERS);
                 time += 60 * 1000;
-                await service.startExecution(repo, keys, { user: 'REP_TESTER' });
+                await service.startExecution(repo, keys, { user: seed.executedBy || 'REP_TESTER' });
                 time += 20 * 1000;
                 await service.refreshExecution(repo, keys);
             }

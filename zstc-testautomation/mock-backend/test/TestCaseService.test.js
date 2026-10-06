@@ -36,14 +36,14 @@ test('golden path: describe → analyze → validate → save → approve → ex
 
     const active = await activate(repo, draft);
     const saved = await repo.findOne('TestCase', active);
-    assert.equal(saved.CaseID, 'STC-2026-000013');
+    assert.equal(saved.CaseID, 'STC-2026-000015');
     assert.equal(saved.__OperationControl.approve, true);
     assert.equal(saved.__OperationControl.startExecution, false);
 
     await service.approve(repo, active);
     const started = await service.startExecution(repo, active);
     assert.equal(started.testCase.ExecutionStatus, 'RUNNING');
-    assert.equal(started.testCase.ExternalExecutionID, 'MOCK-20260929-0005');
+    assert.equal(started.testCase.ExternalExecutionID, 'MOCK-20260929-0007');
     // default variant W2_QUOTATION: SR, quotation, customer acceptance, order, confirmation, billing request, billing document
     const steps = (await repo.find('ExecutionStep', { ExecutionUUID: started.testCase.LatestExecutionUUID })).sort((a, b) => a.Sequence - b.Sequence);
     assert.deepEqual(
