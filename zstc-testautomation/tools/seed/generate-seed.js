@@ -83,6 +83,7 @@ const GENERATED_SETS = [
     'ExecutionStep',
     'DocumentReference',
     'TestAssertion',
+    'ResultFinding',
     'RegressionRun',
     'RegressionRunItem',
     'ReleaseTestCase',
@@ -406,6 +407,20 @@ const CASES = [
             BILLING_DOC_REQUEST: 10000009,
             BILLING_DOCUMENT: 90000112,
             ACCOUNTING_DOCUMENT: 1400000097
+        },
+        // second run after a change: 2 hours on site, the expected net value was not adapted → FAILED (result analysis demo)
+        secondRun: {
+            at: '2026-10-01T09:00:00Z',
+            data: { ServiceDuration: 2 },
+            numbers: {
+                EXECUTION: 7,
+                SERVICE_REQUEST: 8000000003,
+                QUOTATION_ORDER: 8000000022,
+                SERVICE_CONFIRMATION: 8999999994,
+                BILLING_DOC_REQUEST: 10000007,
+                BILLING_DOCUMENT: 90000110,
+                ACCOUNTING_DOCUMENT: 1400000095
+            }
         }
     },
     {
@@ -830,6 +845,21 @@ async function main() {
             }
             if (seed.run === 'execute') {
                 numberRanges.setNext(TENANT, seed.numbers || DEFAULT_SEED_NUMBERS);
+                time += 60 * 1000;
+                await service.startExecution(repo, keys, { user: seed.executedBy || 'REP_TESTER' });
+                time += 20 * 1000;
+                await service.refreshExecution(repo, keys);
+            }
+            if (seed.secondRun) {
+                // change of the approved test case, new approval, second run in the release in test
+                time = Date.parse(seed.secondRun.at);
+                await repo.update('TestCaseData', keys, seed.secondRun.data);
+                await service.onActivated(repo, keys, createdBy);
+                time += 5 * 60 * 1000;
+                await service.validateTestCase(repo, keys, { asStateMessages: false });
+                time += 10 * 60 * 1000;
+                await service.approve(repo, keys, seed.approvedBy || 'QA_LEAD');
+                numberRanges.setNext(TENANT, seed.secondRun.numbers);
                 time += 60 * 1000;
                 await service.startExecution(repo, keys, { user: seed.executedBy || 'REP_TESTER' });
                 time += 20 * 1000;

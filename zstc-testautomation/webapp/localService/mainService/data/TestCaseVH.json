@@ -74,7 +74,7 @@
         "StartObject": "SERVICE_REQUEST",
         "EndObject": "ACCOUNTING_DOCUMENT",
         "ApprovalStatus": "APPROVED",
-        "LatestResult": "PASSED"
+        "LatestResult": "FAILED_FUNCTIONAL"
     },
     {
         "CaseID": "STC-2026-000008",

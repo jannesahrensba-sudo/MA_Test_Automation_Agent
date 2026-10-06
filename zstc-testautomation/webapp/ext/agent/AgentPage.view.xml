@@ -55,7 +55,19 @@
                     <Button id="agentSend" text="{i18n>agentSend}" icon="sap-icon://paper-plane" type="Emphasized" press=".onSend" enabled="{= !${agent>/busy} &amp;&amp; ${agent>/input}.trim().length > 0 }" />
                     <Button id="agentStop" text="{i18n>agentStop}" icon="sap-icon://stop" press=".onStop" visible="{agent>/busy}" />
                     <ToolbarSpacer id="agentInputSpacer" />
-                    <MenuButton id="agentExamples" text="{i18n>agentExamples}" icon="sap-icon://example" enabled="{= !${agent>/busy} }">
+                    <MenuButton id="agentQuestions" text="{i18n>agentQuestions}" icon="sap-icon://question-mark" enabled="{= !${agent>/busy} }" visible="{= !!${agent>/analysis} }">
+                        <menu>
+                            <Menu id="agentQuestionMenu" itemSelected=".onQuestion">
+                                <MenuItem id="questionCause" key="cause" text="{i18n>agentQuestionCause}" icon="sap-icon://question-mark" />
+                                <MenuItem id="questionTeam" key="team" text="{i18n>agentQuestionTeam}" icon="sap-icon://group" />
+                                <MenuItem id="questionCompare" key="compare" text="{i18n>agentQuestionCompare}" icon="sap-icon://compare" />
+                                <MenuItem id="questionConfidence" key="confidence" text="{i18n>agentQuestionConfidence}" icon="sap-icon://inspection" />
+                                <MenuItem id="questionAction" key="action" text="{i18n>agentQuestionAction}" icon="sap-icon://action" />
+                                <MenuItem id="questionDocuments" key="documents" text="{i18n>agentQuestionDocuments}" icon="sap-icon://documents" />
+                            </Menu>
+                        </menu>
+                    </MenuButton>
+                    <MenuButton id="agentExamples" text="{i18n>agentExamples}" icon="sap-icon://example" enabled="{= !${agent>/busy} }" visible="{= !${agent>/analysis} }">
                         <menu>
                             <Menu id="agentExampleMenu" itemSelected=".onExample">
                                 <MenuItem id="exampleHkv" key="hkv" text="{i18n>agentExampleHkv}" icon="sap-icon://temperature" />
@@ -68,12 +80,41 @@
                     </MenuButton>
                 </OverflowToolbar>
             </VBox>
-            <!-- draft of the test case and the steps of the agent -->
+            <!-- draft of the test case (or the result under discussion) and the steps of the agent -->
             <VBox id="agentDraftColumn">
                 <layoutData>
                     <l:GridData id="agentDraftSpan" span="XL5 L5 M12 S12" />
                 </layoutData>
-                <Panel id="agentDraftPanel" headerText="{i18n>agentDraftTitle}" class="sapUiNoContentPadding">
+                <!-- "Ergebnis besprechen": result of the latest run with the findings of the deterministic result analysis -->
+                <Panel id="agentResultPanel" headerText="{i18n>agentResultTitle}" visible="{= !!${agent>/analysis} }" class="sapUiNoContentPadding">
+                    <VBox id="agentResultBox" class="sapUiSmallMargin">
+                        <Title id="agentResultHeading" text="{agent>/analysis/heading}" wrapping="true" />
+                        <HBox id="agentResultStatus" wrap="Wrap" alignItems="Center" class="sapUiTinyMarginTop">
+                            <ObjectStatus id="agentResultVerdict" title="{i18n>agentResultVerdict}" text="{agent>/analysis/resultText}" state="{agent>/analysis/resultState}" inverted="true" class="sapUiSmallMarginEnd" />
+                            <ObjectStatus id="agentResultRun" title="{i18n>agentResultRun}" text="{agent>/analysis/runId}" visible="{= !!${agent>/analysis/runId} }" class="sapUiSmallMarginEnd" />
+                            <ObjectStatus id="agentResultRelease" title="{i18n>agentResultRelease}" text="{agent>/analysis/release}" visible="{= !!${agent>/analysis/release} }" class="sapUiSmallMarginEnd" />
+                            <ObjectStatus id="agentResultVersion" title="{i18n>agentResultVersion}" text="{agent>/analysis/version}" visible="{= !!${agent>/analysis/version} }" />
+                        </HBox>
+                        <Text id="agentResultCounts" text="{agent>/analysis/counts}" visible="{= !!${agent>/analysis/counts} }" class="sapUiTinyMarginTop" />
+                        <MessageStrip
+                            id="agentResultHeadline"
+                            text="{agent>/analysis/headline}"
+                            type="{= ${agent>/analysis/resultState} === 'Success' ? 'Success' : ${agent>/analysis/resultState} === 'Error' ? 'Error' : ${agent>/analysis/resultState} === 'Warning' ? 'Warning' : 'Information' }"
+                            showIcon="true"
+                            visible="{= !!${agent>/analysis/headline} }"
+                            class="sapUiTinyMarginTop" />
+                        <List id="agentResultFindings" items="{agent>/analysis/findings}" headerText="{i18n>agentResultFindings}" noDataText="{i18n>agentResultNoFindings}" class="sapUiTinyMarginTop">
+                            <StandardListItem title="{agent>title}" description="{agent>description}" icon="{agent>icon}" highlight="{agent>state}" info="{agent>info}" wrapping="true" />
+                        </List>
+                        <MessageStrip id="agentResultHint" text="{i18n>agentResultHint}" type="Information" showIcon="true" class="sapUiTinyMarginTop" />
+                        <FlexBox id="agentResultActions" wrap="Wrap" alignItems="Center" class="sapUiSmallMarginTop">
+                            <Button id="agentResultOpen" class="sapUiTinyMarginEnd sapUiTinyMarginBottom" text="{i18n>agentResultOpen}" icon="sap-icon://navigation-right-arrow" type="Emphasized" press=".onOpenResultTestCase" />
+                            <Button id="agentResultDashboard" class="sapUiTinyMarginEnd sapUiTinyMarginBottom" text="{i18n>agentResultDashboard}" icon="sap-icon://business-objects-experience" press=".onShowDashboard" />
+                            <Button id="agentResultClose" class="sapUiTinyMarginBottom" text="{i18n>agentResultClose}" icon="sap-icon://decline" press=".onCloseAnalysis" enabled="{= !${agent>/busy} }" />
+                        </FlexBox>
+                    </VBox>
+                </Panel>
+                <Panel id="agentDraftPanel" headerText="{i18n>agentDraftTitle}" visible="{= !${agent>/analysis} }" class="sapUiNoContentPadding">
                     <VBox id="agentDraftBox" class="sapUiSmallMargin">
                         <Title id="agentDraftHeading" text="{= ${agent>/draft/title} || ${i18n>agentNoDraft} }" wrapping="true" />
                         <HBox id="agentDraftStatus" wrap="Wrap" alignItems="Center" visible="{= !!${agent>/draft} }" class="sapUiTinyMarginTop">

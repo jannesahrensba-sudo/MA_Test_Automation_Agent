@@ -141,6 +141,9 @@
                 <NavigationProperty Name="_LatestTestAssertion" Type="Collection(com.sap.gateway.srvd.zui_stc_test_case.v0001.TestAssertionType)">
                     <ReferentialConstraint Property="LatestExecutionUUID" ReferencedProperty="ExecutionUUID"/>
                 </NavigationProperty>
+                <NavigationProperty Name="_LatestResultFinding" Type="Collection(com.sap.gateway.srvd.zui_stc_test_case.v0001.ResultFindingType)">
+                    <ReferentialConstraint Property="LatestExecutionUUID" ReferencedProperty="ExecutionUUID"/>
+                </NavigationProperty>
                 <NavigationProperty Name="_ProcessProfile" Type="com.sap.gateway.srvd.zui_stc_test_case.v0001.ProcessProfileVHType">
                     <ReferentialConstraint Property="ProcessProfile" ReferencedProperty="ProcessProfile"/>
                 </NavigationProperty>
@@ -320,6 +323,7 @@
                 <Property Name="EndObject" Type="Edm.String" MaxLength="30"/>
                 <Property Name="StartObject" Type="Edm.String" MaxLength="30"/>
                 <Property Name="PredecessorExecution" Type="Edm.String" MaxLength="60"/>
+                <Property Name="AnalysisHeadline" Type="Edm.String" MaxLength="255"/>
                 <Property Name="RunType" Type="Edm.String" MaxLength="20"/>
                 <Property Name="RegressionRunUUID" Type="Edm.Guid"/>
                 <Property Name="ExecutedBy" Type="Edm.String" MaxLength="12"/>
@@ -350,6 +354,10 @@
                     <OnDelete Action="Cascade"/>
                 </NavigationProperty>
                 <NavigationProperty Name="_TestAssertion" Type="Collection(com.sap.gateway.srvd.zui_stc_test_case.v0001.TestAssertionType)" Partner="_Execution">
+                    <ReferentialConstraint Property="ExecutionUUID" ReferencedProperty="ExecutionUUID"/>
+                    <OnDelete Action="Cascade"/>
+                </NavigationProperty>
+                <NavigationProperty Name="_ResultFinding" Type="Collection(com.sap.gateway.srvd.zui_stc_test_case.v0001.ResultFindingType)" Partner="_Execution">
                     <ReferentialConstraint Property="ExecutionUUID" ReferencedProperty="ExecutionUUID"/>
                     <OnDelete Action="Cascade"/>
                 </NavigationProperty>
@@ -478,6 +486,52 @@
                 </NavigationProperty>
                 <NavigationProperty Name="DraftAdministrativeData" Type="com.sap.gateway.srvd.zui_stc_test_case.v0001.I_DraftAdministrativeDataType"/>
                 <NavigationProperty Name="SiblingEntity" Type="com.sap.gateway.srvd.zui_stc_test_case.v0001.TestAssertionType"/>
+            </EntityType>
+            <EntityType Name="ResultFindingType">
+                <Key>
+                    <PropertyRef Name="FindingUUID"/>
+                    <PropertyRef Name="IsActiveEntity"/>
+                </Key>
+                <Property Name="FindingUUID" Type="Edm.Guid" Nullable="false"/>
+                <Property Name="ExecutionUUID" Type="Edm.Guid"/>
+                <Property Name="TestCaseUUID" Type="Edm.Guid"/>
+                <Property Name="CaseID" Type="Edm.String" MaxLength="20"/>
+                <Property Name="ExternalExecutionID" Type="Edm.String" MaxLength="40"/>
+                <Property Name="ReleaseID" Type="Edm.String" MaxLength="20"/>
+                <Property Name="Sequence" Type="Edm.Int16"/>
+                <Property Name="Category" Type="Edm.String" MaxLength="20"/>
+                <Property Name="Severity" Type="Edm.String" MaxLength="10"/>
+                <Property Name="Criticality" Type="Edm.Byte"/>
+                <Property Name="FindingCode" Type="Edm.String" MaxLength="30"/>
+                <Property Name="ProcessStepID" Type="Edm.String" MaxLength="20"/>
+                <Property Name="StepName" Type="Edm.String" MaxLength="80"/>
+                <Property Name="ResponsibleTeam" Type="Edm.String" MaxLength="20"/>
+                <Property Name="Finding" Type="Edm.String" MaxLength="255"/>
+                <Property Name="ProbableCause" Type="Edm.String" MaxLength="255"/>
+                <Property Name="Recommendation" Type="Edm.String" MaxLength="255"/>
+                <Property Name="Evidence" Type="Edm.String" MaxLength="255"/>
+                <Property Name="Confidence" Type="Edm.String" MaxLength="10"/>
+                <Property Name="Parameters" Type="Edm.String" MaxLength="1000"/>
+                <Property Name="IsActiveEntity" Type="Edm.Boolean" Nullable="false"/>
+                <Property Name="HasActiveEntity" Type="Edm.Boolean" Nullable="false"/>
+                <Property Name="HasDraftEntity" Type="Edm.Boolean" Nullable="false"/>
+                <NavigationProperty Name="_Execution" Type="com.sap.gateway.srvd.zui_stc_test_case.v0001.ExecutionType" Partner="_ResultFinding" Nullable="false">
+                    <ReferentialConstraint Property="ExecutionUUID" ReferencedProperty="ExecutionUUID"/>
+                </NavigationProperty>
+                <NavigationProperty Name="_ResponsibleTeam" Type="com.sap.gateway.srvd.zui_stc_test_case.v0001.ProcessTeamVHType">
+                    <ReferentialConstraint Property="ResponsibleTeam" ReferencedProperty="ProcessTeam"/>
+                </NavigationProperty>
+                <NavigationProperty Name="_Severity" Type="com.sap.gateway.srvd.zui_stc_test_case.v0001.ValidationItemStatusVHType">
+                    <ReferentialConstraint Property="Severity" ReferencedProperty="Code"/>
+                </NavigationProperty>
+                <NavigationProperty Name="_Category" Type="com.sap.gateway.srvd.zui_stc_test_case.v0001.FindingCategoryVHType">
+                    <ReferentialConstraint Property="Category" ReferencedProperty="Code"/>
+                </NavigationProperty>
+                <NavigationProperty Name="_Confidence" Type="com.sap.gateway.srvd.zui_stc_test_case.v0001.ConfidenceVHType">
+                    <ReferentialConstraint Property="Confidence" ReferencedProperty="Code"/>
+                </NavigationProperty>
+                <NavigationProperty Name="DraftAdministrativeData" Type="com.sap.gateway.srvd.zui_stc_test_case.v0001.I_DraftAdministrativeDataType"/>
+                <NavigationProperty Name="SiblingEntity" Type="com.sap.gateway.srvd.zui_stc_test_case.v0001.ResultFindingType"/>
             </EntityType>
             <EntityType Name="TestCaseStepType">
                 <Key>
@@ -1468,6 +1522,20 @@
                 <Property Name="Code" Type="Edm.String" Nullable="false" MaxLength="30"/>
                 <Property Name="Text" Type="Edm.String" MaxLength="40"/>
             </EntityType>
+            <EntityType Name="FindingCategoryVHType">
+                <Key>
+                    <PropertyRef Name="Code"/>
+                </Key>
+                <Property Name="Code" Type="Edm.String" Nullable="false" MaxLength="30"/>
+                <Property Name="Text" Type="Edm.String" MaxLength="30"/>
+            </EntityType>
+            <EntityType Name="ConfidenceVHType">
+                <Key>
+                    <PropertyRef Name="Code"/>
+                </Key>
+                <Property Name="Code" Type="Edm.String" Nullable="false" MaxLength="30"/>
+                <Property Name="Text" Type="Edm.String" MaxLength="30"/>
+            </EntityType>
             <EntityType Name="I_DraftAdministrativeDataType">
                 <Key>
                     <PropertyRef Name="DraftUUID"/>
@@ -1693,6 +1761,7 @@
                     <NavigationPropertyBinding Path="_LatestExecutionStep" Target="ExecutionStep"/>
                     <NavigationPropertyBinding Path="_LatestDocumentReference" Target="DocumentReference"/>
                     <NavigationPropertyBinding Path="_LatestTestAssertion" Target="TestAssertion"/>
+                    <NavigationPropertyBinding Path="_LatestResultFinding" Target="ResultFinding"/>
                     <NavigationPropertyBinding Path="_ProcessProfile" Target="ProcessProfileVH"/>
                     <NavigationPropertyBinding Path="_Status" Target="LifecycleStatusVH"/>
                     <NavigationPropertyBinding Path="_ValidationStatus" Target="ValidationStatusVH"/>
@@ -1740,6 +1809,7 @@
                     <NavigationPropertyBinding Path="_ExecutionStep" Target="ExecutionStep"/>
                     <NavigationPropertyBinding Path="_DocumentReference" Target="DocumentReference"/>
                     <NavigationPropertyBinding Path="_TestAssertion" Target="TestAssertion"/>
+                    <NavigationPropertyBinding Path="_ResultFinding" Target="ResultFinding"/>
                     <NavigationPropertyBinding Path="_ExecutionProvider" Target="ExecutionProviderVH"/>
                     <NavigationPropertyBinding Path="_Status" Target="ExecutionStatusVH"/>
                     <NavigationPropertyBinding Path="_FunctionalResult" Target="FinalResultVH"/>
@@ -1768,6 +1838,15 @@
                     <NavigationPropertyBinding Path="_Result" Target="AssertionResultVH"/>
                     <NavigationPropertyBinding Path="DraftAdministrativeData" Target="I_DraftAdministrativeData"/>
                     <NavigationPropertyBinding Path="SiblingEntity" Target="TestAssertion"/>
+                </EntitySet>
+                <EntitySet Name="ResultFinding" EntityType="com.sap.gateway.srvd.zui_stc_test_case.v0001.ResultFindingType">
+                    <NavigationPropertyBinding Path="_Execution" Target="Execution"/>
+                    <NavigationPropertyBinding Path="_ResponsibleTeam" Target="ProcessTeamVH"/>
+                    <NavigationPropertyBinding Path="_Severity" Target="ValidationItemStatusVH"/>
+                    <NavigationPropertyBinding Path="_Category" Target="FindingCategoryVH"/>
+                    <NavigationPropertyBinding Path="_Confidence" Target="ConfidenceVH"/>
+                    <NavigationPropertyBinding Path="DraftAdministrativeData" Target="I_DraftAdministrativeData"/>
+                    <NavigationPropertyBinding Path="SiblingEntity" Target="ResultFinding"/>
                 </EntitySet>
                 <EntitySet Name="TestCaseStep" EntityType="com.sap.gateway.srvd.zui_stc_test_case.v0001.TestCaseStepType">
                     <NavigationPropertyBinding Path="_TestCase" Target="TestCase"/>
@@ -1934,6 +2013,8 @@
                 <EntitySet Name="RunDecisionVH" EntityType="com.sap.gateway.srvd.zui_stc_test_case.v0001.RunDecisionVHType"/>
                 <EntitySet Name="EndObjectVH" EntityType="com.sap.gateway.srvd.zui_stc_test_case.v0001.EndObjectVHType"/>
                 <EntitySet Name="DocumentOriginVH" EntityType="com.sap.gateway.srvd.zui_stc_test_case.v0001.DocumentOriginVHType"/>
+                <EntitySet Name="FindingCategoryVH" EntityType="com.sap.gateway.srvd.zui_stc_test_case.v0001.FindingCategoryVHType"/>
+                <EntitySet Name="ConfidenceVH" EntityType="com.sap.gateway.srvd.zui_stc_test_case.v0001.ConfidenceVHType"/>
                 <EntitySet Name="I_DraftAdministrativeData" EntityType="com.sap.gateway.srvd.zui_stc_test_case.v0001.I_DraftAdministrativeDataType"/>
             </EntityContainer>
             <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.TestCaseType/TestCaseUUID">
@@ -3142,6 +3223,10 @@
                 <Annotation Term="SAP__common.Label" String="Taken Over From"/>
                 <Annotation Term="SAP__core.Computed" Bool="true"/>
             </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.ExecutionType/AnalysisHeadline">
+                <Annotation Term="SAP__common.Label" String="Analysis"/>
+                <Annotation Term="SAP__core.Computed" Bool="true"/>
+            </Annotations>
             <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.ExecutionType/RunType">
                 <Annotation Term="SAP__common.Label" String="Run Type"/>
                 <Annotation Term="SAP__common.Text" Path="_RunType/Text">
@@ -3441,6 +3526,119 @@
                 <Annotation Term="SAP__UI.Hidden" Bool="true"/>
             </Annotations>
             <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.TestAssertionType/HasDraftEntity">
+                <Annotation Term="SAP__common.Label" String="Has Draft"/>
+                <Annotation Term="SAP__UI.Hidden" Bool="true"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.ResultFindingType/FindingUUID">
+                <Annotation Term="SAP__common.Label" String="Finding UUID"/>
+                <Annotation Term="SAP__core.Computed" Bool="true"/>
+                <Annotation Term="SAP__UI.Hidden" Bool="true"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.ResultFindingType/ExecutionUUID">
+                <Annotation Term="SAP__common.Label" String="Execution UUID"/>
+                <Annotation Term="SAP__core.Computed" Bool="true"/>
+                <Annotation Term="SAP__UI.Hidden" Bool="true"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.ResultFindingType/TestCaseUUID">
+                <Annotation Term="SAP__common.Label" String="Test Case UUID"/>
+                <Annotation Term="SAP__core.Computed" Bool="true"/>
+                <Annotation Term="SAP__UI.Hidden" Bool="true"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.ResultFindingType/CaseID">
+                <Annotation Term="SAP__common.Label" String="Test Case"/>
+                <Annotation Term="SAP__core.Computed" Bool="true"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.ResultFindingType/ExternalExecutionID">
+                <Annotation Term="SAP__common.Label" String="Run"/>
+                <Annotation Term="SAP__core.Computed" Bool="true"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.ResultFindingType/ReleaseID">
+                <Annotation Term="SAP__common.Label" String="Release"/>
+                <Annotation Term="SAP__core.Computed" Bool="true"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.ResultFindingType/Sequence">
+                <Annotation Term="SAP__common.Label" String="No."/>
+                <Annotation Term="SAP__core.Computed" Bool="true"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.ResultFindingType/Category">
+                <Annotation Term="SAP__common.Label" String="Category"/>
+                <Annotation Term="SAP__common.Text" Path="_Category/Text">
+                    <Annotation Term="SAP__UI.TextArrangement" EnumMember="SAP__UI.TextArrangementType/TextOnly"/>
+                </Annotation>
+                <Annotation Term="SAP__core.Computed" Bool="true"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.ResultFindingType/Severity">
+                <Annotation Term="SAP__common.Label" String="Severity"/>
+                <Annotation Term="SAP__common.Text" Path="_Severity/Text">
+                    <Annotation Term="SAP__UI.TextArrangement" EnumMember="SAP__UI.TextArrangementType/TextOnly"/>
+                </Annotation>
+                <Annotation Term="SAP__core.Computed" Bool="true"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.ResultFindingType/Criticality">
+                <Annotation Term="SAP__common.Label" String="Criticality"/>
+                <Annotation Term="SAP__core.Computed" Bool="true"/>
+                <Annotation Term="SAP__UI.Hidden" Bool="true"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.ResultFindingType/FindingCode">
+                <Annotation Term="SAP__common.Label" String="Finding Code"/>
+                <Annotation Term="SAP__core.Computed" Bool="true"/>
+                <Annotation Term="SAP__UI.Hidden" Bool="true"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.ResultFindingType/ProcessStepID">
+                <Annotation Term="SAP__common.Label" String="Process Step"/>
+                <Annotation Term="SAP__common.Text" Path="StepName">
+                    <Annotation Term="SAP__UI.TextArrangement" EnumMember="SAP__UI.TextArrangementType/TextFirst"/>
+                </Annotation>
+                <Annotation Term="SAP__core.Computed" Bool="true"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.ResultFindingType/StepName">
+                <Annotation Term="SAP__common.Label" String="Process Step Name"/>
+                <Annotation Term="SAP__core.Computed" Bool="true"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.ResultFindingType/ResponsibleTeam">
+                <Annotation Term="SAP__common.Label" String="Responsible Team"/>
+                <Annotation Term="SAP__common.Text" Path="_ResponsibleTeam/ProcessTeamName">
+                    <Annotation Term="SAP__UI.TextArrangement" EnumMember="SAP__UI.TextArrangementType/TextFirst"/>
+                </Annotation>
+                <Annotation Term="SAP__core.Computed" Bool="true"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.ResultFindingType/Finding">
+                <Annotation Term="SAP__common.Label" String="Finding"/>
+                <Annotation Term="SAP__core.Computed" Bool="true"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.ResultFindingType/ProbableCause">
+                <Annotation Term="SAP__common.Label" String="Probable Cause"/>
+                <Annotation Term="SAP__core.Computed" Bool="true"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.ResultFindingType/Recommendation">
+                <Annotation Term="SAP__common.Label" String="Recommendation"/>
+                <Annotation Term="SAP__core.Computed" Bool="true"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.ResultFindingType/Evidence">
+                <Annotation Term="SAP__common.Label" String="Evidence"/>
+                <Annotation Term="SAP__core.Computed" Bool="true"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.ResultFindingType/Confidence">
+                <Annotation Term="SAP__common.Label" String="Confidence"/>
+                <Annotation Term="SAP__common.Text" Path="_Confidence/Text">
+                    <Annotation Term="SAP__UI.TextArrangement" EnumMember="SAP__UI.TextArrangementType/TextOnly"/>
+                </Annotation>
+                <Annotation Term="SAP__core.Computed" Bool="true"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.ResultFindingType/Parameters">
+                <Annotation Term="SAP__common.Label" String="Parameters"/>
+                <Annotation Term="SAP__core.Computed" Bool="true"/>
+                <Annotation Term="SAP__UI.Hidden" Bool="true"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.ResultFindingType/IsActiveEntity">
+                <Annotation Term="SAP__common.Label" String="Is Active"/>
+                <Annotation Term="SAP__UI.Hidden" Bool="true"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.ResultFindingType/HasActiveEntity">
+                <Annotation Term="SAP__common.Label" String="Has Active"/>
+                <Annotation Term="SAP__UI.Hidden" Bool="true"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.ResultFindingType/HasDraftEntity">
                 <Annotation Term="SAP__common.Label" String="Has Draft"/>
                 <Annotation Term="SAP__UI.Hidden" Bool="true"/>
             </Annotations>
@@ -5720,6 +5918,24 @@
             <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.DocumentOriginVHType/Text">
                 <Annotation Term="SAP__common.Label" String="Description"/>
             </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.FindingCategoryVHType/Code">
+                <Annotation Term="SAP__common.Label" String="Category"/>
+                <Annotation Term="SAP__common.Text" Path="Text">
+                    <Annotation Term="SAP__UI.TextArrangement" EnumMember="SAP__UI.TextArrangementType/TextOnly"/>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.FindingCategoryVHType/Text">
+                <Annotation Term="SAP__common.Label" String="Description"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.ConfidenceVHType/Code">
+                <Annotation Term="SAP__common.Label" String="Confidence"/>
+                <Annotation Term="SAP__common.Text" Path="Text">
+                    <Annotation Term="SAP__UI.TextArrangement" EnumMember="SAP__UI.TextArrangementType/TextOnly"/>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.ConfidenceVHType/Text">
+                <Annotation Term="SAP__common.Label" String="Description"/>
+            </Annotations>
             <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.I_DraftAdministrativeDataType/DraftUUID">
                 <Annotation Term="SAP__common.Label" String="Draft (Technical ID)"/>
             </Annotations>
@@ -5930,6 +6146,24 @@
                                         </Record>
                                     </PropertyValue>
                                 </Record>
+                                <Record Type="SAP__capabilities.NavigationPropertyRestriction">
+                                    <PropertyValue Property="NavigationProperty" NavigationPropertyPath="_LatestResultFinding"/>
+                                    <PropertyValue Property="InsertRestrictions">
+                                        <Record Type="SAP__capabilities.InsertRestrictionsType">
+                                            <PropertyValue Property="Insertable" Bool="false"/>
+                                        </Record>
+                                    </PropertyValue>
+                                    <PropertyValue Property="DeleteRestrictions">
+                                        <Record Type="SAP__capabilities.DeleteRestrictionsType">
+                                            <PropertyValue Property="Deletable" Bool="false"/>
+                                        </Record>
+                                    </PropertyValue>
+                                    <PropertyValue Property="UpdateRestrictions">
+                                        <Record Type="SAP__capabilities.UpdateRestrictionsType">
+                                            <PropertyValue Property="Updatable" Bool="false"/>
+                                        </Record>
+                                    </PropertyValue>
+                                </Record>
                             </Collection>
                         </PropertyValue>
                     </Record>
@@ -6073,6 +6307,24 @@
                                         </Record>
                                     </PropertyValue>
                                 </Record>
+                                <Record Type="SAP__capabilities.NavigationPropertyRestriction">
+                                    <PropertyValue Property="NavigationProperty" NavigationPropertyPath="_ResultFinding"/>
+                                    <PropertyValue Property="InsertRestrictions">
+                                        <Record Type="SAP__capabilities.InsertRestrictionsType">
+                                            <PropertyValue Property="Insertable" Bool="false"/>
+                                        </Record>
+                                    </PropertyValue>
+                                    <PropertyValue Property="DeleteRestrictions">
+                                        <Record Type="SAP__capabilities.DeleteRestrictionsType">
+                                            <PropertyValue Property="Deletable" Bool="false"/>
+                                        </Record>
+                                    </PropertyValue>
+                                    <PropertyValue Property="UpdateRestrictions">
+                                        <Record Type="SAP__capabilities.UpdateRestrictionsType">
+                                            <PropertyValue Property="Updatable" Bool="false"/>
+                                        </Record>
+                                    </PropertyValue>
+                                </Record>
                             </Collection>
                         </PropertyValue>
                     </Record>
@@ -6133,6 +6385,33 @@
                 </Annotation>
             </Annotations>
             <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.Container/TestAssertion">
+                <Annotation Term="SAP__common.DraftNode">
+                    <Record Type="SAP__common.DraftNodeType">
+                        <PropertyValue Property="PreparationAction" String="com.sap.gateway.srvd.zui_stc_test_case.v0001.Prepare"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="SAP__capabilities.SearchRestrictions">
+                    <Record Type="SAP__capabilities.SearchRestrictionsType">
+                        <PropertyValue Property="Searchable" Bool="false"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="SAP__capabilities.InsertRestrictions">
+                    <Record Type="SAP__capabilities.InsertRestrictionsType">
+                        <PropertyValue Property="Insertable" Bool="false"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="SAP__capabilities.UpdateRestrictions">
+                    <Record Type="SAP__capabilities.UpdateRestrictionsType">
+                        <PropertyValue Property="Updatable" Bool="false"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="SAP__capabilities.DeleteRestrictions">
+                    <Record Type="SAP__capabilities.DeleteRestrictionsType">
+                        <PropertyValue Property="Deletable" Bool="false"/>
+                    </Record>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.Container/ResultFinding">
                 <Annotation Term="SAP__common.DraftNode">
                     <Record Type="SAP__common.DraftNodeType">
                         <PropertyValue Property="PreparationAction" String="com.sap.gateway.srvd.zui_stc_test_case.v0001.Prepare"/>
@@ -7867,6 +8146,50 @@
                     </Record>
                 </Annotation>
             </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.Container/FindingCategoryVH">
+                <Annotation Term="SAP__capabilities.SearchRestrictions">
+                    <Record Type="SAP__capabilities.SearchRestrictionsType">
+                        <PropertyValue Property="Searchable" Bool="false"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="SAP__capabilities.InsertRestrictions">
+                    <Record Type="SAP__capabilities.InsertRestrictionsType">
+                        <PropertyValue Property="Insertable" Bool="false"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="SAP__capabilities.UpdateRestrictions">
+                    <Record Type="SAP__capabilities.UpdateRestrictionsType">
+                        <PropertyValue Property="Updatable" Bool="false"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="SAP__capabilities.DeleteRestrictions">
+                    <Record Type="SAP__capabilities.DeleteRestrictionsType">
+                        <PropertyValue Property="Deletable" Bool="false"/>
+                    </Record>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.Container/ConfidenceVH">
+                <Annotation Term="SAP__capabilities.SearchRestrictions">
+                    <Record Type="SAP__capabilities.SearchRestrictionsType">
+                        <PropertyValue Property="Searchable" Bool="false"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="SAP__capabilities.InsertRestrictions">
+                    <Record Type="SAP__capabilities.InsertRestrictionsType">
+                        <PropertyValue Property="Insertable" Bool="false"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="SAP__capabilities.UpdateRestrictions">
+                    <Record Type="SAP__capabilities.UpdateRestrictionsType">
+                        <PropertyValue Property="Updatable" Bool="false"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="SAP__capabilities.DeleteRestrictions">
+                    <Record Type="SAP__capabilities.DeleteRestrictionsType">
+                        <PropertyValue Property="Deletable" Bool="false"/>
+                    </Record>
+                </Annotation>
+            </Annotations>
             <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.Container/I_DraftAdministrativeData">
                 <Annotation Term="SAP__capabilities.SearchRestrictions">
                     <Record Type="SAP__capabilities.SearchRestrictionsType">
@@ -8320,6 +8643,10 @@
                                     <PropertyValue Property="Label" String="Run Type"/>
                                 </Record>
                                 <Record Type="SAP__UI.DataField">
+                                    <PropertyValue Property="Value" Path="_LatestExecution/AnalysisHeadline"/>
+                                    <PropertyValue Property="Label" String="Analysis"/>
+                                </Record>
+                                <Record Type="SAP__UI.DataField">
                                     <PropertyValue Property="Value" Path="_LatestExecution/StartObject"/>
                                     <PropertyValue Property="Label" String="Start from"/>
                                 </Record>
@@ -8521,6 +8848,11 @@
                             <PropertyValue Property="ID" String="Assertions"/>
                             <PropertyValue Property="Label" String="Test Assertions"/>
                             <PropertyValue Property="Target" AnnotationPath="_LatestTestAssertion/@UI.LineItem"/>
+                        </Record>
+                        <Record Type="SAP__UI.ReferenceFacet">
+                            <PropertyValue Property="ID" String="ResultAnalysis"/>
+                            <PropertyValue Property="Label" String="Result Analysis"/>
+                            <PropertyValue Property="Target" AnnotationPath="_LatestResultFinding/@UI.PresentationVariant"/>
                         </Record>
                         <Record Type="SAP__UI.CollectionFacet">
                             <PropertyValue Property="ID" String="TechnicalLogSection"/>
@@ -9206,6 +9538,78 @@
                         </Record>
                         <Record Type="SAP__UI.DataField">
                             <PropertyValue Property="Value" Path="Message"/>
+                        </Record>
+                    </Collection>
+                    <Annotation Term="SAP__UI.Criticality" Path="Criticality"/>
+                </Annotation>
+                <Annotation Term="SAP__UI.PresentationVariant">
+                    <Record Type="SAP__UI.PresentationVariantType">
+                        <PropertyValue Property="SortOrder">
+                            <Collection>
+                                <Record Type="SAP__common.SortOrderType">
+                                    <PropertyValue Property="Property" PropertyPath="Sequence"/>
+                                    <PropertyValue Property="Descending" Bool="false"/>
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                        <PropertyValue Property="Visualizations">
+                            <Collection>
+                                <AnnotationPath>@UI.LineItem</AnnotationPath>
+                            </Collection>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.ResultFindingType">
+                <Annotation Term="SAP__UI.HeaderInfo">
+                    <Record Type="SAP__UI.HeaderInfoType">
+                        <PropertyValue Property="TypeName" String="Finding"/>
+                        <PropertyValue Property="TypeNamePlural" String="Findings"/>
+                        <PropertyValue Property="Title">
+                            <Record Type="SAP__UI.DataField">
+                                <PropertyValue Property="Value" Path="Finding"/>
+                            </Record>
+                        </PropertyValue>
+                        <PropertyValue Property="Description">
+                            <Record Type="SAP__UI.DataField">
+                                <PropertyValue Property="Value" Path="Category"/>
+                            </Record>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+                <Annotation Term="SAP__UI.LineItem">
+                    <Collection>
+                        <Record Type="SAP__UI.DataField">
+                            <PropertyValue Property="Value" Path="Category"/>
+                            <Annotation Term="SAP__UI.Importance" EnumMember="SAP__UI.ImportanceType/Medium"/>
+                        </Record>
+                        <Record Type="SAP__UI.DataField">
+                            <PropertyValue Property="Value" Path="Finding"/>
+                            <Annotation Term="SAP__UI.Importance" EnumMember="SAP__UI.ImportanceType/High"/>
+                        </Record>
+                        <Record Type="SAP__UI.DataField">
+                            <PropertyValue Property="Value" Path="ProbableCause"/>
+                            <Annotation Term="SAP__UI.Importance" EnumMember="SAP__UI.ImportanceType/High"/>
+                        </Record>
+                        <Record Type="SAP__UI.DataField">
+                            <PropertyValue Property="Value" Path="Recommendation"/>
+                            <Annotation Term="SAP__UI.Importance" EnumMember="SAP__UI.ImportanceType/High"/>
+                        </Record>
+                        <Record Type="SAP__UI.DataField">
+                            <PropertyValue Property="Value" Path="ProcessStepID"/>
+                            <Annotation Term="SAP__UI.Importance" EnumMember="SAP__UI.ImportanceType/Medium"/>
+                        </Record>
+                        <Record Type="SAP__UI.DataField">
+                            <PropertyValue Property="Value" Path="ResponsibleTeam"/>
+                            <Annotation Term="SAP__UI.Importance" EnumMember="SAP__UI.ImportanceType/Medium"/>
+                        </Record>
+                        <Record Type="SAP__UI.DataField">
+                            <PropertyValue Property="Value" Path="Confidence"/>
+                            <Annotation Term="SAP__UI.Importance" EnumMember="SAP__UI.ImportanceType/Low"/>
+                        </Record>
+                        <Record Type="SAP__UI.DataField">
+                            <PropertyValue Property="Value" Path="Evidence"/>
+                            <Annotation Term="SAP__UI.Importance" EnumMember="SAP__UI.ImportanceType/Low"/>
                         </Record>
                     </Collection>
                     <Annotation Term="SAP__UI.Criticality" Path="Criticality"/>
@@ -11318,6 +11722,7 @@
                                 <NavigationPropertyPath>_it/_LatestExecutionStep</NavigationPropertyPath>
                                 <NavigationPropertyPath>_it/_LatestDocumentReference</NavigationPropertyPath>
                                 <NavigationPropertyPath>_it/_LatestTestAssertion</NavigationPropertyPath>
+                                <NavigationPropertyPath>_it/_LatestResultFinding</NavigationPropertyPath>
                             </Collection>
                         </PropertyValue>
                     </Record>
@@ -11351,6 +11756,7 @@
                                 <NavigationPropertyPath>_it/_LatestExecutionStep</NavigationPropertyPath>
                                 <NavigationPropertyPath>_it/_LatestDocumentReference</NavigationPropertyPath>
                                 <NavigationPropertyPath>_it/_LatestTestAssertion</NavigationPropertyPath>
+                                <NavigationPropertyPath>_it/_LatestResultFinding</NavigationPropertyPath>
                             </Collection>
                         </PropertyValue>
                     </Record>
@@ -11384,6 +11790,7 @@
                                 <NavigationPropertyPath>_it/_LatestExecutionStep</NavigationPropertyPath>
                                 <NavigationPropertyPath>_it/_LatestDocumentReference</NavigationPropertyPath>
                                 <NavigationPropertyPath>_it/_LatestTestAssertion</NavigationPropertyPath>
+                                <NavigationPropertyPath>_it/_LatestResultFinding</NavigationPropertyPath>
                             </Collection>
                         </PropertyValue>
                     </Record>

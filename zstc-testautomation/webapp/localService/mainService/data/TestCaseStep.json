@@ -189,7 +189,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0093-4a5b-9c6d-000000000093",
+        "TestCaseStepUUID": "9e3f4c30-0094-4a5b-9c6d-000000000094",
         "TestCaseUUID": "6f1c2a10-0003-4c3e-9a51-000000000003",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -210,7 +210,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0094-4a5b-9c6d-000000000094",
+        "TestCaseStepUUID": "9e3f4c30-0095-4a5b-9c6d-000000000095",
         "TestCaseUUID": "6f1c2a10-0003-4c3e-9a51-000000000003",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -231,7 +231,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0095-4a5b-9c6d-000000000095",
+        "TestCaseStepUUID": "9e3f4c30-0096-4a5b-9c6d-000000000096",
         "TestCaseUUID": "6f1c2a10-0003-4c3e-9a51-000000000003",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -252,7 +252,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0096-4a5b-9c6d-000000000096",
+        "TestCaseStepUUID": "9e3f4c30-0097-4a5b-9c6d-000000000097",
         "TestCaseUUID": "6f1c2a10-0003-4c3e-9a51-000000000003",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -273,7 +273,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0097-4a5b-9c6d-000000000097",
+        "TestCaseStepUUID": "9e3f4c30-0098-4a5b-9c6d-000000000098",
         "TestCaseUUID": "6f1c2a10-0003-4c3e-9a51-000000000003",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -294,7 +294,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0098-4a5b-9c6d-000000000098",
+        "TestCaseStepUUID": "9e3f4c30-0099-4a5b-9c6d-000000000099",
         "TestCaseUUID": "6f1c2a10-0003-4c3e-9a51-000000000003",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -315,7 +315,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0099-4a5b-9c6d-000000000099",
+        "TestCaseStepUUID": "9e3f4c30-0100-4a5b-9c6d-000000000100",
         "TestCaseUUID": "6f1c2a10-0003-4c3e-9a51-000000000003",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -336,7 +336,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0100-4a5b-9c6d-000000000100",
+        "TestCaseStepUUID": "9e3f4c30-0101-4a5b-9c6d-000000000101",
         "TestCaseUUID": "6f1c2a10-0003-4c3e-9a51-000000000003",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -357,7 +357,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0101-4a5b-9c6d-000000000101",
+        "TestCaseStepUUID": "9e3f4c30-0102-4a5b-9c6d-000000000102",
         "TestCaseUUID": "6f1c2a10-0003-4c3e-9a51-000000000003",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -378,7 +378,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0103-4a5b-9c6d-000000000103",
+        "TestCaseStepUUID": "9e3f4c30-0104-4a5b-9c6d-000000000104",
         "TestCaseUUID": "6f1c2a10-0004-4c3e-9a51-000000000004",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -399,7 +399,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0104-4a5b-9c6d-000000000104",
+        "TestCaseStepUUID": "9e3f4c30-0105-4a5b-9c6d-000000000105",
         "TestCaseUUID": "6f1c2a10-0004-4c3e-9a51-000000000004",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -420,7 +420,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0105-4a5b-9c6d-000000000105",
+        "TestCaseStepUUID": "9e3f4c30-0106-4a5b-9c6d-000000000106",
         "TestCaseUUID": "6f1c2a10-0004-4c3e-9a51-000000000004",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -441,7 +441,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0106-4a5b-9c6d-000000000106",
+        "TestCaseStepUUID": "9e3f4c30-0107-4a5b-9c6d-000000000107",
         "TestCaseUUID": "6f1c2a10-0004-4c3e-9a51-000000000004",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -462,7 +462,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0107-4a5b-9c6d-000000000107",
+        "TestCaseStepUUID": "9e3f4c30-0108-4a5b-9c6d-000000000108",
         "TestCaseUUID": "6f1c2a10-0004-4c3e-9a51-000000000004",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -483,7 +483,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0108-4a5b-9c6d-000000000108",
+        "TestCaseStepUUID": "9e3f4c30-0109-4a5b-9c6d-000000000109",
         "TestCaseUUID": "6f1c2a10-0004-4c3e-9a51-000000000004",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -504,7 +504,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0109-4a5b-9c6d-000000000109",
+        "TestCaseStepUUID": "9e3f4c30-0110-4a5b-9c6d-000000000110",
         "TestCaseUUID": "6f1c2a10-0004-4c3e-9a51-000000000004",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -525,7 +525,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0162-4a5b-9c6d-000000000162",
+        "TestCaseStepUUID": "9e3f4c30-0164-4a5b-9c6d-000000000164",
         "TestCaseUUID": "6f1c2a10-0005-4c3e-9a51-000000000005",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -538,48 +538,6 @@
         "BusinessObjectType": "SERVICE_REQUEST",
         "Action": "Service Request mit den Testdaten anlegen: Kunde, Referenzobjekt, Problembeschreibung, Priorität.",
         "ExpectedResult": "Service Request angelegt und abgeschlossen; Case ID als Kundenreferenz.",
-        "ResponsibleTeam": "PT-REPARATUR",
-        "TeamAssignment": "ASSIGNED",
-        "IsHandover": false,
-        "Automation": "AUTOMATED",
-        "TeamAssignmentCriticality": 3,
-        "StepSource": "DERIVED"
-    },
-    {
-        "TestCaseStepUUID": "9e3f4c30-0163-4a5b-9c6d-000000000163",
-        "TestCaseUUID": "6f1c2a10-0005-4c3e-9a51-000000000005",
-        "IsActiveEntity": true,
-        "HasActiveEntity": false,
-        "HasDraftEntity": false,
-        "DraftAdministrativeData": null,
-        "StepNo": 20,
-        "ProcessID": "SRV-REP",
-        "ProcessStepID": "REP-020",
-        "StepName": "Entscheidung: Angebot nötig?",
-        "BusinessObjectType": "",
-        "Action": "Entscheidung gemäß Prozessvariante: Nein → Weg 1 (Auftrag), Ja → Weg 2 (Angebot).",
-        "ExpectedResult": "Pfad der Prozessvariante wird fortgesetzt.",
-        "ResponsibleTeam": "PT-REPARATUR",
-        "TeamAssignment": "ASSIGNED",
-        "IsHandover": false,
-        "Automation": "DECISION",
-        "TeamAssignmentCriticality": 3,
-        "StepSource": "DERIVED"
-    },
-    {
-        "TestCaseStepUUID": "9e3f4c30-0164-4a5b-9c6d-000000000164",
-        "TestCaseUUID": "6f1c2a10-0005-4c3e-9a51-000000000005",
-        "IsActiveEntity": true,
-        "HasActiveEntity": false,
-        "HasDraftEntity": false,
-        "DraftAdministrativeData": null,
-        "StepNo": 30,
-        "ProcessID": "SRV-REP",
-        "ProcessStepID": "REP-060",
-        "StepName": "Service Order anlegen (aus Request, Angebot oder Vertrag)",
-        "BusinessObjectType": "SERVICE_ORDER",
-        "Action": "Service Order mit Leistungs- und Ersatzteilposition anlegen und freigeben; Referenz auf Vorgänger bzw. Vertrag.",
-        "ExpectedResult": "Auftrag freigegeben, nach der Rückmeldung abgeschlossen; bei Weg 3 mit Vertragsreferenz.",
         "ResponsibleTeam": "PT-REPARATUR",
         "TeamAssignment": "ASSIGNED",
         "IsHandover": false,
@@ -594,6 +552,48 @@
         "HasActiveEntity": false,
         "HasDraftEntity": false,
         "DraftAdministrativeData": null,
+        "StepNo": 20,
+        "ProcessID": "SRV-REP",
+        "ProcessStepID": "REP-020",
+        "StepName": "Entscheidung: Angebot nötig?",
+        "BusinessObjectType": "",
+        "Action": "Entscheidung gemäß Prozessvariante: Nein → Weg 1 (Auftrag), Ja → Weg 2 (Angebot).",
+        "ExpectedResult": "Pfad der Prozessvariante wird fortgesetzt.",
+        "ResponsibleTeam": "PT-REPARATUR",
+        "TeamAssignment": "ASSIGNED",
+        "IsHandover": false,
+        "Automation": "DECISION",
+        "TeamAssignmentCriticality": 3,
+        "StepSource": "DERIVED"
+    },
+    {
+        "TestCaseStepUUID": "9e3f4c30-0166-4a5b-9c6d-000000000166",
+        "TestCaseUUID": "6f1c2a10-0005-4c3e-9a51-000000000005",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "StepNo": 30,
+        "ProcessID": "SRV-REP",
+        "ProcessStepID": "REP-060",
+        "StepName": "Service Order anlegen (aus Request, Angebot oder Vertrag)",
+        "BusinessObjectType": "SERVICE_ORDER",
+        "Action": "Service Order mit Leistungs- und Ersatzteilposition anlegen und freigeben; Referenz auf Vorgänger bzw. Vertrag.",
+        "ExpectedResult": "Auftrag freigegeben, nach der Rückmeldung abgeschlossen; bei Weg 3 mit Vertragsreferenz.",
+        "ResponsibleTeam": "PT-REPARATUR",
+        "TeamAssignment": "ASSIGNED",
+        "IsHandover": false,
+        "Automation": "AUTOMATED",
+        "TeamAssignmentCriticality": 3,
+        "StepSource": "DERIVED"
+    },
+    {
+        "TestCaseStepUUID": "9e3f4c30-0167-4a5b-9c6d-000000000167",
+        "TestCaseUUID": "6f1c2a10-0005-4c3e-9a51-000000000005",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
         "StepNo": 40,
         "ProcessID": "SRV-REP",
         "ProcessStepID": "REP-070",
@@ -609,7 +609,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0166-4a5b-9c6d-000000000166",
+        "TestCaseStepUUID": "9e3f4c30-0168-4a5b-9c6d-000000000168",
         "TestCaseUUID": "6f1c2a10-0005-4c3e-9a51-000000000005",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -630,7 +630,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0167-4a5b-9c6d-000000000167",
+        "TestCaseStepUUID": "9e3f4c30-0169-4a5b-9c6d-000000000169",
         "TestCaseUUID": "6f1c2a10-0005-4c3e-9a51-000000000005",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -651,7 +651,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0168-4a5b-9c6d-000000000168",
+        "TestCaseStepUUID": "9e3f4c30-0170-4a5b-9c6d-000000000170",
         "TestCaseUUID": "6f1c2a10-0005-4c3e-9a51-000000000005",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -672,7 +672,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0191-4a5b-9c6d-000000000191",
+        "TestCaseStepUUID": "9e3f4c30-0193-4a5b-9c6d-000000000193",
         "TestCaseUUID": "6f1c2a10-0006-4c3e-9a51-000000000006",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -693,7 +693,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0192-4a5b-9c6d-000000000192",
+        "TestCaseStepUUID": "9e3f4c30-0194-4a5b-9c6d-000000000194",
         "TestCaseUUID": "6f1c2a10-0006-4c3e-9a51-000000000006",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -714,7 +714,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0193-4a5b-9c6d-000000000193",
+        "TestCaseStepUUID": "9e3f4c30-0195-4a5b-9c6d-000000000195",
         "TestCaseUUID": "6f1c2a10-0006-4c3e-9a51-000000000006",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -735,7 +735,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0194-4a5b-9c6d-000000000194",
+        "TestCaseStepUUID": "9e3f4c30-0196-4a5b-9c6d-000000000196",
         "TestCaseUUID": "6f1c2a10-0006-4c3e-9a51-000000000006",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -756,7 +756,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0195-4a5b-9c6d-000000000195",
+        "TestCaseStepUUID": "9e3f4c30-0197-4a5b-9c6d-000000000197",
         "TestCaseUUID": "6f1c2a10-0006-4c3e-9a51-000000000006",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -777,7 +777,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0196-4a5b-9c6d-000000000196",
+        "TestCaseStepUUID": "9e3f4c30-0198-4a5b-9c6d-000000000198",
         "TestCaseUUID": "6f1c2a10-0006-4c3e-9a51-000000000006",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -798,7 +798,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0197-4a5b-9c6d-000000000197",
+        "TestCaseStepUUID": "9e3f4c30-0199-4a5b-9c6d-000000000199",
         "TestCaseUUID": "6f1c2a10-0006-4c3e-9a51-000000000006",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -819,7 +819,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0198-4a5b-9c6d-000000000198",
+        "TestCaseStepUUID": "9e3f4c30-0200-4a5b-9c6d-000000000200",
         "TestCaseUUID": "6f1c2a10-0006-4c3e-9a51-000000000006",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -840,7 +840,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0199-4a5b-9c6d-000000000199",
+        "TestCaseStepUUID": "9e3f4c30-0201-4a5b-9c6d-000000000201",
         "TestCaseUUID": "6f1c2a10-0006-4c3e-9a51-000000000006",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -861,7 +861,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0201-4a5b-9c6d-000000000201",
+        "TestCaseStepUUID": "9e3f4c30-0203-4a5b-9c6d-000000000203",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -882,7 +882,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0202-4a5b-9c6d-000000000202",
+        "TestCaseStepUUID": "9e3f4c30-0204-4a5b-9c6d-000000000204",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -903,7 +903,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0203-4a5b-9c6d-000000000203",
+        "TestCaseStepUUID": "9e3f4c30-0205-4a5b-9c6d-000000000205",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -924,7 +924,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0204-4a5b-9c6d-000000000204",
+        "TestCaseStepUUID": "9e3f4c30-0206-4a5b-9c6d-000000000206",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -945,7 +945,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0205-4a5b-9c6d-000000000205",
+        "TestCaseStepUUID": "9e3f4c30-0207-4a5b-9c6d-000000000207",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -966,7 +966,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0206-4a5b-9c6d-000000000206",
+        "TestCaseStepUUID": "9e3f4c30-0208-4a5b-9c6d-000000000208",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -987,7 +987,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0207-4a5b-9c6d-000000000207",
+        "TestCaseStepUUID": "9e3f4c30-0209-4a5b-9c6d-000000000209",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1008,7 +1008,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0208-4a5b-9c6d-000000000208",
+        "TestCaseStepUUID": "9e3f4c30-0210-4a5b-9c6d-000000000210",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1029,7 +1029,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0264-4a5b-9c6d-000000000264",
+        "TestCaseStepUUID": "9e3f4c30-0324-4a5b-9c6d-000000000324",
         "TestCaseUUID": "6f1c2a10-0008-4c3e-9a51-000000000008",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1050,7 +1050,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0265-4a5b-9c6d-000000000265",
+        "TestCaseStepUUID": "9e3f4c30-0325-4a5b-9c6d-000000000325",
         "TestCaseUUID": "6f1c2a10-0008-4c3e-9a51-000000000008",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1071,7 +1071,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0266-4a5b-9c6d-000000000266",
+        "TestCaseStepUUID": "9e3f4c30-0326-4a5b-9c6d-000000000326",
         "TestCaseUUID": "6f1c2a10-0008-4c3e-9a51-000000000008",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1092,7 +1092,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0267-4a5b-9c6d-000000000267",
+        "TestCaseStepUUID": "9e3f4c30-0327-4a5b-9c6d-000000000327",
         "TestCaseUUID": "6f1c2a10-0008-4c3e-9a51-000000000008",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1113,7 +1113,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0305-4a5b-9c6d-000000000305",
+        "TestCaseStepUUID": "9e3f4c30-0366-4a5b-9c6d-000000000366",
         "TestCaseUUID": "6f1c2a10-0009-4c3e-9a51-000000000009",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1134,7 +1134,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0306-4a5b-9c6d-000000000306",
+        "TestCaseStepUUID": "9e3f4c30-0367-4a5b-9c6d-000000000367",
         "TestCaseUUID": "6f1c2a10-0009-4c3e-9a51-000000000009",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1155,7 +1155,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0307-4a5b-9c6d-000000000307",
+        "TestCaseStepUUID": "9e3f4c30-0368-4a5b-9c6d-000000000368",
         "TestCaseUUID": "6f1c2a10-0009-4c3e-9a51-000000000009",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1176,7 +1176,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0308-4a5b-9c6d-000000000308",
+        "TestCaseStepUUID": "9e3f4c30-0369-4a5b-9c6d-000000000369",
         "TestCaseUUID": "6f1c2a10-0009-4c3e-9a51-000000000009",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1197,7 +1197,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0309-4a5b-9c6d-000000000309",
+        "TestCaseStepUUID": "9e3f4c30-0370-4a5b-9c6d-000000000370",
         "TestCaseUUID": "6f1c2a10-0009-4c3e-9a51-000000000009",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1218,7 +1218,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0310-4a5b-9c6d-000000000310",
+        "TestCaseStepUUID": "9e3f4c30-0371-4a5b-9c6d-000000000371",
         "TestCaseUUID": "6f1c2a10-0009-4c3e-9a51-000000000009",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1239,7 +1239,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0334-4a5b-9c6d-000000000334",
+        "TestCaseStepUUID": "9e3f4c30-0395-4a5b-9c6d-000000000395",
         "TestCaseUUID": "6f1c2a10-0010-4c3e-9a51-000000000010",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1260,7 +1260,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0335-4a5b-9c6d-000000000335",
+        "TestCaseStepUUID": "9e3f4c30-0396-4a5b-9c6d-000000000396",
         "TestCaseUUID": "6f1c2a10-0010-4c3e-9a51-000000000010",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1281,7 +1281,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0336-4a5b-9c6d-000000000336",
+        "TestCaseStepUUID": "9e3f4c30-0397-4a5b-9c6d-000000000397",
         "TestCaseUUID": "6f1c2a10-0010-4c3e-9a51-000000000010",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1302,7 +1302,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0337-4a5b-9c6d-000000000337",
+        "TestCaseStepUUID": "9e3f4c30-0398-4a5b-9c6d-000000000398",
         "TestCaseUUID": "6f1c2a10-0010-4c3e-9a51-000000000010",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1323,7 +1323,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0338-4a5b-9c6d-000000000338",
+        "TestCaseStepUUID": "9e3f4c30-0399-4a5b-9c6d-000000000399",
         "TestCaseUUID": "6f1c2a10-0010-4c3e-9a51-000000000010",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1344,7 +1344,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0339-4a5b-9c6d-000000000339",
+        "TestCaseStepUUID": "9e3f4c30-0400-4a5b-9c6d-000000000400",
         "TestCaseUUID": "6f1c2a10-0010-4c3e-9a51-000000000010",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1365,7 +1365,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0363-4a5b-9c6d-000000000363",
+        "TestCaseStepUUID": "9e3f4c30-0424-4a5b-9c6d-000000000424",
         "TestCaseUUID": "6f1c2a10-0011-4c3e-9a51-000000000011",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1386,7 +1386,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0364-4a5b-9c6d-000000000364",
+        "TestCaseStepUUID": "9e3f4c30-0425-4a5b-9c6d-000000000425",
         "TestCaseUUID": "6f1c2a10-0011-4c3e-9a51-000000000011",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1407,7 +1407,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0365-4a5b-9c6d-000000000365",
+        "TestCaseStepUUID": "9e3f4c30-0426-4a5b-9c6d-000000000426",
         "TestCaseUUID": "6f1c2a10-0011-4c3e-9a51-000000000011",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1428,7 +1428,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0375-4a5b-9c6d-000000000375",
+        "TestCaseStepUUID": "9e3f4c30-0436-4a5b-9c6d-000000000436",
         "TestCaseUUID": "6f1c2a10-0012-4c3e-9a51-000000000012",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1449,7 +1449,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0376-4a5b-9c6d-000000000376",
+        "TestCaseStepUUID": "9e3f4c30-0437-4a5b-9c6d-000000000437",
         "TestCaseUUID": "6f1c2a10-0012-4c3e-9a51-000000000012",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1470,7 +1470,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0399-4a5b-9c6d-000000000399",
+        "TestCaseStepUUID": "9e3f4c30-0460-4a5b-9c6d-000000000460",
         "TestCaseUUID": "6f1c2a10-0013-4c3e-9a51-000000000013",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1491,7 +1491,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0400-4a5b-9c6d-000000000400",
+        "TestCaseStepUUID": "9e3f4c30-0461-4a5b-9c6d-000000000461",
         "TestCaseUUID": "6f1c2a10-0013-4c3e-9a51-000000000013",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1512,7 +1512,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0401-4a5b-9c6d-000000000401",
+        "TestCaseStepUUID": "9e3f4c30-0462-4a5b-9c6d-000000000462",
         "TestCaseUUID": "6f1c2a10-0013-4c3e-9a51-000000000013",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1533,7 +1533,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0402-4a5b-9c6d-000000000402",
+        "TestCaseStepUUID": "9e3f4c30-0463-4a5b-9c6d-000000000463",
         "TestCaseUUID": "6f1c2a10-0013-4c3e-9a51-000000000013",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1554,7 +1554,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0403-4a5b-9c6d-000000000403",
+        "TestCaseStepUUID": "9e3f4c30-0464-4a5b-9c6d-000000000464",
         "TestCaseUUID": "6f1c2a10-0013-4c3e-9a51-000000000013",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1575,7 +1575,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0448-4a5b-9c6d-000000000448",
+        "TestCaseStepUUID": "9e3f4c30-0510-4a5b-9c6d-000000000510",
         "TestCaseUUID": "6f1c2a10-0014-4c3e-9a51-000000000014",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1596,7 +1596,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0449-4a5b-9c6d-000000000449",
+        "TestCaseStepUUID": "9e3f4c30-0511-4a5b-9c6d-000000000511",
         "TestCaseUUID": "6f1c2a10-0014-4c3e-9a51-000000000014",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1617,7 +1617,7 @@
         "StepSource": "DERIVED"
     },
     {
-        "TestCaseStepUUID": "9e3f4c30-0450-4a5b-9c6d-000000000450",
+        "TestCaseStepUUID": "9e3f4c30-0512-4a5b-9c6d-000000000512",
         "TestCaseUUID": "6f1c2a10-0014-4c3e-9a51-000000000014",
         "IsActiveEntity": true,
         "HasActiveEntity": false,

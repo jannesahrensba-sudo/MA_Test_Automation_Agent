@@ -1,0 +1,26 @@
+[
+    {
+        "Code": "RESULT",
+        "Text": "Result"
+    },
+    {
+        "Code": "DEVIATION",
+        "Text": "Deviation"
+    },
+    {
+        "Code": "TECHNICAL",
+        "Text": "Technical error"
+    },
+    {
+        "Code": "PRECONDITION",
+        "Text": "Precondition"
+    },
+    {
+        "Code": "HANDOVER",
+        "Text": "Handover"
+    },
+    {
+        "Code": "REGRESSION",
+        "Text": "Comparison with previous run"
+    }
+]

@@ -51,6 +51,11 @@ function priceItem(product, quantity, unit) {
     return { netAmount: round2(entry.price * effectiveQty), currency: entry.currency, priced: true };
 }
 
+/** @returns {{price: number, unit: string, currency: string}|undefined} mock price list entry of a product */
+function unitPrice(product) {
+    return PRICE_LIST[product];
+}
+
 /** @returns {boolean} whether the product is blocked in the mock plant (simulation rule SIM-6) */
 function isBlocked(product) {
     return PRICE_LIST[product]?.blocked === true;
@@ -86,4 +91,4 @@ function expectedNetAmount(data) {
     return round2(net);
 }
 
-module.exports = { PRICE_LIST, priceItem, isBlocked, round2, expectedNetAmount };
+module.exports = { PRICE_LIST, priceItem, unitPrice, isBlocked, round2, expectedNetAmount };

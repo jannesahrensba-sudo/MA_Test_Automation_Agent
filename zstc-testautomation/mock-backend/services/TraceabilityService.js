@@ -99,12 +99,17 @@ function stepResult(state, run, step, testCase) {
         const failedAssertion = (state.assertionsByRun.get(run.ExecutionUUID) || []).some((a) => a.ProcessStepID === step.StepID && a.Result === ASSERTION.FAILED);
         return failedAssertion ? 'FAILED' : 'PASSED';
     }
-    // decisions and manual steps have no execution step: they are covered through the path of a finished run
+    // decisions and manual steps have no execution step: they are covered when the run reached a later step of its path
+    // (a failure further on, e.g. a net value deviation in billing, is not a failure of the decision)
     const onPath = (state.testStepsByCase.get(testCase.TestCaseUUID) || []).some((ts) => ts.ProcessStepID === step.StepID);
     if (!onPath || step.Automation === catalog.AUTOMATION.AUTOMATED) {
         return undefined;
     }
-    return PASSED_RESULTS.has(run.FunctionalResult) ? 'PASSED' : FAILED_RESULTS.has(run.FunctionalResult) ? 'FAILED' : undefined;
+    const sequenceOf = new Map((state.stepsByProcess.get(step.ProcessID) || []).map((ps) => [ps.StepID, ps.Sequence]));
+    const reached = (state.executionStepsByRun.get(run.ExecutionUUID) || []).some(
+        (st) => (st.ExecutionStatus === STEP_STATUS.DONE || st.ExecutionStatus === STEP_STATUS.FAILED) && Number(sequenceOf.get(st.ProcessStepID)) > Number(step.Sequence)
+    );
+    return reached ? 'PASSED' : undefined;
 }
 
 /**

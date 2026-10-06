@@ -147,8 +147,8 @@
         "ResponsibleTeam": "PT-E2E"
     },
     {
-        "StepUUID": "9e3f4c30-0133-4a5b-9c6d-000000000133",
-        "ExecutionUUID": "9e3f4c30-0132-4a5b-9c6d-000000000132",
+        "StepUUID": "9e3f4c30-0134-4a5b-9c6d-000000000134",
+        "ExecutionUUID": "9e3f4c30-0133-4a5b-9c6d-000000000133",
         "TestCaseUUID": "6f1c2a10-0004-4c3e-9a51-000000000004",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -168,8 +168,8 @@
         "ResponsibleTeam": "PT-REPARATUR"
     },
     {
-        "StepUUID": "9e3f4c30-0134-4a5b-9c6d-000000000134",
-        "ExecutionUUID": "9e3f4c30-0132-4a5b-9c6d-000000000132",
+        "StepUUID": "9e3f4c30-0135-4a5b-9c6d-000000000135",
+        "ExecutionUUID": "9e3f4c30-0133-4a5b-9c6d-000000000133",
         "TestCaseUUID": "6f1c2a10-0004-4c3e-9a51-000000000004",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -189,8 +189,8 @@
         "ResponsibleTeam": "PT-REPARATUR"
     },
     {
-        "StepUUID": "9e3f4c30-0135-4a5b-9c6d-000000000135",
-        "ExecutionUUID": "9e3f4c30-0132-4a5b-9c6d-000000000132",
+        "StepUUID": "9e3f4c30-0136-4a5b-9c6d-000000000136",
+        "ExecutionUUID": "9e3f4c30-0133-4a5b-9c6d-000000000133",
         "TestCaseUUID": "6f1c2a10-0004-4c3e-9a51-000000000004",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -210,8 +210,8 @@
         "ResponsibleTeam": "PT-REPARATUR"
     },
     {
-        "StepUUID": "9e3f4c30-0136-4a5b-9c6d-000000000136",
-        "ExecutionUUID": "9e3f4c30-0132-4a5b-9c6d-000000000132",
+        "StepUUID": "9e3f4c30-0137-4a5b-9c6d-000000000137",
+        "ExecutionUUID": "9e3f4c30-0133-4a5b-9c6d-000000000133",
         "TestCaseUUID": "6f1c2a10-0004-4c3e-9a51-000000000004",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -231,8 +231,8 @@
         "ResponsibleTeam": "PT-E2E"
     },
     {
-        "StepUUID": "9e3f4c30-0137-4a5b-9c6d-000000000137",
-        "ExecutionUUID": "9e3f4c30-0132-4a5b-9c6d-000000000132",
+        "StepUUID": "9e3f4c30-0138-4a5b-9c6d-000000000138",
+        "ExecutionUUID": "9e3f4c30-0133-4a5b-9c6d-000000000133",
         "TestCaseUUID": "6f1c2a10-0004-4c3e-9a51-000000000004",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -252,8 +252,8 @@
         "ResponsibleTeam": "PT-E2E"
     },
     {
-        "StepUUID": "9e3f4c30-0232-4a5b-9c6d-000000000232",
-        "ExecutionUUID": "9e3f4c30-0231-4a5b-9c6d-000000000231",
+        "StepUUID": "9e3f4c30-0234-4a5b-9c6d-000000000234",
+        "ExecutionUUID": "9e3f4c30-0233-4a5b-9c6d-000000000233",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -273,8 +273,8 @@
         "ResponsibleTeam": "PT-REPARATUR"
     },
     {
-        "StepUUID": "9e3f4c30-0233-4a5b-9c6d-000000000233",
-        "ExecutionUUID": "9e3f4c30-0231-4a5b-9c6d-000000000231",
+        "StepUUID": "9e3f4c30-0235-4a5b-9c6d-000000000235",
+        "ExecutionUUID": "9e3f4c30-0233-4a5b-9c6d-000000000233",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -294,8 +294,8 @@
         "ResponsibleTeam": "PT-REPARATUR"
     },
     {
-        "StepUUID": "9e3f4c30-0234-4a5b-9c6d-000000000234",
-        "ExecutionUUID": "9e3f4c30-0231-4a5b-9c6d-000000000231",
+        "StepUUID": "9e3f4c30-0236-4a5b-9c6d-000000000236",
+        "ExecutionUUID": "9e3f4c30-0233-4a5b-9c6d-000000000233",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -315,8 +315,8 @@
         "ResponsibleTeam": "PT-REPARATUR"
     },
     {
-        "StepUUID": "9e3f4c30-0235-4a5b-9c6d-000000000235",
-        "ExecutionUUID": "9e3f4c30-0231-4a5b-9c6d-000000000231",
+        "StepUUID": "9e3f4c30-0237-4a5b-9c6d-000000000237",
+        "ExecutionUUID": "9e3f4c30-0233-4a5b-9c6d-000000000233",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -336,8 +336,8 @@
         "ResponsibleTeam": "PT-E2E"
     },
     {
-        "StepUUID": "9e3f4c30-0236-4a5b-9c6d-000000000236",
-        "ExecutionUUID": "9e3f4c30-0231-4a5b-9c6d-000000000231",
+        "StepUUID": "9e3f4c30-0238-4a5b-9c6d-000000000238",
+        "ExecutionUUID": "9e3f4c30-0233-4a5b-9c6d-000000000233",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -357,8 +357,8 @@
         "ResponsibleTeam": "PT-E2E"
     },
     {
-        "StepUUID": "9e3f4c30-0237-4a5b-9c6d-000000000237",
-        "ExecutionUUID": "9e3f4c30-0231-4a5b-9c6d-000000000231",
+        "StepUUID": "9e3f4c30-0239-4a5b-9c6d-000000000239",
+        "ExecutionUUID": "9e3f4c30-0233-4a5b-9c6d-000000000233",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -378,8 +378,134 @@
         "ResponsibleTeam": "PT-E2E"
     },
     {
+        "StepUUID": "9e3f4c30-0290-4a5b-9c6d-000000000290",
+        "ExecutionUUID": "9e3f4c30-0289-4a5b-9c6d-000000000289",
+        "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 1,
+        "BusinessObjectType": "SERVICE_REQUEST",
+        "ExpectedStatus": "Completed",
+        "ActualStatus": "Completed",
+        "ExecutionStatus": "DONE",
+        "Criticality": 3,
+        "StartedAt": "2026-10-01T09:16:00.000Z",
+        "FinishedAt": "2026-10-01T09:16:02.000Z",
+        "Message": "8000000003 created.",
+        "ProcessStepID": "REP-010",
+        "StepName": "Kundenanliegen als Service Request erfassen",
+        "ResponsibleTeam": "PT-REPARATUR"
+    },
+    {
         "StepUUID": "9e3f4c30-0291-4a5b-9c6d-000000000291",
-        "ExecutionUUID": "9e3f4c30-0290-4a5b-9c6d-000000000290",
+        "ExecutionUUID": "9e3f4c30-0289-4a5b-9c6d-000000000289",
+        "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 2,
+        "BusinessObjectType": "SERVICE_ORDER",
+        "ExpectedStatus": "Completed",
+        "ActualStatus": "Completed",
+        "ExecutionStatus": "DONE",
+        "Criticality": 3,
+        "StartedAt": "2026-10-01T09:16:02.000Z",
+        "FinishedAt": "2026-10-01T09:16:04.000Z",
+        "Message": "8000000022 created.",
+        "ProcessStepID": "REP-060",
+        "StepName": "Service Order anlegen (aus Request, Angebot oder Vertrag)",
+        "ResponsibleTeam": "PT-REPARATUR"
+    },
+    {
+        "StepUUID": "9e3f4c30-0292-4a5b-9c6d-000000000292",
+        "ExecutionUUID": "9e3f4c30-0289-4a5b-9c6d-000000000289",
+        "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 3,
+        "BusinessObjectType": "SERVICE_CONFIRMATION",
+        "ExpectedStatus": "Completed",
+        "ActualStatus": "Completed",
+        "ExecutionStatus": "DONE",
+        "Criticality": 3,
+        "StartedAt": "2026-10-01T09:16:04.000Z",
+        "FinishedAt": "2026-10-01T09:16:06.000Z",
+        "Message": "8999999994 created.",
+        "ProcessStepID": "REP-080",
+        "StepName": "Service Confirmation (Aufwand) buchen",
+        "ResponsibleTeam": "PT-REPARATUR"
+    },
+    {
+        "StepUUID": "9e3f4c30-0293-4a5b-9c6d-000000000293",
+        "ExecutionUUID": "9e3f4c30-0289-4a5b-9c6d-000000000289",
+        "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 4,
+        "BusinessObjectType": "BILLING_DOC_REQUEST",
+        "ExpectedStatus": "Billed",
+        "ActualStatus": "Billed",
+        "ExecutionStatus": "DONE",
+        "Criticality": 3,
+        "StartedAt": "2026-10-01T09:16:06.000Z",
+        "FinishedAt": "2026-10-01T09:16:08.000Z",
+        "Message": "10000007 created.",
+        "ProcessStepID": "REP-090",
+        "StepName": "Freigabe zur Fakturierung (Billing Document Request)",
+        "ResponsibleTeam": "PT-E2E"
+    },
+    {
+        "StepUUID": "9e3f4c30-0294-4a5b-9c6d-000000000294",
+        "ExecutionUUID": "9e3f4c30-0289-4a5b-9c6d-000000000289",
+        "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 5,
+        "BusinessObjectType": "BILLING_DOCUMENT",
+        "ExpectedStatus": "Posted",
+        "ActualStatus": "Posted",
+        "ExecutionStatus": "DONE",
+        "Criticality": 3,
+        "StartedAt": "2026-10-01T09:16:08.000Z",
+        "FinishedAt": "2026-10-01T09:16:10.000Z",
+        "Message": "90000110 created.",
+        "ProcessStepID": "REP-100",
+        "StepName": "Faktura (SD) erzeugen",
+        "ResponsibleTeam": "PT-E2E"
+    },
+    {
+        "StepUUID": "9e3f4c30-0295-4a5b-9c6d-000000000295",
+        "ExecutionUUID": "9e3f4c30-0289-4a5b-9c6d-000000000289",
+        "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 6,
+        "BusinessObjectType": "ACCOUNTING_DOCUMENT",
+        "ExpectedStatus": "Posted",
+        "ActualStatus": "Posted",
+        "ExecutionStatus": "DONE",
+        "Criticality": 3,
+        "StartedAt": "2026-10-01T09:16:10.000Z",
+        "FinishedAt": "2026-10-01T09:16:12.000Z",
+        "Message": "1400000095 posted.",
+        "ProcessStepID": "REP-110",
+        "StepName": "Buchhaltungsbeleg (FI) prüfen",
+        "ResponsibleTeam": "PT-E2E"
+    },
+    {
+        "StepUUID": "9e3f4c30-0351-4a5b-9c6d-000000000351",
+        "ExecutionUUID": "9e3f4c30-0350-4a5b-9c6d-000000000350",
         "TestCaseUUID": "6f1c2a10-0008-4c3e-9a51-000000000008",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -399,8 +525,8 @@
         "ResponsibleTeam": "PT-REPARATUR"
     },
     {
-        "StepUUID": "9e3f4c30-0292-4a5b-9c6d-000000000292",
-        "ExecutionUUID": "9e3f4c30-0290-4a5b-9c6d-000000000290",
+        "StepUUID": "9e3f4c30-0352-4a5b-9c6d-000000000352",
+        "ExecutionUUID": "9e3f4c30-0350-4a5b-9c6d-000000000350",
         "TestCaseUUID": "6f1c2a10-0008-4c3e-9a51-000000000008",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -420,8 +546,8 @@
         "ResponsibleTeam": "PT-ANGEBOT"
     },
     {
-        "StepUUID": "9e3f4c30-0293-4a5b-9c6d-000000000293",
-        "ExecutionUUID": "9e3f4c30-0290-4a5b-9c6d-000000000290",
+        "StepUUID": "9e3f4c30-0353-4a5b-9c6d-000000000353",
+        "ExecutionUUID": "9e3f4c30-0350-4a5b-9c6d-000000000350",
         "TestCaseUUID": "6f1c2a10-0008-4c3e-9a51-000000000008",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -441,8 +567,8 @@
         "ResponsibleTeam": "PT-ANGEBOT"
     },
     {
-        "StepUUID": "9e3f4c30-0427-4a5b-9c6d-000000000427",
-        "ExecutionUUID": "9e3f4c30-0426-4a5b-9c6d-000000000426",
+        "StepUUID": "9e3f4c30-0488-4a5b-9c6d-000000000488",
+        "ExecutionUUID": "9e3f4c30-0487-4a5b-9c6d-000000000487",
         "TestCaseUUID": "6f1c2a10-0013-4c3e-9a51-000000000013",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -462,8 +588,8 @@
         "ResponsibleTeam": "PT-REPARATUR"
     },
     {
-        "StepUUID": "9e3f4c30-0428-4a5b-9c6d-000000000428",
-        "ExecutionUUID": "9e3f4c30-0426-4a5b-9c6d-000000000426",
+        "StepUUID": "9e3f4c30-0489-4a5b-9c6d-000000000489",
+        "ExecutionUUID": "9e3f4c30-0487-4a5b-9c6d-000000000487",
         "TestCaseUUID": "6f1c2a10-0013-4c3e-9a51-000000000013",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -483,8 +609,8 @@
         "ResponsibleTeam": "PT-REPARATUR"
     },
     {
-        "StepUUID": "9e3f4c30-0429-4a5b-9c6d-000000000429",
-        "ExecutionUUID": "9e3f4c30-0426-4a5b-9c6d-000000000426",
+        "StepUUID": "9e3f4c30-0490-4a5b-9c6d-000000000490",
+        "ExecutionUUID": "9e3f4c30-0487-4a5b-9c6d-000000000487",
         "TestCaseUUID": "6f1c2a10-0013-4c3e-9a51-000000000013",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -504,8 +630,8 @@
         "ResponsibleTeam": "PT-REPARATUR"
     },
     {
-        "StepUUID": "9e3f4c30-0475-4a5b-9c6d-000000000475",
-        "ExecutionUUID": "9e3f4c30-0474-4a5b-9c6d-000000000474",
+        "StepUUID": "9e3f4c30-0537-4a5b-9c6d-000000000537",
+        "ExecutionUUID": "9e3f4c30-0536-4a5b-9c6d-000000000536",
         "TestCaseUUID": "6f1c2a10-0014-4c3e-9a51-000000000014",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -525,8 +651,8 @@
         "ResponsibleTeam": "PT-E2E"
     },
     {
-        "StepUUID": "9e3f4c30-0476-4a5b-9c6d-000000000476",
-        "ExecutionUUID": "9e3f4c30-0474-4a5b-9c6d-000000000474",
+        "StepUUID": "9e3f4c30-0538-4a5b-9c6d-000000000538",
+        "ExecutionUUID": "9e3f4c30-0536-4a5b-9c6d-000000000536",
         "TestCaseUUID": "6f1c2a10-0014-4c3e-9a51-000000000014",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -546,8 +672,8 @@
         "ResponsibleTeam": "PT-E2E"
     },
     {
-        "StepUUID": "9e3f4c30-0477-4a5b-9c6d-000000000477",
-        "ExecutionUUID": "9e3f4c30-0474-4a5b-9c6d-000000000474",
+        "StepUUID": "9e3f4c30-0539-4a5b-9c6d-000000000539",
+        "ExecutionUUID": "9e3f4c30-0536-4a5b-9c6d-000000000536",
         "TestCaseUUID": "6f1c2a10-0014-4c3e-9a51-000000000014",
         "IsActiveEntity": true,
         "HasActiveEntity": false,

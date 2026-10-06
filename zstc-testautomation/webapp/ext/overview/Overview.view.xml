@@ -13,6 +13,7 @@
                 <Button id="serviceAssistant" text="{i18n>agentName}" icon="sap-icon://ai" type="Emphasized" press=".onShowAssistant" />
                 <Button id="newTestCase" text="{i18n>newTestCase}" icon="sap-icon://add" press=".onCreateTestCase" />
                 <Button id="allTestCases" text="{i18n>allTestCases}" icon="sap-icon://list" press=".onShowTestCases" />
+                <Button id="analytics" text="{i18n>showAnalytics}" icon="sap-icon://business-objects-experience" press=".onShowAnalytics" />
                 <Button id="releases" text="{i18n>releases}" icon="sap-icon://calendar" press=".onShowReleases" />
                 <Button id="processes" text="{i18n>processes}" icon="sap-icon://process" press=".onShowProcesses" />
                 <Button id="processTeams" text="{i18n>processTeams}" icon="sap-icon://group" press=".onShowProcessTeams" />

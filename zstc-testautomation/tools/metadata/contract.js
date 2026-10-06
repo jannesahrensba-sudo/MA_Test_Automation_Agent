@@ -340,7 +340,9 @@ const codeListNames = [
     ['CoverageStatusVH', 'Coverage', 30],
     ['RunDecisionVH', 'Decision', 20],
     ['EndObjectVH', 'End Object', 40],
-    ['DocumentOriginVH', 'Document Origin', 40]
+    ['DocumentOriginVH', 'Document Origin', 40],
+    ['FindingCategoryVH', 'Category', 30],
+    ['ConfidenceVH', 'Confidence', 30]
 ];
 const codeLists = codeListNames.map(([name, label, textLength]) => ({
     name,
@@ -518,6 +520,7 @@ const entities = [
             { name: '_LatestExecutionStep', target: 'ExecutionStep', collection: true, constraints: [['LatestExecutionUUID', 'ExecutionUUID']] },
             { name: '_LatestDocumentReference', target: 'DocumentReference', collection: true, constraints: [['LatestExecutionUUID', 'ExecutionUUID']] },
             { name: '_LatestTestAssertion', target: 'TestAssertion', collection: true, constraints: [['LatestExecutionUUID', 'ExecutionUUID']] },
+            { name: '_LatestResultFinding', target: 'ResultFinding', collection: true, constraints: [['LatestExecutionUUID', 'ExecutionUUID']] },
             textNav('_ProcessProfile', 'ProcessProfileVH', 'ProcessProfile', 'ProcessProfile'),
             textNav('_Status', 'LifecycleStatusVH', 'Status', 'Code'),
             textNav('_ValidationStatus', 'ValidationStatusVH', 'ValidationStatus', 'Code'),
@@ -753,6 +756,8 @@ const entities = [
             code('EndObject', 30, 'Run up to', 'EndObjectVH', { computed: true }),
             code('StartObject', 30, 'Start from', 'EndObjectVH', { computed: true }),
             str('PredecessorExecution', 60, 'Taken Over From', { computed: true }),
+            // result analysis: main finding of the run (findings in ResultFinding)
+            str('AnalysisHeadline', 255, 'Analysis', { computed: true }),
             code('RunType', 20, 'Run Type', 'RunTypeVH', { computed: true }),
             guid('RegressionRunUUID', 'Regression Run', { computed: true, hidden: true }),
             str('ExecutedBy', 12, 'Executed By', { computed: true })
@@ -766,6 +771,7 @@ const entities = [
             { name: '_ExecutionStep', target: 'ExecutionStep', collection: true, partner: '_Execution', constraints: [['ExecutionUUID', 'ExecutionUUID']], cascade: true },
             { name: '_DocumentReference', target: 'DocumentReference', collection: true, partner: '_Execution', constraints: [['ExecutionUUID', 'ExecutionUUID']], cascade: true },
             { name: '_TestAssertion', target: 'TestAssertion', collection: true, partner: '_Execution', constraints: [['ExecutionUUID', 'ExecutionUUID']], cascade: true },
+            { name: '_ResultFinding', target: 'ResultFinding', collection: true, partner: '_Execution', constraints: [['ExecutionUUID', 'ExecutionUUID']], cascade: true },
             textNav('_ExecutionProvider', 'ExecutionProviderVH', 'ExecutionProvider', 'Code'),
             textNav('_Status', 'ExecutionStatusVH', 'Status', 'Code'),
             textNav('_FunctionalResult', 'FinalResultVH', 'FunctionalResult', 'Code')
@@ -859,6 +865,42 @@ const entities = [
             { name: '_Execution', target: 'Execution', partner: '_TestAssertion', nullable: false, constraints: [['ExecutionUUID', 'ExecutionUUID']] },
             textNav('_BusinessObjectType', 'BusinessObjectTypeVH', 'BusinessObjectType', 'Code'),
             textNav('_Result', 'AssertionResultVH', 'Result', 'Code')
+        ]
+    },
+    /* ------------------------------ ResultFinding (deterministic result analysis of a run) ------------------------------ */
+    {
+        name: 'ResultFinding',
+        draft: 'node',
+        keys: ['FindingUUID'],
+        props: [
+            guid('FindingUUID', 'Finding UUID', { nullable: false, computed: true, hidden: true }),
+            guid('ExecutionUUID', 'Execution UUID', { computed: true, hidden: true }),
+            guid('TestCaseUUID', 'Test Case UUID', { computed: true, hidden: true }),
+            // run context (in CDS through the association to the execution and the test case): evaluation per release
+            str('CaseID', 20, 'Test Case', { computed: true }),
+            str('ExternalExecutionID', 40, 'Run', { computed: true }),
+            str('ReleaseID', 20, 'Release', { computed: true }),
+            int16('Sequence', 'No.', { computed: true }),
+            code('Category', 20, 'Category', 'FindingCategoryVH', { computed: true }),
+            str('Severity', 10, 'Severity', { computed: true, text: '_Severity/Text', textArrangement: 'TextOnly' }),
+            crit('Criticality'),
+            str('FindingCode', 30, 'Finding Code', { computed: true, hidden: true }),
+            str('ProcessStepID', 20, 'Process Step', { computed: true, text: 'StepName', textArrangement: 'TextFirst' }),
+            str('StepName', 80, 'Process Step Name', { computed: true }),
+            str('ResponsibleTeam', 20, 'Responsible Team', { computed: true, text: '_ResponsibleTeam/ProcessTeamName', textArrangement: 'TextFirst' }),
+            str('Finding', 255, 'Finding', { computed: true }),
+            str('ProbableCause', 255, 'Probable Cause', { computed: true }),
+            str('Recommendation', 255, 'Recommendation', { computed: true }),
+            str('Evidence', 255, 'Evidence', { computed: true }),
+            code('Confidence', 10, 'Confidence', 'ConfidenceVH', { computed: true }),
+            str('Parameters', 1000, 'Parameters', { computed: true, hidden: true })
+        ],
+        navs: [
+            { name: '_Execution', target: 'Execution', partner: '_ResultFinding', nullable: false, constraints: [['ExecutionUUID', 'ExecutionUUID']] },
+            textNav('_ResponsibleTeam', 'ProcessTeamVH', 'ResponsibleTeam', 'ProcessTeam'),
+            textNav('_Severity', 'ValidationItemStatusVH', 'Severity', 'Code'),
+            codeNav('Category', 'FindingCategoryVH'),
+            codeNav('Confidence', 'ConfidenceVH')
         ]
     },
     /* ------------------------------ TestCaseStep (test steps derived from the process variant) ------------------------------ */
@@ -1476,7 +1518,7 @@ const executionTargets = [
     '_it/__OperationControl',
     '_it/__EntityControl'
 ];
-const executionEntities = ['_it/_Execution', '_it/_LatestExecution', '_it/_LatestExecutionStep', '_it/_LatestDocumentReference', '_it/_LatestTestAssertion'];
+const executionEntities = ['_it/_Execution', '_it/_LatestExecution', '_it/_LatestExecutionStep', '_it/_LatestDocumentReference', '_it/_LatestTestAssertion', '_it/_LatestResultFinding'];
 const validationTargets = [
     '_it/ValidationStatus',
     '_it/ValidationCriticality',
@@ -1617,6 +1659,7 @@ const annotations = {
                 df('_LatestExecution/ReleaseID', 'Release'),
                 df('_LatestExecution/TestCaseVersion', 'Test Case Version'),
                 df('_LatestExecution/RunType', 'Run Type'),
+                df('_LatestExecution/AnalysisHeadline', 'Analysis'),
                 df('_LatestExecution/StartObject', 'Start from'),
                 df('_LatestExecution/PredecessorExecution', 'Taken Over From'),
                 df('_LatestExecution/ExecutionProvider', 'Execution Provider'),
@@ -1660,6 +1703,7 @@ const annotations = {
                     collFacet('ExecutionStepsGroup', 'Steps', [refFacet('ExecutionSteps', 'Steps', '_LatestExecutionStep/@UI.LineItem')])
                 ]),
                 refFacet('Assertions', 'Test Assertions', '_LatestTestAssertion/@UI.LineItem'),
+                refFacet('ResultAnalysis', 'Result Analysis', '_LatestResultFinding/@UI.PresentationVariant'),
                 collFacet('TechnicalLogSection', 'Technical Log', [
                     collFacet('TechnicalLogGroup', 'Latest Run', [refFacet('TechnicalLogDetails', 'Latest Run', '@UI.FieldGroup#TechnicalLog')]),
                     collFacet('ExecutionHistoryGroup', 'All Runs', [refFacet('ExecutionHistory', 'All Runs', '_Execution/@UI.LineItem#History')])
@@ -1873,6 +1917,26 @@ const annotations = {
                 df('Message')
             ]),
             undefined,
+            [['SAP__UI.Criticality', V.path('Criticality')]]
+        ],
+        ['SAP__UI.PresentationVariant', sortBy('Sequence')]
+    ],
+    [`${NS}.ResultFindingType`]: [
+        ['SAP__UI.HeaderInfo', headerInfo('Finding', 'Findings', 'Finding', 'Category')],
+        [
+            'SAP__UI.LineItem',
+            V.coll([
+                df('Category', undefined, {}, 'Medium'),
+                df('Finding', undefined, {}, 'High'),
+                df('ProbableCause', undefined, {}, 'High'),
+                df('Recommendation', undefined, {}, 'High'),
+                df('ProcessStepID', undefined, {}, 'Medium'),
+                df('ResponsibleTeam', undefined, {}, 'Medium'),
+                df('Confidence', undefined, {}, 'Low'),
+                df('Evidence', undefined, {}, 'Low')
+            ]),
+            undefined,
+            // severity as row highlight (no cell criticality in tables of draft objects, FE 1.136)
             [['SAP__UI.Criticality', V.path('Criticality')]]
         ],
         ['SAP__UI.PresentationVariant', sortBy('Sequence')]

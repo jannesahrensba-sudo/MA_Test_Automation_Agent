@@ -1,4 +1,4 @@
-sap.ui.define(["./prompts"], function (prompts) {
+sap.ui.define(["./prompts", "./resultReport"], function (prompts, resultReport) {
     "use strict";
 
     /**
@@ -8,6 +8,7 @@ sap.ui.define(["./prompts"], function (prompts) {
      * the local proxy and — as tool contract — the Joule agent (docs/agent-konzept.md).
      *
      * Approve and start execution are deliberately NOT tools: they need the confirmation of the user.
+     * ergebnis_lesen reads the result of a run with its deterministic analysis (discussion of a result, read-only).
      */
 
     const MAX_DESCRIPTION = 40;
@@ -327,7 +328,45 @@ sap.ui.define(["./prompts"], function (prompts) {
             }
         };
 
-        return [search, capture];
+        const result = {
+            name: "ergebnis_lesen",
+            description:
+                "Liest das Ergebnis des letzten Laufs eines gespeicherten Testfalls: Lauf (Release, Version, Ergebnis), Schritte mit Status, abweichende Prüfungen (Soll/Ist), " +
+                "Belege (erzeugt oder von einem Vorgänger übernommen), die Befunde der deterministischen Ergebnisanalyse (Ursache, Konfidenz, Evidenz, zuständiges Team, Empfehlung) " +
+                "und die Läufe davor. Ohne case_id: der Testfall, dessen Ergebnis gerade besprochen wird. Ändert nichts.",
+            inputSchema: {
+                type: "object",
+                properties: {
+                    case_id: { type: "string", description: "Case ID, z. B. STC-2026-000007; leer = besprochener Testfall" }
+                }
+            },
+            execute: async function (input) {
+                const caseId = asString(input && input.case_id).toUpperCase();
+                let analysis = session.analysis;
+                if (caseId && (!analysis || analysis.caseId !== caseId)) {
+                    if (!/^STC-\d{4}-\d{6}$/.test(caseId)) {
+                        throw new Error("case_id: erwartet wird eine Case ID wie STC-2026-000007.");
+                    }
+                    const uuid = await gateway.findTestCase(caseId);
+                    if (!uuid) {
+                        throw new Error("Testfall " + caseId + " nicht gefunden (nur gespeicherte Testfälle haben Ergebnisse).");
+                    }
+                    analysis = resultReport.fromRead(await gateway.readResult(uuid));
+                    if (!session.analysis && !session.draft) {
+                        // first result of the conversation: shown in the analysis panel
+                        session.setAnalysis(analysis, { keepChat: true });
+                    } else {
+                        session.step({ icon: "sap-icon://inspection", text: "Ergebnis gelesen: " + caseId + (analysis.run ? " · Lauf " + analysis.run.id : " · noch kein Lauf") });
+                    }
+                } else if (!analysis) {
+                    throw new Error("Es wird kein Ergebnis besprochen: case_id angeben.");
+                }
+                const masterData = await gateway.masterData();
+                return resultReport.summarize(analysis, masterData.describe);
+            }
+        };
+
+        return [search, capture, result];
     }
 
     return {

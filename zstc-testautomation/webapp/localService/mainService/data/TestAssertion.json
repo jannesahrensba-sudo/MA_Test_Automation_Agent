@@ -400,8 +400,8 @@
         "Message": "Document flow is complete and consistent."
     },
     {
-        "AssertionUUID": "9e3f4c30-0143-4a5b-9c6d-000000000143",
-        "ExecutionUUID": "9e3f4c30-0132-4a5b-9c6d-000000000132",
+        "AssertionUUID": "9e3f4c30-0144-4a5b-9c6d-000000000144",
+        "ExecutionUUID": "9e3f4c30-0133-4a5b-9c6d-000000000133",
         "TestCaseUUID": "6f1c2a10-0004-4c3e-9a51-000000000004",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -420,8 +420,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0144-4a5b-9c6d-000000000144",
-        "ExecutionUUID": "9e3f4c30-0132-4a5b-9c6d-000000000132",
+        "AssertionUUID": "9e3f4c30-0145-4a5b-9c6d-000000000145",
+        "ExecutionUUID": "9e3f4c30-0133-4a5b-9c6d-000000000133",
         "TestCaseUUID": "6f1c2a10-0004-4c3e-9a51-000000000004",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -440,8 +440,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0145-4a5b-9c6d-000000000145",
-        "ExecutionUUID": "9e3f4c30-0132-4a5b-9c6d-000000000132",
+        "AssertionUUID": "9e3f4c30-0146-4a5b-9c6d-000000000146",
+        "ExecutionUUID": "9e3f4c30-0133-4a5b-9c6d-000000000133",
         "TestCaseUUID": "6f1c2a10-0004-4c3e-9a51-000000000004",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -460,8 +460,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0146-4a5b-9c6d-000000000146",
-        "ExecutionUUID": "9e3f4c30-0132-4a5b-9c6d-000000000132",
+        "AssertionUUID": "9e3f4c30-0147-4a5b-9c6d-000000000147",
+        "ExecutionUUID": "9e3f4c30-0133-4a5b-9c6d-000000000133",
         "TestCaseUUID": "6f1c2a10-0004-4c3e-9a51-000000000004",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -480,8 +480,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0147-4a5b-9c6d-000000000147",
-        "ExecutionUUID": "9e3f4c30-0132-4a5b-9c6d-000000000132",
+        "AssertionUUID": "9e3f4c30-0148-4a5b-9c6d-000000000148",
+        "ExecutionUUID": "9e3f4c30-0133-4a5b-9c6d-000000000133",
         "TestCaseUUID": "6f1c2a10-0004-4c3e-9a51-000000000004",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -500,8 +500,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0148-4a5b-9c6d-000000000148",
-        "ExecutionUUID": "9e3f4c30-0132-4a5b-9c6d-000000000132",
+        "AssertionUUID": "9e3f4c30-0149-4a5b-9c6d-000000000149",
+        "ExecutionUUID": "9e3f4c30-0133-4a5b-9c6d-000000000133",
         "TestCaseUUID": "6f1c2a10-0004-4c3e-9a51-000000000004",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -520,8 +520,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0149-4a5b-9c6d-000000000149",
-        "ExecutionUUID": "9e3f4c30-0132-4a5b-9c6d-000000000132",
+        "AssertionUUID": "9e3f4c30-0150-4a5b-9c6d-000000000150",
+        "ExecutionUUID": "9e3f4c30-0133-4a5b-9c6d-000000000133",
         "TestCaseUUID": "6f1c2a10-0004-4c3e-9a51-000000000004",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -540,8 +540,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0150-4a5b-9c6d-000000000150",
-        "ExecutionUUID": "9e3f4c30-0132-4a5b-9c6d-000000000132",
+        "AssertionUUID": "9e3f4c30-0151-4a5b-9c6d-000000000151",
+        "ExecutionUUID": "9e3f4c30-0133-4a5b-9c6d-000000000133",
         "TestCaseUUID": "6f1c2a10-0004-4c3e-9a51-000000000004",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -560,8 +560,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0151-4a5b-9c6d-000000000151",
-        "ExecutionUUID": "9e3f4c30-0132-4a5b-9c6d-000000000132",
+        "AssertionUUID": "9e3f4c30-0152-4a5b-9c6d-000000000152",
+        "ExecutionUUID": "9e3f4c30-0133-4a5b-9c6d-000000000133",
         "TestCaseUUID": "6f1c2a10-0004-4c3e-9a51-000000000004",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -580,8 +580,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0152-4a5b-9c6d-000000000152",
-        "ExecutionUUID": "9e3f4c30-0132-4a5b-9c6d-000000000132",
+        "AssertionUUID": "9e3f4c30-0153-4a5b-9c6d-000000000153",
+        "ExecutionUUID": "9e3f4c30-0133-4a5b-9c6d-000000000133",
         "TestCaseUUID": "6f1c2a10-0004-4c3e-9a51-000000000004",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -600,8 +600,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0153-4a5b-9c6d-000000000153",
-        "ExecutionUUID": "9e3f4c30-0132-4a5b-9c6d-000000000132",
+        "AssertionUUID": "9e3f4c30-0154-4a5b-9c6d-000000000154",
+        "ExecutionUUID": "9e3f4c30-0133-4a5b-9c6d-000000000133",
         "TestCaseUUID": "6f1c2a10-0004-4c3e-9a51-000000000004",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -620,8 +620,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0154-4a5b-9c6d-000000000154",
-        "ExecutionUUID": "9e3f4c30-0132-4a5b-9c6d-000000000132",
+        "AssertionUUID": "9e3f4c30-0155-4a5b-9c6d-000000000155",
+        "ExecutionUUID": "9e3f4c30-0133-4a5b-9c6d-000000000133",
         "TestCaseUUID": "6f1c2a10-0004-4c3e-9a51-000000000004",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -640,8 +640,8 @@
         "Message": "Net value matches the expectation."
     },
     {
-        "AssertionUUID": "9e3f4c30-0155-4a5b-9c6d-000000000155",
-        "ExecutionUUID": "9e3f4c30-0132-4a5b-9c6d-000000000132",
+        "AssertionUUID": "9e3f4c30-0156-4a5b-9c6d-000000000156",
+        "ExecutionUUID": "9e3f4c30-0133-4a5b-9c6d-000000000133",
         "TestCaseUUID": "6f1c2a10-0004-4c3e-9a51-000000000004",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -660,8 +660,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0156-4a5b-9c6d-000000000156",
-        "ExecutionUUID": "9e3f4c30-0132-4a5b-9c6d-000000000132",
+        "AssertionUUID": "9e3f4c30-0157-4a5b-9c6d-000000000157",
+        "ExecutionUUID": "9e3f4c30-0133-4a5b-9c6d-000000000133",
         "TestCaseUUID": "6f1c2a10-0004-4c3e-9a51-000000000004",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -680,8 +680,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0157-4a5b-9c6d-000000000157",
-        "ExecutionUUID": "9e3f4c30-0132-4a5b-9c6d-000000000132",
+        "AssertionUUID": "9e3f4c30-0158-4a5b-9c6d-000000000158",
+        "ExecutionUUID": "9e3f4c30-0133-4a5b-9c6d-000000000133",
         "TestCaseUUID": "6f1c2a10-0004-4c3e-9a51-000000000004",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -700,8 +700,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0158-4a5b-9c6d-000000000158",
-        "ExecutionUUID": "9e3f4c30-0132-4a5b-9c6d-000000000132",
+        "AssertionUUID": "9e3f4c30-0159-4a5b-9c6d-000000000159",
+        "ExecutionUUID": "9e3f4c30-0133-4a5b-9c6d-000000000133",
         "TestCaseUUID": "6f1c2a10-0004-4c3e-9a51-000000000004",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -720,8 +720,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0159-4a5b-9c6d-000000000159",
-        "ExecutionUUID": "9e3f4c30-0132-4a5b-9c6d-000000000132",
+        "AssertionUUID": "9e3f4c30-0160-4a5b-9c6d-000000000160",
+        "ExecutionUUID": "9e3f4c30-0133-4a5b-9c6d-000000000133",
         "TestCaseUUID": "6f1c2a10-0004-4c3e-9a51-000000000004",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -740,8 +740,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0160-4a5b-9c6d-000000000160",
-        "ExecutionUUID": "9e3f4c30-0132-4a5b-9c6d-000000000132",
+        "AssertionUUID": "9e3f4c30-0161-4a5b-9c6d-000000000161",
+        "ExecutionUUID": "9e3f4c30-0133-4a5b-9c6d-000000000133",
         "TestCaseUUID": "6f1c2a10-0004-4c3e-9a51-000000000004",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -760,8 +760,8 @@
         "Message": "Document flow is complete and consistent."
     },
     {
-        "AssertionUUID": "9e3f4c30-0244-4a5b-9c6d-000000000244",
-        "ExecutionUUID": "9e3f4c30-0231-4a5b-9c6d-000000000231",
+        "AssertionUUID": "9e3f4c30-0246-4a5b-9c6d-000000000246",
+        "ExecutionUUID": "9e3f4c30-0233-4a5b-9c6d-000000000233",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -780,8 +780,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0245-4a5b-9c6d-000000000245",
-        "ExecutionUUID": "9e3f4c30-0231-4a5b-9c6d-000000000231",
+        "AssertionUUID": "9e3f4c30-0247-4a5b-9c6d-000000000247",
+        "ExecutionUUID": "9e3f4c30-0233-4a5b-9c6d-000000000233",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -800,8 +800,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0246-4a5b-9c6d-000000000246",
-        "ExecutionUUID": "9e3f4c30-0231-4a5b-9c6d-000000000231",
+        "AssertionUUID": "9e3f4c30-0248-4a5b-9c6d-000000000248",
+        "ExecutionUUID": "9e3f4c30-0233-4a5b-9c6d-000000000233",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -820,8 +820,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0247-4a5b-9c6d-000000000247",
-        "ExecutionUUID": "9e3f4c30-0231-4a5b-9c6d-000000000231",
+        "AssertionUUID": "9e3f4c30-0249-4a5b-9c6d-000000000249",
+        "ExecutionUUID": "9e3f4c30-0233-4a5b-9c6d-000000000233",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -840,8 +840,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0248-4a5b-9c6d-000000000248",
-        "ExecutionUUID": "9e3f4c30-0231-4a5b-9c6d-000000000231",
+        "AssertionUUID": "9e3f4c30-0250-4a5b-9c6d-000000000250",
+        "ExecutionUUID": "9e3f4c30-0233-4a5b-9c6d-000000000233",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -860,8 +860,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0249-4a5b-9c6d-000000000249",
-        "ExecutionUUID": "9e3f4c30-0231-4a5b-9c6d-000000000231",
+        "AssertionUUID": "9e3f4c30-0251-4a5b-9c6d-000000000251",
+        "ExecutionUUID": "9e3f4c30-0233-4a5b-9c6d-000000000233",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -880,8 +880,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0250-4a5b-9c6d-000000000250",
-        "ExecutionUUID": "9e3f4c30-0231-4a5b-9c6d-000000000231",
+        "AssertionUUID": "9e3f4c30-0252-4a5b-9c6d-000000000252",
+        "ExecutionUUID": "9e3f4c30-0233-4a5b-9c6d-000000000233",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -900,8 +900,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0251-4a5b-9c6d-000000000251",
-        "ExecutionUUID": "9e3f4c30-0231-4a5b-9c6d-000000000231",
+        "AssertionUUID": "9e3f4c30-0253-4a5b-9c6d-000000000253",
+        "ExecutionUUID": "9e3f4c30-0233-4a5b-9c6d-000000000233",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -920,8 +920,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0252-4a5b-9c6d-000000000252",
-        "ExecutionUUID": "9e3f4c30-0231-4a5b-9c6d-000000000231",
+        "AssertionUUID": "9e3f4c30-0254-4a5b-9c6d-000000000254",
+        "ExecutionUUID": "9e3f4c30-0233-4a5b-9c6d-000000000233",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -940,8 +940,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0253-4a5b-9c6d-000000000253",
-        "ExecutionUUID": "9e3f4c30-0231-4a5b-9c6d-000000000231",
+        "AssertionUUID": "9e3f4c30-0255-4a5b-9c6d-000000000255",
+        "ExecutionUUID": "9e3f4c30-0233-4a5b-9c6d-000000000233",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -960,8 +960,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0254-4a5b-9c6d-000000000254",
-        "ExecutionUUID": "9e3f4c30-0231-4a5b-9c6d-000000000231",
+        "AssertionUUID": "9e3f4c30-0256-4a5b-9c6d-000000000256",
+        "ExecutionUUID": "9e3f4c30-0233-4a5b-9c6d-000000000233",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -980,8 +980,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0255-4a5b-9c6d-000000000255",
-        "ExecutionUUID": "9e3f4c30-0231-4a5b-9c6d-000000000231",
+        "AssertionUUID": "9e3f4c30-0257-4a5b-9c6d-000000000257",
+        "ExecutionUUID": "9e3f4c30-0233-4a5b-9c6d-000000000233",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1000,8 +1000,8 @@
         "Message": "Net value matches the expectation."
     },
     {
-        "AssertionUUID": "9e3f4c30-0256-4a5b-9c6d-000000000256",
-        "ExecutionUUID": "9e3f4c30-0231-4a5b-9c6d-000000000231",
+        "AssertionUUID": "9e3f4c30-0258-4a5b-9c6d-000000000258",
+        "ExecutionUUID": "9e3f4c30-0233-4a5b-9c6d-000000000233",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1020,8 +1020,8 @@
         "Message": "Billing document 90000112 posted to accounting (company code 2010, fiscal year 2026)."
     },
     {
-        "AssertionUUID": "9e3f4c30-0257-4a5b-9c6d-000000000257",
-        "ExecutionUUID": "9e3f4c30-0231-4a5b-9c6d-000000000231",
+        "AssertionUUID": "9e3f4c30-0259-4a5b-9c6d-000000000259",
+        "ExecutionUUID": "9e3f4c30-0233-4a5b-9c6d-000000000233",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1040,8 +1040,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0258-4a5b-9c6d-000000000258",
-        "ExecutionUUID": "9e3f4c30-0231-4a5b-9c6d-000000000231",
+        "AssertionUUID": "9e3f4c30-0260-4a5b-9c6d-000000000260",
+        "ExecutionUUID": "9e3f4c30-0233-4a5b-9c6d-000000000233",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1060,8 +1060,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0259-4a5b-9c6d-000000000259",
-        "ExecutionUUID": "9e3f4c30-0231-4a5b-9c6d-000000000231",
+        "AssertionUUID": "9e3f4c30-0261-4a5b-9c6d-000000000261",
+        "ExecutionUUID": "9e3f4c30-0233-4a5b-9c6d-000000000233",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1080,8 +1080,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0260-4a5b-9c6d-000000000260",
-        "ExecutionUUID": "9e3f4c30-0231-4a5b-9c6d-000000000231",
+        "AssertionUUID": "9e3f4c30-0262-4a5b-9c6d-000000000262",
+        "ExecutionUUID": "9e3f4c30-0233-4a5b-9c6d-000000000233",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1100,8 +1100,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0261-4a5b-9c6d-000000000261",
-        "ExecutionUUID": "9e3f4c30-0231-4a5b-9c6d-000000000231",
+        "AssertionUUID": "9e3f4c30-0263-4a5b-9c6d-000000000263",
+        "ExecutionUUID": "9e3f4c30-0233-4a5b-9c6d-000000000233",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1120,8 +1120,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0262-4a5b-9c6d-000000000262",
-        "ExecutionUUID": "9e3f4c30-0231-4a5b-9c6d-000000000231",
+        "AssertionUUID": "9e3f4c30-0264-4a5b-9c6d-000000000264",
+        "ExecutionUUID": "9e3f4c30-0233-4a5b-9c6d-000000000233",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1140,8 +1140,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0263-4a5b-9c6d-000000000263",
-        "ExecutionUUID": "9e3f4c30-0231-4a5b-9c6d-000000000231",
+        "AssertionUUID": "9e3f4c30-0265-4a5b-9c6d-000000000265",
+        "ExecutionUUID": "9e3f4c30-0233-4a5b-9c6d-000000000233",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1160,8 +1160,408 @@
         "Message": "Document flow is complete and consistent."
     },
     {
-        "AssertionUUID": "9e3f4c30-0296-4a5b-9c6d-000000000296",
-        "ExecutionUUID": "9e3f4c30-0290-4a5b-9c6d-000000000290",
+        "AssertionUUID": "9e3f4c30-0302-4a5b-9c6d-000000000302",
+        "ExecutionUUID": "9e3f4c30-0289-4a5b-9c6d-000000000289",
+        "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 1,
+        "BusinessObjectType": "SERVICE_REQUEST",
+        "ProcessStepID": "REP-010",
+        "StepName": "Kundenanliegen als Service Request erfassen",
+        "Field": "SoldToParty",
+        "ExpectedValue": "MD-100010",
+        "ActualValue": "MD-100010",
+        "Tolerance": "",
+        "Result": "PASSED",
+        "Criticality": 3,
+        "Message": "Expected and actual value match."
+    },
+    {
+        "AssertionUUID": "9e3f4c30-0303-4a5b-9c6d-000000000303",
+        "ExecutionUUID": "9e3f4c30-0289-4a5b-9c6d-000000000289",
+        "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 2,
+        "BusinessObjectType": "SERVICE_REQUEST",
+        "ProcessStepID": "REP-010",
+        "StepName": "Kundenanliegen als Service Request erfassen",
+        "Field": "FunctionalLocation",
+        "ExpectedValue": "LG-0815-NE03",
+        "ActualValue": "LG-0815-NE03",
+        "Tolerance": "",
+        "Result": "PASSED",
+        "Criticality": 3,
+        "Message": "Expected and actual value match."
+    },
+    {
+        "AssertionUUID": "9e3f4c30-0304-4a5b-9c6d-000000000304",
+        "ExecutionUUID": "9e3f4c30-0289-4a5b-9c6d-000000000289",
+        "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 3,
+        "BusinessObjectType": "SERVICE_REQUEST",
+        "ProcessStepID": "REP-010",
+        "StepName": "Kundenanliegen als Service Request erfassen",
+        "Field": "Equipment",
+        "ExpectedValue": "WZ-0815-031",
+        "ActualValue": "WZ-0815-031",
+        "Tolerance": "",
+        "Result": "PASSED",
+        "Criticality": 3,
+        "Message": "Expected and actual value match."
+    },
+    {
+        "AssertionUUID": "9e3f4c30-0305-4a5b-9c6d-000000000305",
+        "ExecutionUUID": "9e3f4c30-0289-4a5b-9c6d-000000000289",
+        "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 4,
+        "BusinessObjectType": "SERVICE_ORDER",
+        "ProcessStepID": "REP-060",
+        "StepName": "Service Order anlegen (aus Request, Angebot oder Vertrag)",
+        "Field": "SoldToParty",
+        "ExpectedValue": "MD-100010",
+        "ActualValue": "MD-100010",
+        "Tolerance": "",
+        "Result": "PASSED",
+        "Criticality": 3,
+        "Message": "Expected and actual value match."
+    },
+    {
+        "AssertionUUID": "9e3f4c30-0306-4a5b-9c6d-000000000306",
+        "ExecutionUUID": "9e3f4c30-0289-4a5b-9c6d-000000000289",
+        "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 5,
+        "BusinessObjectType": "SERVICE_ORDER",
+        "ProcessStepID": "REP-060",
+        "StepName": "Service Order anlegen (aus Request, Angebot oder Vertrag)",
+        "Field": "ServiceProduct",
+        "ExpectedValue": "MD-SRV-STOER",
+        "ActualValue": "MD-SRV-STOER",
+        "Tolerance": "",
+        "Result": "PASSED",
+        "Criticality": 3,
+        "Message": "Expected and actual value match."
+    },
+    {
+        "AssertionUUID": "9e3f4c30-0307-4a5b-9c6d-000000000307",
+        "ExecutionUUID": "9e3f4c30-0289-4a5b-9c6d-000000000289",
+        "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 6,
+        "BusinessObjectType": "SERVICE_ORDER",
+        "ProcessStepID": "REP-060",
+        "StepName": "Service Order anlegen (aus Request, Angebot oder Vertrag)",
+        "Field": "ServiceDuration",
+        "ExpectedValue": "2 HR",
+        "ActualValue": "2 HR",
+        "Tolerance": "",
+        "Result": "PASSED",
+        "Criticality": 3,
+        "Message": "Expected and actual value match."
+    },
+    {
+        "AssertionUUID": "9e3f4c30-0308-4a5b-9c6d-000000000308",
+        "ExecutionUUID": "9e3f4c30-0289-4a5b-9c6d-000000000289",
+        "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 7,
+        "BusinessObjectType": "SERVICE_ORDER",
+        "ProcessStepID": "REP-060",
+        "StepName": "Service Order anlegen (aus Request, Angebot oder Vertrag)",
+        "Field": "ServicePart",
+        "ExpectedValue": "MD-ERS-WZ",
+        "ActualValue": "MD-ERS-WZ",
+        "Tolerance": "",
+        "Result": "PASSED",
+        "Criticality": 3,
+        "Message": "Expected and actual value match."
+    },
+    {
+        "AssertionUUID": "9e3f4c30-0309-4a5b-9c6d-000000000309",
+        "ExecutionUUID": "9e3f4c30-0289-4a5b-9c6d-000000000289",
+        "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 8,
+        "BusinessObjectType": "SERVICE_ORDER",
+        "ProcessStepID": "REP-060",
+        "StepName": "Service Order anlegen (aus Request, Angebot oder Vertrag)",
+        "Field": "Quantity",
+        "ExpectedValue": "1",
+        "ActualValue": "1",
+        "Tolerance": "",
+        "Result": "PASSED",
+        "Criticality": 3,
+        "Message": "Expected and actual value match."
+    },
+    {
+        "AssertionUUID": "9e3f4c30-0310-4a5b-9c6d-000000000310",
+        "ExecutionUUID": "9e3f4c30-0289-4a5b-9c6d-000000000289",
+        "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 9,
+        "BusinessObjectType": "SERVICE_ORDER",
+        "ProcessStepID": "REP-060",
+        "StepName": "Service Order anlegen (aus Request, Angebot oder Vertrag)",
+        "Field": "Unit",
+        "ExpectedValue": "PC",
+        "ActualValue": "PC",
+        "Tolerance": "",
+        "Result": "PASSED",
+        "Criticality": 3,
+        "Message": "Expected and actual value match."
+    },
+    {
+        "AssertionUUID": "9e3f4c30-0311-4a5b-9c6d-000000000311",
+        "ExecutionUUID": "9e3f4c30-0289-4a5b-9c6d-000000000289",
+        "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 10,
+        "BusinessObjectType": "SERVICE_CONFIRMATION",
+        "ProcessStepID": "REP-080",
+        "StepName": "Service Confirmation (Aufwand) buchen",
+        "Field": "ServiceDuration",
+        "ExpectedValue": "2 HR",
+        "ActualValue": "2 HR",
+        "Tolerance": "",
+        "Result": "PASSED",
+        "Criticality": 3,
+        "Message": "Expected and actual value match."
+    },
+    {
+        "AssertionUUID": "9e3f4c30-0312-4a5b-9c6d-000000000312",
+        "ExecutionUUID": "9e3f4c30-0289-4a5b-9c6d-000000000289",
+        "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 11,
+        "BusinessObjectType": "BILLING_DOCUMENT",
+        "ProcessStepID": "REP-100",
+        "StepName": "Faktura (SD) erzeugen",
+        "Field": "SoldToParty",
+        "ExpectedValue": "MD-100010",
+        "ActualValue": "MD-100010",
+        "Tolerance": "",
+        "Result": "PASSED",
+        "Criticality": 3,
+        "Message": "Expected and actual value match."
+    },
+    {
+        "AssertionUUID": "9e3f4c30-0313-4a5b-9c6d-000000000313",
+        "ExecutionUUID": "9e3f4c30-0289-4a5b-9c6d-000000000289",
+        "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 12,
+        "BusinessObjectType": "BILLING_DOCUMENT",
+        "ProcessStepID": "REP-100",
+        "StepName": "Faktura (SD) erzeugen",
+        "Field": "NetValue",
+        "ExpectedValue": "114.00 EUR",
+        "ActualValue": "183.00 EUR",
+        "Tolerance": "0.00 EUR",
+        "Result": "FAILED",
+        "Criticality": 1,
+        "Message": "Deviation 69.00 EUR exceeds the tolerance 0.00 EUR."
+    },
+    {
+        "AssertionUUID": "9e3f4c30-0314-4a5b-9c6d-000000000314",
+        "ExecutionUUID": "9e3f4c30-0289-4a5b-9c6d-000000000289",
+        "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 13,
+        "BusinessObjectType": "ACCOUNTING_DOCUMENT",
+        "ProcessStepID": "REP-110",
+        "StepName": "Buchhaltungsbeleg (FI) prüfen",
+        "Field": "AccountingDocument",
+        "ExpectedValue": "1400000095",
+        "ActualValue": "1400000095",
+        "Tolerance": "",
+        "Result": "PASSED",
+        "Criticality": 3,
+        "Message": "Billing document 90000110 posted to accounting (company code 2010, fiscal year 2026)."
+    },
+    {
+        "AssertionUUID": "9e3f4c30-0315-4a5b-9c6d-000000000315",
+        "ExecutionUUID": "9e3f4c30-0289-4a5b-9c6d-000000000289",
+        "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 14,
+        "BusinessObjectType": "SERVICE_REQUEST",
+        "ProcessStepID": "REP-010",
+        "StepName": "Kundenanliegen als Service Request erfassen",
+        "Field": "Status",
+        "ExpectedValue": "Completed",
+        "ActualValue": "Completed",
+        "Tolerance": "",
+        "Result": "PASSED",
+        "Criticality": 3,
+        "Message": "Expected and actual value match."
+    },
+    {
+        "AssertionUUID": "9e3f4c30-0316-4a5b-9c6d-000000000316",
+        "ExecutionUUID": "9e3f4c30-0289-4a5b-9c6d-000000000289",
+        "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 15,
+        "BusinessObjectType": "SERVICE_ORDER",
+        "ProcessStepID": "REP-060",
+        "StepName": "Service Order anlegen (aus Request, Angebot oder Vertrag)",
+        "Field": "Status",
+        "ExpectedValue": "Completed",
+        "ActualValue": "Completed",
+        "Tolerance": "",
+        "Result": "PASSED",
+        "Criticality": 3,
+        "Message": "Expected and actual value match."
+    },
+    {
+        "AssertionUUID": "9e3f4c30-0317-4a5b-9c6d-000000000317",
+        "ExecutionUUID": "9e3f4c30-0289-4a5b-9c6d-000000000289",
+        "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 16,
+        "BusinessObjectType": "SERVICE_CONFIRMATION",
+        "ProcessStepID": "REP-080",
+        "StepName": "Service Confirmation (Aufwand) buchen",
+        "Field": "Status",
+        "ExpectedValue": "Completed",
+        "ActualValue": "Completed",
+        "Tolerance": "",
+        "Result": "PASSED",
+        "Criticality": 3,
+        "Message": "Expected and actual value match."
+    },
+    {
+        "AssertionUUID": "9e3f4c30-0318-4a5b-9c6d-000000000318",
+        "ExecutionUUID": "9e3f4c30-0289-4a5b-9c6d-000000000289",
+        "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 17,
+        "BusinessObjectType": "BILLING_DOC_REQUEST",
+        "ProcessStepID": "REP-090",
+        "StepName": "Freigabe zur Fakturierung (Billing Document Request)",
+        "Field": "Status",
+        "ExpectedValue": "Billed",
+        "ActualValue": "Billed",
+        "Tolerance": "",
+        "Result": "PASSED",
+        "Criticality": 3,
+        "Message": "Expected and actual value match."
+    },
+    {
+        "AssertionUUID": "9e3f4c30-0319-4a5b-9c6d-000000000319",
+        "ExecutionUUID": "9e3f4c30-0289-4a5b-9c6d-000000000289",
+        "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 18,
+        "BusinessObjectType": "BILLING_DOCUMENT",
+        "ProcessStepID": "REP-100",
+        "StepName": "Faktura (SD) erzeugen",
+        "Field": "Status",
+        "ExpectedValue": "Posted",
+        "ActualValue": "Posted",
+        "Tolerance": "",
+        "Result": "PASSED",
+        "Criticality": 3,
+        "Message": "Expected and actual value match."
+    },
+    {
+        "AssertionUUID": "9e3f4c30-0320-4a5b-9c6d-000000000320",
+        "ExecutionUUID": "9e3f4c30-0289-4a5b-9c6d-000000000289",
+        "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 19,
+        "BusinessObjectType": "ACCOUNTING_DOCUMENT",
+        "ProcessStepID": "REP-110",
+        "StepName": "Buchhaltungsbeleg (FI) prüfen",
+        "Field": "Status",
+        "ExpectedValue": "Posted",
+        "ActualValue": "Posted",
+        "Tolerance": "",
+        "Result": "PASSED",
+        "Criticality": 3,
+        "Message": "Expected and actual value match."
+    },
+    {
+        "AssertionUUID": "9e3f4c30-0321-4a5b-9c6d-000000000321",
+        "ExecutionUUID": "9e3f4c30-0289-4a5b-9c6d-000000000289",
+        "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 20,
+        "BusinessObjectType": "ACCOUNTING_DOCUMENT",
+        "ProcessStepID": "REP-110",
+        "StepName": "Buchhaltungsbeleg (FI) prüfen",
+        "Field": "DocumentFlow",
+        "ExpectedValue": "SR → SO → SC → BDR → BD → FI",
+        "ActualValue": "8000000003 → 8000000022 → 8999999994 → 10000007 → 90000110 → 1400000095",
+        "Tolerance": "",
+        "Result": "PASSED",
+        "Criticality": 3,
+        "Message": "Document flow is complete and consistent."
+    },
+    {
+        "AssertionUUID": "9e3f4c30-0356-4a5b-9c6d-000000000356",
+        "ExecutionUUID": "9e3f4c30-0350-4a5b-9c6d-000000000350",
         "TestCaseUUID": "6f1c2a10-0008-4c3e-9a51-000000000008",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1180,8 +1580,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0297-4a5b-9c6d-000000000297",
-        "ExecutionUUID": "9e3f4c30-0290-4a5b-9c6d-000000000290",
+        "AssertionUUID": "9e3f4c30-0357-4a5b-9c6d-000000000357",
+        "ExecutionUUID": "9e3f4c30-0350-4a5b-9c6d-000000000350",
         "TestCaseUUID": "6f1c2a10-0008-4c3e-9a51-000000000008",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1200,8 +1600,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0298-4a5b-9c6d-000000000298",
-        "ExecutionUUID": "9e3f4c30-0290-4a5b-9c6d-000000000290",
+        "AssertionUUID": "9e3f4c30-0358-4a5b-9c6d-000000000358",
+        "ExecutionUUID": "9e3f4c30-0350-4a5b-9c6d-000000000350",
         "TestCaseUUID": "6f1c2a10-0008-4c3e-9a51-000000000008",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1220,8 +1620,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0299-4a5b-9c6d-000000000299",
-        "ExecutionUUID": "9e3f4c30-0290-4a5b-9c6d-000000000290",
+        "AssertionUUID": "9e3f4c30-0359-4a5b-9c6d-000000000359",
+        "ExecutionUUID": "9e3f4c30-0350-4a5b-9c6d-000000000350",
         "TestCaseUUID": "6f1c2a10-0008-4c3e-9a51-000000000008",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1240,8 +1640,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0300-4a5b-9c6d-000000000300",
-        "ExecutionUUID": "9e3f4c30-0290-4a5b-9c6d-000000000290",
+        "AssertionUUID": "9e3f4c30-0360-4a5b-9c6d-000000000360",
+        "ExecutionUUID": "9e3f4c30-0350-4a5b-9c6d-000000000350",
         "TestCaseUUID": "6f1c2a10-0008-4c3e-9a51-000000000008",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1260,8 +1660,8 @@
         "Message": "No follow-up order for the rejected quotation."
     },
     {
-        "AssertionUUID": "9e3f4c30-0301-4a5b-9c6d-000000000301",
-        "ExecutionUUID": "9e3f4c30-0290-4a5b-9c6d-000000000290",
+        "AssertionUUID": "9e3f4c30-0361-4a5b-9c6d-000000000361",
+        "ExecutionUUID": "9e3f4c30-0350-4a5b-9c6d-000000000350",
         "TestCaseUUID": "6f1c2a10-0008-4c3e-9a51-000000000008",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1280,8 +1680,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0302-4a5b-9c6d-000000000302",
-        "ExecutionUUID": "9e3f4c30-0290-4a5b-9c6d-000000000290",
+        "AssertionUUID": "9e3f4c30-0362-4a5b-9c6d-000000000362",
+        "ExecutionUUID": "9e3f4c30-0350-4a5b-9c6d-000000000350",
         "TestCaseUUID": "6f1c2a10-0008-4c3e-9a51-000000000008",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1300,8 +1700,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0303-4a5b-9c6d-000000000303",
-        "ExecutionUUID": "9e3f4c30-0290-4a5b-9c6d-000000000290",
+        "AssertionUUID": "9e3f4c30-0363-4a5b-9c6d-000000000363",
+        "ExecutionUUID": "9e3f4c30-0350-4a5b-9c6d-000000000350",
         "TestCaseUUID": "6f1c2a10-0008-4c3e-9a51-000000000008",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1320,8 +1720,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0304-4a5b-9c6d-000000000304",
-        "ExecutionUUID": "9e3f4c30-0290-4a5b-9c6d-000000000290",
+        "AssertionUUID": "9e3f4c30-0364-4a5b-9c6d-000000000364",
+        "ExecutionUUID": "9e3f4c30-0350-4a5b-9c6d-000000000350",
         "TestCaseUUID": "6f1c2a10-0008-4c3e-9a51-000000000008",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1340,8 +1740,8 @@
         "Message": "Document flow is complete and consistent."
     },
     {
-        "AssertionUUID": "9e3f4c30-0433-4a5b-9c6d-000000000433",
-        "ExecutionUUID": "9e3f4c30-0426-4a5b-9c6d-000000000426",
+        "AssertionUUID": "9e3f4c30-0494-4a5b-9c6d-000000000494",
+        "ExecutionUUID": "9e3f4c30-0487-4a5b-9c6d-000000000487",
         "TestCaseUUID": "6f1c2a10-0013-4c3e-9a51-000000000013",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1360,8 +1760,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0434-4a5b-9c6d-000000000434",
-        "ExecutionUUID": "9e3f4c30-0426-4a5b-9c6d-000000000426",
+        "AssertionUUID": "9e3f4c30-0495-4a5b-9c6d-000000000495",
+        "ExecutionUUID": "9e3f4c30-0487-4a5b-9c6d-000000000487",
         "TestCaseUUID": "6f1c2a10-0013-4c3e-9a51-000000000013",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1380,8 +1780,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0435-4a5b-9c6d-000000000435",
-        "ExecutionUUID": "9e3f4c30-0426-4a5b-9c6d-000000000426",
+        "AssertionUUID": "9e3f4c30-0496-4a5b-9c6d-000000000496",
+        "ExecutionUUID": "9e3f4c30-0487-4a5b-9c6d-000000000487",
         "TestCaseUUID": "6f1c2a10-0013-4c3e-9a51-000000000013",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1400,8 +1800,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0436-4a5b-9c6d-000000000436",
-        "ExecutionUUID": "9e3f4c30-0426-4a5b-9c6d-000000000426",
+        "AssertionUUID": "9e3f4c30-0497-4a5b-9c6d-000000000497",
+        "ExecutionUUID": "9e3f4c30-0487-4a5b-9c6d-000000000487",
         "TestCaseUUID": "6f1c2a10-0013-4c3e-9a51-000000000013",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1420,8 +1820,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0437-4a5b-9c6d-000000000437",
-        "ExecutionUUID": "9e3f4c30-0426-4a5b-9c6d-000000000426",
+        "AssertionUUID": "9e3f4c30-0498-4a5b-9c6d-000000000498",
+        "ExecutionUUID": "9e3f4c30-0487-4a5b-9c6d-000000000487",
         "TestCaseUUID": "6f1c2a10-0013-4c3e-9a51-000000000013",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1440,8 +1840,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0438-4a5b-9c6d-000000000438",
-        "ExecutionUUID": "9e3f4c30-0426-4a5b-9c6d-000000000426",
+        "AssertionUUID": "9e3f4c30-0499-4a5b-9c6d-000000000499",
+        "ExecutionUUID": "9e3f4c30-0487-4a5b-9c6d-000000000487",
         "TestCaseUUID": "6f1c2a10-0013-4c3e-9a51-000000000013",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1460,8 +1860,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0439-4a5b-9c6d-000000000439",
-        "ExecutionUUID": "9e3f4c30-0426-4a5b-9c6d-000000000426",
+        "AssertionUUID": "9e3f4c30-0500-4a5b-9c6d-000000000500",
+        "ExecutionUUID": "9e3f4c30-0487-4a5b-9c6d-000000000487",
         "TestCaseUUID": "6f1c2a10-0013-4c3e-9a51-000000000013",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1480,8 +1880,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0440-4a5b-9c6d-000000000440",
-        "ExecutionUUID": "9e3f4c30-0426-4a5b-9c6d-000000000426",
+        "AssertionUUID": "9e3f4c30-0501-4a5b-9c6d-000000000501",
+        "ExecutionUUID": "9e3f4c30-0487-4a5b-9c6d-000000000487",
         "TestCaseUUID": "6f1c2a10-0013-4c3e-9a51-000000000013",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1500,8 +1900,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0441-4a5b-9c6d-000000000441",
-        "ExecutionUUID": "9e3f4c30-0426-4a5b-9c6d-000000000426",
+        "AssertionUUID": "9e3f4c30-0502-4a5b-9c6d-000000000502",
+        "ExecutionUUID": "9e3f4c30-0487-4a5b-9c6d-000000000487",
         "TestCaseUUID": "6f1c2a10-0013-4c3e-9a51-000000000013",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1520,8 +1920,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0442-4a5b-9c6d-000000000442",
-        "ExecutionUUID": "9e3f4c30-0426-4a5b-9c6d-000000000426",
+        "AssertionUUID": "9e3f4c30-0503-4a5b-9c6d-000000000503",
+        "ExecutionUUID": "9e3f4c30-0487-4a5b-9c6d-000000000487",
         "TestCaseUUID": "6f1c2a10-0013-4c3e-9a51-000000000013",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1540,8 +1940,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0443-4a5b-9c6d-000000000443",
-        "ExecutionUUID": "9e3f4c30-0426-4a5b-9c6d-000000000426",
+        "AssertionUUID": "9e3f4c30-0504-4a5b-9c6d-000000000504",
+        "ExecutionUUID": "9e3f4c30-0487-4a5b-9c6d-000000000487",
         "TestCaseUUID": "6f1c2a10-0013-4c3e-9a51-000000000013",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1560,8 +1960,8 @@
         "Message": "Net value matches the expectation."
     },
     {
-        "AssertionUUID": "9e3f4c30-0444-4a5b-9c6d-000000000444",
-        "ExecutionUUID": "9e3f4c30-0426-4a5b-9c6d-000000000426",
+        "AssertionUUID": "9e3f4c30-0505-4a5b-9c6d-000000000505",
+        "ExecutionUUID": "9e3f4c30-0487-4a5b-9c6d-000000000487",
         "TestCaseUUID": "6f1c2a10-0013-4c3e-9a51-000000000013",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1580,8 +1980,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0445-4a5b-9c6d-000000000445",
-        "ExecutionUUID": "9e3f4c30-0426-4a5b-9c6d-000000000426",
+        "AssertionUUID": "9e3f4c30-0506-4a5b-9c6d-000000000506",
+        "ExecutionUUID": "9e3f4c30-0487-4a5b-9c6d-000000000487",
         "TestCaseUUID": "6f1c2a10-0013-4c3e-9a51-000000000013",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1600,8 +2000,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0446-4a5b-9c6d-000000000446",
-        "ExecutionUUID": "9e3f4c30-0426-4a5b-9c6d-000000000426",
+        "AssertionUUID": "9e3f4c30-0507-4a5b-9c6d-000000000507",
+        "ExecutionUUID": "9e3f4c30-0487-4a5b-9c6d-000000000487",
         "TestCaseUUID": "6f1c2a10-0013-4c3e-9a51-000000000013",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1620,8 +2020,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0447-4a5b-9c6d-000000000447",
-        "ExecutionUUID": "9e3f4c30-0426-4a5b-9c6d-000000000426",
+        "AssertionUUID": "9e3f4c30-0508-4a5b-9c6d-000000000508",
+        "ExecutionUUID": "9e3f4c30-0487-4a5b-9c6d-000000000487",
         "TestCaseUUID": "6f1c2a10-0013-4c3e-9a51-000000000013",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1640,8 +2040,8 @@
         "Message": "Document flow is complete and consistent."
     },
     {
-        "AssertionUUID": "9e3f4c30-0484-4a5b-9c6d-000000000484",
-        "ExecutionUUID": "9e3f4c30-0474-4a5b-9c6d-000000000474",
+        "AssertionUUID": "9e3f4c30-0546-4a5b-9c6d-000000000546",
+        "ExecutionUUID": "9e3f4c30-0536-4a5b-9c6d-000000000536",
         "TestCaseUUID": "6f1c2a10-0014-4c3e-9a51-000000000014",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1660,8 +2060,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0485-4a5b-9c6d-000000000485",
-        "ExecutionUUID": "9e3f4c30-0474-4a5b-9c6d-000000000474",
+        "AssertionUUID": "9e3f4c30-0547-4a5b-9c6d-000000000547",
+        "ExecutionUUID": "9e3f4c30-0536-4a5b-9c6d-000000000536",
         "TestCaseUUID": "6f1c2a10-0014-4c3e-9a51-000000000014",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1680,8 +2080,8 @@
         "Message": "Net value matches the expectation."
     },
     {
-        "AssertionUUID": "9e3f4c30-0486-4a5b-9c6d-000000000486",
-        "ExecutionUUID": "9e3f4c30-0474-4a5b-9c6d-000000000474",
+        "AssertionUUID": "9e3f4c30-0548-4a5b-9c6d-000000000548",
+        "ExecutionUUID": "9e3f4c30-0536-4a5b-9c6d-000000000536",
         "TestCaseUUID": "6f1c2a10-0014-4c3e-9a51-000000000014",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1700,8 +2100,8 @@
         "Message": "Billing document 90000111 posted to accounting (company code 2010, fiscal year 2026)."
     },
     {
-        "AssertionUUID": "9e3f4c30-0487-4a5b-9c6d-000000000487",
-        "ExecutionUUID": "9e3f4c30-0474-4a5b-9c6d-000000000474",
+        "AssertionUUID": "9e3f4c30-0549-4a5b-9c6d-000000000549",
+        "ExecutionUUID": "9e3f4c30-0536-4a5b-9c6d-000000000536",
         "TestCaseUUID": "6f1c2a10-0014-4c3e-9a51-000000000014",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1720,8 +2120,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0488-4a5b-9c6d-000000000488",
-        "ExecutionUUID": "9e3f4c30-0474-4a5b-9c6d-000000000474",
+        "AssertionUUID": "9e3f4c30-0550-4a5b-9c6d-000000000550",
+        "ExecutionUUID": "9e3f4c30-0536-4a5b-9c6d-000000000536",
         "TestCaseUUID": "6f1c2a10-0014-4c3e-9a51-000000000014",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1740,8 +2140,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0489-4a5b-9c6d-000000000489",
-        "ExecutionUUID": "9e3f4c30-0474-4a5b-9c6d-000000000474",
+        "AssertionUUID": "9e3f4c30-0551-4a5b-9c6d-000000000551",
+        "ExecutionUUID": "9e3f4c30-0536-4a5b-9c6d-000000000536",
         "TestCaseUUID": "6f1c2a10-0014-4c3e-9a51-000000000014",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -1760,8 +2160,8 @@
         "Message": "Expected and actual value match."
     },
     {
-        "AssertionUUID": "9e3f4c30-0490-4a5b-9c6d-000000000490",
-        "ExecutionUUID": "9e3f4c30-0474-4a5b-9c6d-000000000474",
+        "AssertionUUID": "9e3f4c30-0552-4a5b-9c6d-000000000552",
+        "ExecutionUUID": "9e3f4c30-0536-4a5b-9c6d-000000000536",
         "TestCaseUUID": "6f1c2a10-0014-4c3e-9a51-000000000014",
         "IsActiveEntity": true,
         "HasActiveEntity": false,

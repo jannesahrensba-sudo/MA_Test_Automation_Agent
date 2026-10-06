@@ -212,6 +212,7 @@ const SET_CAPABILITIES = {
     ExecutionStep: { insertable: false, updatable: false, deletable: false },
     DocumentReference: { insertable: false, updatable: false, deletable: false },
     TestAssertion: { insertable: false, updatable: false, deletable: false },
+    ResultFinding: { insertable: false, updatable: false, deletable: false },
     ProcessProfile: { insertable: false, updatable: '__EntityControl/Updatable', deletable: false, searchable: true },
     FieldRequirement: { insertable: true, updatable: true, deletable: true },
     TestCaseStep: { insertable: true, updatable: true, deletable: true },

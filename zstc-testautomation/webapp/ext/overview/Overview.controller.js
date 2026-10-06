@@ -147,6 +147,10 @@ sap.ui.define(["sap/fe/core/PageController", "sap/ui/model/json/JSONModel"], fun
             return this.routing.navigateToRoute("ReleaseList");
         },
 
+        onShowAnalytics: function () {
+            return this.routing.navigateToRoute("Analytics");
+        },
+
         onShowProcesses: function () {
             return this.routing.navigateToRoute("BusinessProcessList");
         },

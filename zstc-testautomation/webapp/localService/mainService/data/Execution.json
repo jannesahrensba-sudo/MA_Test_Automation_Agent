@@ -29,10 +29,11 @@
         "PredecessorExecution": "",
         "RunType": "SINGLE",
         "RegressionRunUUID": null,
-        "ExecutedBy": "REP_TESTER"
+        "ExecutedBy": "REP_TESTER",
+        "AnalysisHeadline": "PASSED: All 20 assertions passed; 6 documents created: 8000000009 → 8000000028 → 8000000029 → 8999999999 → 10000011 → 90000114."
     },
     {
-        "ExecutionUUID": "9e3f4c30-0132-4a5b-9c6d-000000000132",
+        "ExecutionUUID": "9e3f4c30-0133-4a5b-9c6d-000000000133",
         "TestCaseUUID": "6f1c2a10-0004-4c3e-9a51-000000000004",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -61,10 +62,11 @@
         "PredecessorExecution": "",
         "RunType": "SINGLE",
         "RegressionRunUUID": null,
-        "ExecutedBy": "REP_TESTER"
+        "ExecutedBy": "REP_TESTER",
+        "AnalysisHeadline": "PASSED: All 18 assertions passed; 5 documents created: 8000000008 → 8000000027 → 8999999998 → 10000010 → 90000113."
     },
     {
-        "ExecutionUUID": "9e3f4c30-0231-4a5b-9c6d-000000000231",
+        "ExecutionUUID": "9e3f4c30-0233-4a5b-9c6d-000000000233",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -93,10 +95,44 @@
         "PredecessorExecution": "",
         "RunType": "SINGLE",
         "RegressionRunUUID": null,
-        "ExecutedBy": "REP_TESTER"
+        "ExecutedBy": "REP_TESTER",
+        "AnalysisHeadline": "PASSED: All 20 assertions passed; 6 documents created: 8000000007 → 8000000026 → 8999999997 → 10000009 → 90000112 → 1400000097."
     },
     {
-        "ExecutionUUID": "9e3f4c30-0290-4a5b-9c6d-000000000290",
+        "ExecutionUUID": "9e3f4c30-0289-4a5b-9c6d-000000000289",
+        "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "ExecutionProvider": "MOCK",
+        "ExternalExecutionID": "MOCK-20261001-0007",
+        "CorrelationReference": "STC-2026-000007",
+        "Status": "FINISHED",
+        "StatusCriticality": 3,
+        "ProgressPercent": 100,
+        "StartedAt": "2026-10-01T09:16:00.000Z",
+        "FinishedAt": "2026-10-01T09:16:12.000Z",
+        "DurationInSeconds": 12,
+        "TechnicalResult": "OK",
+        "FunctionalResult": "FAILED_FUNCTIONAL",
+        "FunctionalResultCriticality": 1,
+        "TechnicalLog": "2026-10-01T09:16:00.000Z MOCK start: external execution MOCK-20261001-0007 for STC-2026-000007 (provider MockExecutionProvider, no SAP test automation called)\n2026-10-01T09:16:00.000Z MOCK test data handover: 21 fields, process profile MD_HKV_STOER\n2026-10-01T09:16:00.000Z MOCK plan: REP-010 → REP-060 → REP-080 → REP-090 → REP-100 → REP-110 (variant W1_REQUEST)\n2026-10-01T09:16:02.000Z step 1 SERVICE_REQUEST: 8000000003 created.\n2026-10-01T09:16:04.000Z step 2 SERVICE_ORDER: 8000000022 created.\n2026-10-01T09:16:06.000Z step 3 SERVICE_CONFIRMATION: 8999999994 created.\n2026-10-01T09:16:08.000Z step 4 BILLING_DOC_REQUEST: 10000007 created.\n2026-10-01T09:16:10.000Z step 5 BILLING_DOCUMENT: 90000110 created.\n2026-10-01T09:16:12.000Z step 6 ACCOUNTING_DOCUMENT: 1400000095 posted.\n2026-10-01T09:16:12.000Z MOCK run finished",
+        "ReleaseID": "INT-2026.10",
+        "TestCaseVersion": 2,
+        "ProcessID": "SRV-REP",
+        "ProcessVersion": 2,
+        "ProcessVariant": "W1_REQUEST",
+        "EndObject": "ACCOUNTING_DOCUMENT",
+        "StartObject": "SERVICE_REQUEST",
+        "PredecessorExecution": "",
+        "RunType": "SINGLE",
+        "RegressionRunUUID": null,
+        "ExecutedBy": "REP_TESTER",
+        "AnalysisHeadline": "FAILED_FUNCTIONAL: The documents are priced exactly as the test data says (183.00 EUR); the maintained expectation differs by 1 hour of MD-SRV-STOER (69.00 EUR per hour)."
+    },
+    {
+        "ExecutionUUID": "9e3f4c30-0350-4a5b-9c6d-000000000350",
         "TestCaseUUID": "6f1c2a10-0008-4c3e-9a51-000000000008",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -125,10 +161,11 @@
         "PredecessorExecution": "",
         "RunType": "SINGLE",
         "RegressionRunUUID": null,
-        "ExecutedBy": "REP_TESTER"
+        "ExecutedBy": "REP_TESTER",
+        "AnalysisHeadline": "PASSED: All 9 assertions passed; 2 documents created: 8000000006 → 8000000025."
     },
     {
-        "ExecutionUUID": "9e3f4c30-0426-4a5b-9c6d-000000000426",
+        "ExecutionUUID": "9e3f4c30-0487-4a5b-9c6d-000000000487",
         "TestCaseUUID": "6f1c2a10-0013-4c3e-9a51-000000000013",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -157,10 +194,11 @@
         "PredecessorExecution": "",
         "RunType": "SINGLE",
         "RegressionRunUUID": null,
-        "ExecutedBy": "REP_TESTER"
+        "ExecutedBy": "REP_TESTER",
+        "AnalysisHeadline": "PASSED: All 15 assertions passed; 3 documents created: 8000000005 → 8000000024 → 8999999996."
     },
     {
-        "ExecutionUUID": "9e3f4c30-0474-4a5b-9c6d-000000000474",
+        "ExecutionUUID": "9e3f4c30-0536-4a5b-9c6d-000000000536",
         "TestCaseUUID": "6f1c2a10-0014-4c3e-9a51-000000000014",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -189,6 +227,7 @@
         "PredecessorExecution": "STC-2026-000013 · MOCK-20260929-0005",
         "RunType": "SINGLE",
         "RegressionRunUUID": null,
-        "ExecutedBy": "E2E_TESTER"
+        "ExecutedBy": "E2E_TESTER",
+        "AnalysisHeadline": "PASSED: The run continued with Service Request 8000000005, Service Order 8000000024, Service Confirmation 8999999996 of STC-2026-000013 · MOCK-20260929-0005."
     }
 ]

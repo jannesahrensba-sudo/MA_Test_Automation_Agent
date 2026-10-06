@@ -18,6 +18,7 @@ const { MockTestCaseExtractionService } = require('../extraction/MockTestCaseExt
 const { processHints } = require('../extraction/processHints');
 const { getProvider } = require('../execution/MockExecutionProvider');
 const { verify } = require('../verification/VerificationService');
+const { analyzeRun } = require('../analysis/ResultAnalysisService');
 const numberRanges = require('../common/numberRanges');
 const pricing = require('../common/pricing');
 const clock = require('../common/clock');
@@ -1507,6 +1508,64 @@ async function startExecution(repo, keys, { user = CURRENT_USER, releaseId, runT
     };
 }
 
+/**
+ * Previous finished run of the same test case and what changed since (test case versions, process version).
+ *
+ * @param {object} repo repository
+ * @param {object} tc TestCase entry (active)
+ * @param {object} execution current execution
+ * @returns {Promise<{execution: object, changes: string[]}|undefined>} previous run
+ */
+async function previousRun(repo, tc, execution) {
+    const before = (await repo.find('Execution', { TestCaseUUID: tc.TestCaseUUID, IsActiveEntity: true }))
+        .filter((e) => e.ExecutionUUID !== execution.ExecutionUUID && e.Status !== EXECUTION.RUNNING && e.FunctionalResult && String(e.StartedAt) < String(execution.StartedAt))
+        .sort((a, b) => String(b.StartedAt).localeCompare(String(a.StartedAt)))[0];
+    if (!before) {
+        return undefined;
+    }
+    const changes = (await repo.find('TestCaseVersion', { TestCaseUUID: tc.TestCaseUUID }))
+        .filter((v) => Number(v.Version) > Number(before.TestCaseVersion) && Number(v.Version) <= Number(execution.TestCaseVersion))
+        .sort((a, b) => a.Version - b.Version)
+        .map((v) => `test case version ${v.Version}: ${v.ChangeSummary}`);
+    if (Number(before.ProcessVersion) && Number(execution.ProcessVersion) && Number(before.ProcessVersion) !== Number(execution.ProcessVersion)) {
+        changes.push(`process version ${before.ProcessVersion} → ${execution.ProcessVersion}`);
+    }
+    return { execution: before, changes };
+}
+
+/** Runs the result analysis of a finished execution and stores its findings */
+async function analyzeExecution(repo, tc, data, execution, assertions) {
+    const keys = { ExecutionUUID: execution.ExecutionUUID, IsActiveEntity: true };
+    const model = await processModel(repo, tc.BusinessProcess);
+    const teamOf = (processStepID) => model.steps.find((step) => step.StepID === processStepID)?.ResponsibleTeam || '';
+    const analysis = analyzeRun({
+        testCase: tc,
+        data,
+        execution,
+        steps: (await repo.find('ExecutionStep', keys)).sort((a, b) => a.Sequence - b.Sequence),
+        assertions,
+        documents: await repo.find('DocumentReference', keys),
+        previous: await previousRun(repo, tc, execution),
+        teamOf
+    });
+    for (const finding of analysis.findings) {
+        await repo.add('ResultFinding', {
+            FindingUUID: uuid(),
+            ExecutionUUID: execution.ExecutionUUID,
+            TestCaseUUID: tc.TestCaseUUID,
+            CaseID: tc.CaseID || '',
+            ExternalExecutionID: execution.ExternalExecutionID || '',
+            ReleaseID: execution.ReleaseID || '',
+            IsActiveEntity: true,
+            HasActiveEntity: false,
+            HasDraftEntity: false,
+            DraftAdministrativeData: null,
+            ...finding
+        });
+    }
+    return analysis;
+}
+
 /** Synchronizes provider status, steps, documents and — when finished — assertions and final result */
 async function refreshExecution(repo, keys, { cancel = false } = {}) {
     const tc = await getTestCase(repo, keys);
@@ -1628,6 +1687,9 @@ async function refreshExecution(repo, keys, { cancel = false } = {}) {
             FunctionalResult: verification.finalResult,
             FunctionalResultCriticality: criticalityOf(verification.finalResult)
         });
+        // result analysis: cause, responsible team and recommendation per finding (evidence of this run only)
+        const analysis = await analyzeExecution(repo, tc, data, { ...execution, ...executionPatch }, verification.assertions);
+        executionPatch.AnalysisHeadline = analysis.headline;
         Object.assign(testCasePatch, {
             ExecutionStatus: status.status,
             FinalResult: verification.finalResult,

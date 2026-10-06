@@ -98,12 +98,14 @@ HKV-Störung: 1 Std. + 1 Ersatzgerät = **108,00 EUR**. RWM-Störung: **94,00 EU
 | `STC-2026-000004` | Referenzlauf: HKV in Köln mit Fehleranzeige getauscht (`MD_HKV_STOER`) | ausgeführt, PASSED |
 | `STC-2026-000005` | Negativfall: Ersatz-HKV für einen Rauchwarnmelder (`MD_RWM_STOER`) | INVALID (R10), Vorschlag `MD-ERS-RWM` |
 | `STC-2026-000006` | Golden Case Messdienst: Rauchwarnmelder piept (`MD_RWM_STOER`) | erfasst, noch nicht validiert |
-| `STC-2026-000007` | Weg 1 bis zum FI-Beleg: Warmwasserzähler ohne Anzeige | ausgeführt, PASSED |
+| `STC-2026-000007` | Weg 1 bis zum FI-Beleg: Warmwasserzähler ohne Anzeige (ab der Fakturaanforderung Team „New End to End Prozess“) | erster Lauf PASSED; Version 2 mit 2 Std. Einsatz bei unveränderter Erwartung 114,00 EUR → zweiter Lauf FAILED_FUNCTIONAL; Ergebnisanalyse: Erwartung weicht um genau 1 Std. `MD-SRV-STOER` ab (Konfidenz hoch), Regression gegenüber Version 1 |
 | `STC-2026-000008` | Weg 2: Angebot für RWM-Tausch, Kunde lehnt ab | ausgeführt, PASSED |
 | `STC-2026-000009` | Weg 3 negativ: abgelaufener Gerätemietvertrag `4100000002` | INVALID (R11) |
 | `STC-2026-000010` | Weg 3: RWM-Tausch aus dem Servicevertrag `4100000001` | freigegeben |
 | `STC-2026-000011` | Weg 3: Vertragsabrechnung über den Rechnungsplan (118,80 EUR) | freigegeben |
-| `STC-2026-000012` | Team Angebot: Angebot bis zur Kundenannahme | freigegeben; Start durch `DEMO_USER` abgelehnt (keine Rolle im Team Angebot) |
+| `STC-2026-000012` | Team Angebot: direkt ab dem Angebot bis zur Kundenannahme | freigegeben; Start durch `DEMO_USER` abgelehnt (keine Rolle im Team Angebot) |
+| `STC-2026-000013` | Team Reparatur: HKV-Tausch bis zur Rückmeldung (Übergabe an das Team „New End to End Prozess“) | ausgeführt, PASSED |
+| `STC-2026-000014` | Team „New End to End Prozess“: Rückmeldung von `STC-2026-000013` fakturieren bis zum FI-Beleg | ausgeführt, PASSED; Service Request, Service Order und Rückmeldung übernommen |
 
 ## 7. Beispielmeldungen für den Service-Assistenten
 
@@ -115,6 +117,8 @@ HKV-Störung: 1 Std. + 1 Ersatzgerät = **108,00 EUR**. RWM-Störung: **94,00 EU
 | „Lindenallee 5 in Köln, Herr Nowak: der Rauchwarnmelder im Flur ist abgerissen und liegt auf dem Boden. Meldung von Aylin Demir.“ | `RWM-2040-021`, Team Köln, Gültig |
 | „Musterstraße 12, 1. OG links (Müller): der Warmwasserzähler im Bad ist defekt. Gemeldet von Petra Wagner.“ | Profil HKV → R10 korrigiert das Ersatzteil auf `MD-ERS-WZ`, Gültig |
 | „Laut Wartungsvertrag: Im Kinderzimmer der Wohnung Yilmaz (Musterstraße 12, EG rechts) piept der Rauchwarnmelder. Austausch im Rahmen des Vertrags, Test bis zur Faktura. Gemeldet von Hausmeister Stefan Brandl.“ | Weg 3, Vertrag `4100000001` ermittelt, Gültig; Antwort „nur bis zum Auftrag“ verkürzt den Lauf |
+| Rauchmelder-Meldung oben plus „Bitte direkt ab dem Angebot testen.“ | Weg 2, Start ab Angebot, Gültig, 94,00 EUR |
+| „Ergebnis von STC-2026-000007 besprechen“ | Bericht der Ergebnisanalyse: Nettowert 183,00 statt 114,00 EUR, Ursache Erwartung (1 Std.), zuständig Prozessteam Reparatur, Regression |
 
 ## 8. Grenzen des Modells
 

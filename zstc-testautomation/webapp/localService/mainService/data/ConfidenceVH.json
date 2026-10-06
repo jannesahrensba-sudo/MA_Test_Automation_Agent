@@ -1,0 +1,14 @@
+[
+    {
+        "Code": "HIGH",
+        "Text": "High (proven by the evidence)"
+    },
+    {
+        "Code": "MEDIUM",
+        "Text": "Medium (fits a known cause)"
+    },
+    {
+        "Code": "LOW",
+        "Text": "Low (hint only)"
+    }
+]

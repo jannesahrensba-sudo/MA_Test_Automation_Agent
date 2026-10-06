@@ -43,7 +43,7 @@ test('golden path: describe → analyze → validate → save → approve → ex
     await service.approve(repo, active);
     const started = await service.startExecution(repo, active);
     assert.equal(started.testCase.ExecutionStatus, 'RUNNING');
-    assert.equal(started.testCase.ExternalExecutionID, 'MOCK-20260929-0007');
+    assert.equal(started.testCase.ExternalExecutionID, 'MOCK-20260929-0008');
     // default variant W2_QUOTATION: SR, quotation, customer acceptance, order, confirmation, billing request, billing document
     const steps = (await repo.find('ExecutionStep', { ExecutionUUID: started.testCase.LatestExecutionUUID })).sort((a, b) => a.Sequence - b.Sequence);
     assert.deepEqual(

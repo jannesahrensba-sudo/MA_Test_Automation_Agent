@@ -1,4 +1,4 @@
-sap.ui.define(["./prompts", "./textMatching"], function (prompts, textMatching) {
+sap.ui.define(["./prompts", "./textMatching", "./resultReport"], function (prompts, textMatching, resultReport) {
     "use strict";
 
     /**
@@ -11,6 +11,8 @@ sap.ui.define(["./prompts", "./textMatching"], function (prompts, textMatching) 
      *      against the candidates of the open questions
      *   5. process reference: the backend analysis sets the way through the repair process and the end object from the
      *      report; answers such as "mit Angebot", "über den Wartungsvertrag" or "nur bis zum Auftrag" change them
+     *   6. discussion of a result ("Ergebnis besprechen"): answers from the deterministic result analysis of the backend
+     *      (resultReport) — cause, responsible team, comparison with the previous run, confidence, recommendation
      */
 
     const LABEL = prompts.FIELD_LABELS;
@@ -82,6 +84,20 @@ sap.ui.define(["./prompts", "./textMatching"], function (prompts, textMatching) 
         return value === null || value === undefined || value === "";
     }
 
+    /**
+     * Case ID of a request to discuss a result, e.g. "Ergebnis von STC-2026-000007 besprechen" or "Warum ist STC-2026-000007 fehlgeschlagen?".
+     *
+     * @param {string} text message of the user
+     * @returns {string|undefined} Case ID
+     */
+    function resultRequest(text) {
+        const id = String(text || "").toUpperCase().match(/STC-\d{4}-\d{6}/);
+        if (!id) {
+            return undefined;
+        }
+        return /ergebnis|lauf|laeufe|besprech|auswert|analys|fehlgeschlagen|bestanden|warum|ursache|befund/.test(textMatching.normalize(text)) ? id[0] : undefined;
+    }
+
     class RuleBasedAgent {
         constructor(gateway, session) {
             this.gateway = gateway;
@@ -103,6 +119,10 @@ sap.ui.define(["./prompts", "./textMatching"], function (prompts, textMatching) 
 
         async respond(text) {
             const draft = this.session.draft;
+            const requested = resultRequest(text);
+            if (this.session.analysis || (requested && (!draft || draft.submitted))) {
+                return this.discussResult(text, requested);
+            }
             if (!draft) {
                 return this.firstTurn(text);
             }
@@ -110,6 +130,18 @@ sap.ui.define(["./prompts", "./textMatching"], function (prompts, textMatching) 
                 return "Der Testfall **" + (draft.caseId || "") + "** ist bereits übernommen. Für eine neue Störungsmeldung wählen Sie **Neu beginnen**.";
             }
             return this.followUp(text);
+        }
+
+        /** discussion of a result: another Case ID opens that result, otherwise the question is answered from the analysis */
+        async discussResult(text, requested) {
+            const masterData = await this.gateway.masterData();
+            if (requested && (!this.session.analysis || this.session.analysis.caseId !== requested)) {
+                const analysis = await this.session.openResultByCaseId(requested);
+                return resultReport.report(analysis, masterData.describe);
+            }
+            const answer = resultReport.answer(text, this.session.analysis, masterData.describe);
+            this.session.step({ icon: "sap-icon://inspection", text: "Antwort aus der Ergebnisanalyse: " + (resultReport.intentsOf(text).join(", ") || "keine passende Frage erkannt") });
+            return answer;
         }
 
         async firstTurn(text) {

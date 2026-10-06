@@ -8,9 +8,10 @@ sap.ui.define(
         "./transports",
         "./core/AgentSession",
         "./core/prompts",
-        "./core/markdown"
+        "./core/markdown",
+        "./core/resultReport"
     ],
-    function (PageController, JSONModel, MessageToast, MessageBox, TestCaseGateway, transports, AgentSession, prompts, markdown) {
+    function (PageController, JSONModel, MessageToast, MessageBox, TestCaseGateway, transports, AgentSession, prompts, markdown, resultReport) {
         "use strict";
 
         /** example fault reports (fictional metering-service data, docs/messdienst-szenarien.md) */
@@ -24,6 +25,16 @@ sap.ui.define(
                 "Test bis zur Faktura. Gemeldet von Hausmeister Stefan Brandl."
         };
 
+        /** suggested questions about a result (the assistant answers in German) */
+        const QUESTIONS = {
+            cause: "Warum ist der Lauf fehlgeschlagen?",
+            team: "Wer ist zuständig?",
+            compare: "Was hat sich seit dem letzten Lauf geändert?",
+            confidence: "Wie sicher ist das?",
+            action: "Was soll ich tun?",
+            documents: "Welche Belege hat der Lauf?"
+        };
+
         const STATUS_STATE = { VALID: "Success", AMBIGUOUS: "Warning", INVALID: "Error", NOT_VALIDATED: "None" };
 
         function now() {
@@ -34,6 +45,8 @@ sap.ui.define(
          * Service assistant (FPM custom page): an agent in front of the app. It turns a German fault report into a
          * validated test case draft through the OData service (tools), asks back when something is ambiguous and hands
          * the test case over to the app — saving, approval and start only on the user's confirmation.
+         * Jump-off "Ergebnis besprechen": the header action of the test case (and the analytics page) open this page with
+         * ?analyze=<TestCaseUUID>; the assistant then discusses the result of the latest run with its deterministic analysis.
          */
         return PageController.extend("zstc.testautomation.ext.agent.AgentPage", {
             onInit: function () {
@@ -45,6 +58,7 @@ sap.ui.define(
                     draft: null,
                     draftRows: [],
                     findings: [],
+                    analysis: null,
                     busy: false,
                     busyText: "",
                     input: "",
@@ -57,6 +71,52 @@ sap.ui.define(
                 this._updateModeText();
                 this._welcome();
                 this._detectTransports();
+                // jump-off from the test case: ?analyze=<TestCaseUUID>&n=<nonce>
+                const router = this.getAppComponent().getRouter();
+                router.getRoute("AgentPage").attachPatternMatched(this._onRouteMatched, this);
+                // the route may have matched before this view existed (direct link, first navigation)
+                const current = router.getRouteInfoByHash(router.getHashChanger().getHash());
+                if (current && current.name === "AgentPage") {
+                    setTimeout(this._handleQuery.bind(this, current.arguments && current.arguments["?query"]), 0);
+                }
+            },
+
+            _onRouteMatched: function (event) {
+                this._handleQuery((event.getParameter("arguments") || {})["?query"]);
+            },
+
+            _handleQuery: function (query) {
+                const uuid = query && query.analyze;
+                if (!uuid) {
+                    return;
+                }
+                // every press of "Ergebnis besprechen" carries a new nonce; back navigation to the same hash opens nothing again
+                const key = uuid + "|" + (query.n || "");
+                if (this._handledQuery === key) {
+                    return;
+                }
+                this._handledQuery = key;
+                this._openResult(uuid);
+            },
+
+            /** discussion of the result of the latest run of a test case */
+            _openResult: async function (uuid) {
+                if (this.state.getProperty("/busy")) {
+                    this._pendingResult = uuid;
+                    return;
+                }
+                this.state.setProperty("/busy", true);
+                this.state.setProperty("/busyText", this._text("agentResultReading"));
+                try {
+                    const session = this._session();
+                    this.masterData = await this._gateway().masterData();
+                    const analysis = await session.openResult(uuid);
+                    this._addMessage("assistant", resultReport.report(analysis, this.masterData.describe), this._text("agentResultSource"));
+                } catch (error) {
+                    this._addMessage("assistant", this._text("agentResultError", [transports.describeError(error).text]));
+                } finally {
+                    this.state.setProperty("/busy", false);
+                }
             },
 
             _text: function (key, args) {
@@ -65,7 +125,8 @@ sap.ui.define(
 
             _gateway: function () {
                 if (!this.gateway) {
-                    this.gateway = new TestCaseGateway(this.getView().getModel());
+                    // the view gets the model of the component only once it is placed; a jump-off may come earlier
+                    this.gateway = new TestCaseGateway(this.getView().getModel() || this.getAppComponent().getModel());
                 }
                 return this.gateway;
             },
@@ -77,7 +138,8 @@ sap.ui.define(
                         "Nennen Sie möglichst Adresse, Wohnung oder Bewohner, Raum und wer die Störung gemeldet hat.\n" +
                         "Ich erfasse daraus einen Testfall, prüfe ihn gegen die Stammdaten und frage nach, wenn etwas fehlt. Gestartet wird erst nach Ihrer Bestätigung.\n" +
                         "Der Testfall wird dem Reparaturprozess zugeordnet: Ihr **Prozessteam** und der **Weg** – ohne Angebot, mit Angebot (angenommen oder abgelehnt) " +
-                        "oder über einen Servicevertrag. Sagen Sie z. B. „laut Wartungsvertrag“ oder „nur bis zum Auftrag“, wenn Sie einen anderen Weg oder Endpunkt testen wollen."
+                        "oder über einen Servicevertrag. Sagen Sie z. B. „laut Wartungsvertrag“ oder „nur bis zum Auftrag“, wenn Sie einen anderen Weg oder Endpunkt testen wollen.\n" +
+                        "Ergebnisse besprechen: im Testfall **Ergebnis besprechen** wählen oder hier z. B. „Ergebnis von STC-2026-000007 besprechen“ schreiben."
                 );
             },
 
@@ -144,12 +206,31 @@ sap.ui.define(
                         transport: this.transports[mode] || this.transports.rules,
                         onStep: this._addStep.bind(this),
                         onDraft: this._showDraft.bind(this),
+                        onAnalysis: this._showAnalysis.bind(this),
                         onText: function (update) {
                             this._setStreamingText(update.text);
                         }.bind(this)
                     });
+                    if (this._carriedAnalysis) {
+                        // agent changed during a discussion: the new agent continues with the same result
+                        this.session.setAnalysis(this._carriedAnalysis);
+                        this._carriedAnalysis = undefined;
+                    }
                 }
                 return this.session;
+            },
+
+            _showAnalysis: function (analysis) {
+                if (!analysis) {
+                    this.state.setProperty("/analysis", null);
+                    return;
+                }
+                const describe = this.masterData
+                    ? this.masterData.describe
+                    : function (field, value) {
+                          return String(value);
+                      };
+                this.state.setProperty("/analysis", resultReport.panel(analysis, describe));
             },
 
             _addMessage: function (role, text, info) {
@@ -236,10 +317,17 @@ sap.ui.define(
 
             onModeChange: async function () {
                 if (this.session) {
+                    const analysis = this.session.analysis;
                     await this.session.reset();
                     this.session = undefined;
                     this.state.setProperty("/steps", []);
-                    this._addMessage("assistant", this._text("agentModeChanged"));
+                    if (analysis) {
+                        this._carriedAnalysis = analysis;
+                        this._session();
+                        this._addMessage("assistant", this._text("agentModeChangedResult", [analysis.caseId]));
+                    } else {
+                        this._addMessage("assistant", this._text("agentModeChanged"));
+                    }
                 }
                 this._updateModeText();
             },
@@ -291,6 +379,11 @@ sap.ui.define(
                     this.streamingIndex = undefined;
                     this.abortController = undefined;
                     this.state.setProperty("/busy", false);
+                    if (this._pendingResult) {
+                        const pending = this._pendingResult;
+                        this._pendingResult = undefined;
+                        this._openResult(pending);
+                    }
                 }
             },
 
@@ -374,6 +467,29 @@ sap.ui.define(
 
             onShowOverview: function () {
                 return this.routing.navigateToRoute("Overview");
+            },
+
+            onQuestion: function (event) {
+                const key = event.getParameter("item").getKey();
+                this.state.setProperty("/input", QUESTIONS[key] || "");
+            },
+
+            onOpenResultTestCase: function () {
+                const analysis = this.state.getProperty("/analysis");
+                if (analysis) {
+                    this._navigateToTestCase({ uuid: analysis.uuid, isActive: true });
+                }
+            },
+
+            onCloseAnalysis: function () {
+                if (this.session) {
+                    this.session.closeAnalysis();
+                }
+                this._addMessage("assistant", this._text("agentResultClosed"));
+            },
+
+            onShowDashboard: function () {
+                return this.routing.navigateToRoute("Analytics");
             }
         });
     }

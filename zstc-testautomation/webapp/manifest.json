@@ -64,7 +64,8 @@
                 "sap.fe.templates": {},
                 "sap.suite.ui.commons": {
                     "lazy": true
-                }
+                },
+                "sap.suite.ui.microchart": {}
             }
         },
         "contentDensities": {
@@ -110,6 +111,11 @@
                     "pattern": "Overview:?query:",
                     "name": "Overview",
                     "target": "Overview"
+                },
+                {
+                    "pattern": "Analytics:?query:",
+                    "name": "Analytics",
+                    "target": "Analytics"
                 },
                 {
                     "pattern": "TestCase:?query:",
@@ -201,6 +207,25 @@
                         }
                     }
                 },
+                "Analytics": {
+                    "type": "Component",
+                    "id": "Analytics",
+                    "name": "sap.fe.core.fpm",
+                    "contextPattern": "",
+                    "options": {
+                        "settings": {
+                            "viewName": "zstc.testautomation.ext.analytics.Analytics",
+                            "contextPath": "/Release",
+                            "navigation": {
+                                "Release": {
+                                    "detail": {
+                                        "route": "ReleaseObjectPage"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
                 "TestCaseList": {
                     "type": "Component",
                     "id": "TestCaseList",
@@ -281,6 +306,15 @@
                                 }
                             },
                             "content": {
+                                "header": {
+                                    "actions": {
+                                        "discussResult": {
+                                            "press": "zstc.testautomation.ext.controller.ResultActions.discuss",
+                                            "text": "{i18n>discussResult}",
+                                            "visible": "{= %{IsActiveEntity} === true && !!%{FinalResult} && %{ExecutionStatus} !== 'RUNNING' }"
+                                        }
+                                    }
+                                },
                                 "body": {
                                     "sections": {
                                         "TestData": {
@@ -572,6 +606,17 @@
                                 "_LatestRunItem": {
                                     "detail": {
                                         "route": "TestCaseObjectPage"
+                                    }
+                                }
+                            },
+                            "content": {
+                                "header": {
+                                    "actions": {
+                                        "showAnalytics": {
+                                            "press": "zstc.testautomation.ext.controller.ResultActions.showReleaseAnalytics",
+                                            "text": "{i18n>showAnalytics}",
+                                            "visible": "{= %{IsActiveEntity} === true }"
+                                        }
                                     }
                                 }
                             }

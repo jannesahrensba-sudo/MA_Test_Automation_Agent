@@ -1,4 +1,4 @@
-sap.ui.define(["sap/ui/model/Sorter", "./core/masterData"], function (Sorter, masterDataModule) {
+sap.ui.define(["sap/ui/model/Sorter", "sap/ui/model/Filter", "sap/ui/model/FilterOperator", "./core/masterData"], function (Sorter, Filter, FilterOperator, masterDataModule) {
     "use strict";
 
     const NS = "com.sap.gateway.srvd.zui_stc_test_case.v0001";
@@ -63,6 +63,19 @@ sap.ui.define(["sap/ui/model/Sorter", "./core/masterData"], function (Sorter, ma
         "NetAmountTolerance",
         "TransactionCurrency"
     ];
+    /** result of the latest run ("Ergebnis besprechen"): run, steps, assertions, documents, findings of the analysis, history */
+    const RESULT_SELECT = {
+        header: "TestCaseUUID,IsActiveEntity,CaseID,Title,ProcessProfile,ProcessTeam,BusinessProcess,ProcessVariant,StartObject,EndObject,PredecessorTestCase,Version," +
+            "ApprovalStatus,ExecutionStatus,FinalResult,LatestExecutionUUID,ExternalExecutionID",
+        execution: "ExecutionUUID,IsActiveEntity,ExternalExecutionID,Status,FunctionalResult,TechnicalResult,ReleaseID,TestCaseVersion,ProcessVariant,StartObject,EndObject," +
+            "PredecessorExecution,AnalysisHeadline,StartedAt,FinishedAt,DurationInSeconds,ExecutedBy,RunType",
+        steps: "StepUUID,IsActiveEntity,Sequence,ProcessStepID,StepName,ResponsibleTeam,BusinessObjectType,ExecutionStatus,ExpectedStatus,ActualStatus,Message",
+        assertions: "AssertionUUID,IsActiveEntity,Sequence,BusinessObjectType,Field,ExpectedValue,ActualValue,Tolerance,Result,Message,ProcessStepID,StepName",
+        documents: "DocumentReferenceUUID,IsActiveEntity,Sequence,BusinessObjectType,DocumentID,DocumentOrigin,OriginReference,LifecycleStatus,NetAmount,TransactionCurrency,ProcessStepID",
+        findings: "FindingUUID,IsActiveEntity,Sequence,FindingCode,Category,Severity,ProcessStepID,StepName,ResponsibleTeam,Confidence,Parameters,Finding,ProbableCause,Recommendation,Evidence",
+        history: "ExecutionUUID,IsActiveEntity,ExternalExecutionID,Status,FunctionalResult,ReleaseID,TestCaseVersion,StartedAt,RunType"
+    };
+
     /** Edm.Decimal values are strings in the OData V4 model */
     const DECIMAL_FIELDS = ["ServiceDuration", "ServicePartQuantity", "ExpectedNetAmount", "NetAmountTolerance"];
 
@@ -74,8 +87,8 @@ sap.ui.define(["sap/ui/model/Sorter", "./core/masterData"], function (Sorter, ma
     /**
      * Access of the service assistant to the OData V4 service ZUI_STC_TEST_CASE_O4 — exclusively through the OData V4
      * model of the app (no manual AJAX): value helps, draft create/update (PATCH), bound actions analyze · validate ·
-     * Prepare · Activate · approve · startExecution, and draft discard. The same operations are the tool contract of a
-     * Joule agent (docs/agent-konzept.md).
+     * Prepare · Activate · approve · startExecution, draft discard, and the read of a run result with its analysis.
+     * The same operations are the tool contract of a Joule agent (docs/agent-konzept.md).
      */
     class TestCaseGateway {
         constructor(model) {
@@ -91,8 +104,8 @@ sap.ui.define(["sap/ui/model/Sorter", "./core/masterData"], function (Sorter, ma
             return "/TestCase(TestCaseUUID=" + uuid + ",IsActiveEntity=true)";
         }
 
-        async readList(path, select, sorters) {
-            const binding = this.model.bindList(path, undefined, sorters, undefined, { $$groupId: "$direct", $select: select });
+        async readList(path, select, sorters, filters) {
+            const binding = this.model.bindList(path, undefined, sorters, filters, { $$groupId: "$direct", $select: select });
             try {
                 return (await binding.requestContexts(0, 1000)).map(function (context) {
                     return context.getObject();
@@ -270,6 +283,40 @@ sap.ui.define(["sap/ui/model/Sorter", "./core/masterData"], function (Sorter, ma
                 )
             ]);
             return { testCase: testCase, values: values, findings: findings };
+        }
+
+        /**
+         * Result of the latest run of a saved test case with the findings of the result analysis (read-only).
+         *
+         * @param {string} uuid TestCaseUUID
+         * @returns {Promise<object>} {testCase, values, execution, steps, assertions, documents, findings, history}
+         */
+        async readResult(uuid) {
+            const path = this.activePath(uuid);
+            const testCase = await this.readObject(path, RESULT_SELECT.header);
+            const values = await this.readObject(path + "/_TestCaseData", DATA_FIELDS.join(","));
+            if (!testCase.LatestExecutionUUID) {
+                return { testCase: testCase, values: values, execution: null, steps: [], assertions: [], documents: [], findings: [], history: [] };
+            }
+            const bySequence = [new Sorter("Sequence")];
+            const [execution, steps, assertions, documents, findings, history] = await Promise.all([
+                this.readObject(path + "/_LatestExecution", RESULT_SELECT.execution),
+                this.readList(path + "/_LatestExecutionStep", RESULT_SELECT.steps, bySequence),
+                this.readList(path + "/_LatestTestAssertion", RESULT_SELECT.assertions, bySequence),
+                this.readList(path + "/_LatestDocumentReference", RESULT_SELECT.documents, bySequence),
+                this.readList(path + "/_LatestResultFinding", RESULT_SELECT.findings, bySequence),
+                this.readList(path + "/_Execution", RESULT_SELECT.history, [new Sorter("StartedAt", true)])
+            ]);
+            return { testCase: testCase, values: values, execution: execution, steps: steps, assertions: assertions, documents: documents, findings: findings, history: history };
+        }
+
+        /** TestCaseUUID of a saved test case by its Case ID */
+        async findTestCase(caseId) {
+            const found = await this.readList("/TestCase", "TestCaseUUID,IsActiveEntity,CaseID", undefined, [
+                new Filter("CaseID", FilterOperator.EQ, caseId),
+                new Filter("IsActiveEntity", FilterOperator.EQ, true)
+            ]);
+            return found.length ? found[0].TestCaseUUID : undefined;
         }
 
         /** Save: Prepare (validation on save) and Activate (Case ID) */

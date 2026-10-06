@@ -150,8 +150,8 @@
         "Criticality": 3
     },
     {
-        "DocumentReferenceUUID": "9e3f4c30-0138-4a5b-9c6d-000000000138",
-        "ExecutionUUID": "9e3f4c30-0132-4a5b-9c6d-000000000132",
+        "DocumentReferenceUUID": "9e3f4c30-0139-4a5b-9c6d-000000000139",
+        "ExecutionUUID": "9e3f4c30-0133-4a5b-9c6d-000000000133",
         "TestCaseUUID": "6f1c2a10-0004-4c3e-9a51-000000000004",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -175,8 +175,8 @@
         "Criticality": 3
     },
     {
-        "DocumentReferenceUUID": "9e3f4c30-0139-4a5b-9c6d-000000000139",
-        "ExecutionUUID": "9e3f4c30-0132-4a5b-9c6d-000000000132",
+        "DocumentReferenceUUID": "9e3f4c30-0140-4a5b-9c6d-000000000140",
+        "ExecutionUUID": "9e3f4c30-0133-4a5b-9c6d-000000000133",
         "TestCaseUUID": "6f1c2a10-0004-4c3e-9a51-000000000004",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -200,8 +200,8 @@
         "Criticality": 3
     },
     {
-        "DocumentReferenceUUID": "9e3f4c30-0140-4a5b-9c6d-000000000140",
-        "ExecutionUUID": "9e3f4c30-0132-4a5b-9c6d-000000000132",
+        "DocumentReferenceUUID": "9e3f4c30-0141-4a5b-9c6d-000000000141",
+        "ExecutionUUID": "9e3f4c30-0133-4a5b-9c6d-000000000133",
         "TestCaseUUID": "6f1c2a10-0004-4c3e-9a51-000000000004",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -225,8 +225,8 @@
         "Criticality": 3
     },
     {
-        "DocumentReferenceUUID": "9e3f4c30-0141-4a5b-9c6d-000000000141",
-        "ExecutionUUID": "9e3f4c30-0132-4a5b-9c6d-000000000132",
+        "DocumentReferenceUUID": "9e3f4c30-0142-4a5b-9c6d-000000000142",
+        "ExecutionUUID": "9e3f4c30-0133-4a5b-9c6d-000000000133",
         "TestCaseUUID": "6f1c2a10-0004-4c3e-9a51-000000000004",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -250,8 +250,8 @@
         "Criticality": 3
     },
     {
-        "DocumentReferenceUUID": "9e3f4c30-0142-4a5b-9c6d-000000000142",
-        "ExecutionUUID": "9e3f4c30-0132-4a5b-9c6d-000000000132",
+        "DocumentReferenceUUID": "9e3f4c30-0143-4a5b-9c6d-000000000143",
+        "ExecutionUUID": "9e3f4c30-0133-4a5b-9c6d-000000000133",
         "TestCaseUUID": "6f1c2a10-0004-4c3e-9a51-000000000004",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -275,8 +275,8 @@
         "Criticality": 3
     },
     {
-        "DocumentReferenceUUID": "9e3f4c30-0238-4a5b-9c6d-000000000238",
-        "ExecutionUUID": "9e3f4c30-0231-4a5b-9c6d-000000000231",
+        "DocumentReferenceUUID": "9e3f4c30-0240-4a5b-9c6d-000000000240",
+        "ExecutionUUID": "9e3f4c30-0233-4a5b-9c6d-000000000233",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -300,8 +300,8 @@
         "Criticality": 3
     },
     {
-        "DocumentReferenceUUID": "9e3f4c30-0239-4a5b-9c6d-000000000239",
-        "ExecutionUUID": "9e3f4c30-0231-4a5b-9c6d-000000000231",
+        "DocumentReferenceUUID": "9e3f4c30-0241-4a5b-9c6d-000000000241",
+        "ExecutionUUID": "9e3f4c30-0233-4a5b-9c6d-000000000233",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -325,8 +325,8 @@
         "Criticality": 3
     },
     {
-        "DocumentReferenceUUID": "9e3f4c30-0240-4a5b-9c6d-000000000240",
-        "ExecutionUUID": "9e3f4c30-0231-4a5b-9c6d-000000000231",
+        "DocumentReferenceUUID": "9e3f4c30-0242-4a5b-9c6d-000000000242",
+        "ExecutionUUID": "9e3f4c30-0233-4a5b-9c6d-000000000233",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -350,8 +350,8 @@
         "Criticality": 3
     },
     {
-        "DocumentReferenceUUID": "9e3f4c30-0241-4a5b-9c6d-000000000241",
-        "ExecutionUUID": "9e3f4c30-0231-4a5b-9c6d-000000000231",
+        "DocumentReferenceUUID": "9e3f4c30-0243-4a5b-9c6d-000000000243",
+        "ExecutionUUID": "9e3f4c30-0233-4a5b-9c6d-000000000233",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -375,8 +375,8 @@
         "Criticality": 3
     },
     {
-        "DocumentReferenceUUID": "9e3f4c30-0242-4a5b-9c6d-000000000242",
-        "ExecutionUUID": "9e3f4c30-0231-4a5b-9c6d-000000000231",
+        "DocumentReferenceUUID": "9e3f4c30-0244-4a5b-9c6d-000000000244",
+        "ExecutionUUID": "9e3f4c30-0233-4a5b-9c6d-000000000233",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -400,8 +400,8 @@
         "Criticality": 3
     },
     {
-        "DocumentReferenceUUID": "9e3f4c30-0243-4a5b-9c6d-000000000243",
-        "ExecutionUUID": "9e3f4c30-0231-4a5b-9c6d-000000000231",
+        "DocumentReferenceUUID": "9e3f4c30-0245-4a5b-9c6d-000000000245",
+        "ExecutionUUID": "9e3f4c30-0233-4a5b-9c6d-000000000233",
         "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -425,8 +425,158 @@
         "Criticality": 3
     },
     {
-        "DocumentReferenceUUID": "9e3f4c30-0294-4a5b-9c6d-000000000294",
-        "ExecutionUUID": "9e3f4c30-0290-4a5b-9c6d-000000000290",
+        "DocumentReferenceUUID": "9e3f4c30-0296-4a5b-9c6d-000000000296",
+        "ExecutionUUID": "9e3f4c30-0289-4a5b-9c6d-000000000289",
+        "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 1,
+        "BusinessObjectType": "SERVICE_REQUEST",
+        "DocumentID": "8000000003",
+        "DocumentItem": "",
+        "ProcessStepID": "REP-010",
+        "StepName": "Kundenanliegen als Service Request erfassen",
+        "DocumentOrigin": "CREATED",
+        "OriginReference": "",
+        "PredecessorDocumentID": "",
+        "SuccessorDocumentID": "8000000022",
+        "LifecycleStatus": "Completed",
+        "NetAmount": null,
+        "TransactionCurrency": "EUR",
+        "ExternalURL": "",
+        "ValidationStatus": "SUCCESS",
+        "Criticality": 3
+    },
+    {
+        "DocumentReferenceUUID": "9e3f4c30-0297-4a5b-9c6d-000000000297",
+        "ExecutionUUID": "9e3f4c30-0289-4a5b-9c6d-000000000289",
+        "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 2,
+        "BusinessObjectType": "SERVICE_ORDER",
+        "DocumentID": "8000000022",
+        "DocumentItem": "",
+        "ProcessStepID": "REP-060",
+        "StepName": "Service Order anlegen (aus Request, Angebot oder Vertrag)",
+        "DocumentOrigin": "CREATED",
+        "OriginReference": "",
+        "PredecessorDocumentID": "8000000003",
+        "SuccessorDocumentID": "8999999994",
+        "LifecycleStatus": "Completed",
+        "NetAmount": 183,
+        "TransactionCurrency": "EUR",
+        "ExternalURL": "",
+        "ValidationStatus": "SUCCESS",
+        "Criticality": 3
+    },
+    {
+        "DocumentReferenceUUID": "9e3f4c30-0298-4a5b-9c6d-000000000298",
+        "ExecutionUUID": "9e3f4c30-0289-4a5b-9c6d-000000000289",
+        "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 3,
+        "BusinessObjectType": "SERVICE_CONFIRMATION",
+        "DocumentID": "8999999994",
+        "DocumentItem": "",
+        "ProcessStepID": "REP-080",
+        "StepName": "Service Confirmation (Aufwand) buchen",
+        "DocumentOrigin": "CREATED",
+        "OriginReference": "",
+        "PredecessorDocumentID": "8000000022",
+        "SuccessorDocumentID": "10000007",
+        "LifecycleStatus": "Completed",
+        "NetAmount": null,
+        "TransactionCurrency": "EUR",
+        "ExternalURL": "",
+        "ValidationStatus": "SUCCESS",
+        "Criticality": 3
+    },
+    {
+        "DocumentReferenceUUID": "9e3f4c30-0299-4a5b-9c6d-000000000299",
+        "ExecutionUUID": "9e3f4c30-0289-4a5b-9c6d-000000000289",
+        "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 4,
+        "BusinessObjectType": "BILLING_DOC_REQUEST",
+        "DocumentID": "10000007",
+        "DocumentItem": "",
+        "ProcessStepID": "REP-090",
+        "StepName": "Freigabe zur Fakturierung (Billing Document Request)",
+        "DocumentOrigin": "CREATED",
+        "OriginReference": "",
+        "PredecessorDocumentID": "8999999994",
+        "SuccessorDocumentID": "90000110",
+        "LifecycleStatus": "Billed",
+        "NetAmount": 183,
+        "TransactionCurrency": "EUR",
+        "ExternalURL": "",
+        "ValidationStatus": "SUCCESS",
+        "Criticality": 3
+    },
+    {
+        "DocumentReferenceUUID": "9e3f4c30-0300-4a5b-9c6d-000000000300",
+        "ExecutionUUID": "9e3f4c30-0289-4a5b-9c6d-000000000289",
+        "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 5,
+        "BusinessObjectType": "BILLING_DOCUMENT",
+        "DocumentID": "90000110",
+        "DocumentItem": "",
+        "ProcessStepID": "REP-100",
+        "StepName": "Faktura (SD) erzeugen",
+        "DocumentOrigin": "CREATED",
+        "OriginReference": "",
+        "PredecessorDocumentID": "10000007",
+        "SuccessorDocumentID": "1400000095",
+        "LifecycleStatus": "Posted",
+        "NetAmount": 183,
+        "TransactionCurrency": "EUR",
+        "ExternalURL": "",
+        "ValidationStatus": "SUCCESS",
+        "Criticality": 3
+    },
+    {
+        "DocumentReferenceUUID": "9e3f4c30-0301-4a5b-9c6d-000000000301",
+        "ExecutionUUID": "9e3f4c30-0289-4a5b-9c6d-000000000289",
+        "TestCaseUUID": "6f1c2a10-0007-4c3e-9a51-000000000007",
+        "IsActiveEntity": true,
+        "HasActiveEntity": false,
+        "HasDraftEntity": false,
+        "DraftAdministrativeData": null,
+        "Sequence": 6,
+        "BusinessObjectType": "ACCOUNTING_DOCUMENT",
+        "DocumentID": "1400000095",
+        "DocumentItem": "",
+        "ProcessStepID": "REP-110",
+        "StepName": "Buchhaltungsbeleg (FI) prüfen",
+        "DocumentOrigin": "CREATED",
+        "OriginReference": "",
+        "PredecessorDocumentID": "90000110",
+        "SuccessorDocumentID": "",
+        "LifecycleStatus": "Posted",
+        "NetAmount": 183,
+        "TransactionCurrency": "EUR",
+        "ExternalURL": "",
+        "ValidationStatus": "SUCCESS",
+        "Criticality": 3
+    },
+    {
+        "DocumentReferenceUUID": "9e3f4c30-0354-4a5b-9c6d-000000000354",
+        "ExecutionUUID": "9e3f4c30-0350-4a5b-9c6d-000000000350",
         "TestCaseUUID": "6f1c2a10-0008-4c3e-9a51-000000000008",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -450,8 +600,8 @@
         "Criticality": 3
     },
     {
-        "DocumentReferenceUUID": "9e3f4c30-0295-4a5b-9c6d-000000000295",
-        "ExecutionUUID": "9e3f4c30-0290-4a5b-9c6d-000000000290",
+        "DocumentReferenceUUID": "9e3f4c30-0355-4a5b-9c6d-000000000355",
+        "ExecutionUUID": "9e3f4c30-0350-4a5b-9c6d-000000000350",
         "TestCaseUUID": "6f1c2a10-0008-4c3e-9a51-000000000008",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -475,8 +625,8 @@
         "Criticality": 3
     },
     {
-        "DocumentReferenceUUID": "9e3f4c30-0430-4a5b-9c6d-000000000430",
-        "ExecutionUUID": "9e3f4c30-0426-4a5b-9c6d-000000000426",
+        "DocumentReferenceUUID": "9e3f4c30-0491-4a5b-9c6d-000000000491",
+        "ExecutionUUID": "9e3f4c30-0487-4a5b-9c6d-000000000487",
         "TestCaseUUID": "6f1c2a10-0013-4c3e-9a51-000000000013",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -500,8 +650,8 @@
         "Criticality": 3
     },
     {
-        "DocumentReferenceUUID": "9e3f4c30-0431-4a5b-9c6d-000000000431",
-        "ExecutionUUID": "9e3f4c30-0426-4a5b-9c6d-000000000426",
+        "DocumentReferenceUUID": "9e3f4c30-0492-4a5b-9c6d-000000000492",
+        "ExecutionUUID": "9e3f4c30-0487-4a5b-9c6d-000000000487",
         "TestCaseUUID": "6f1c2a10-0013-4c3e-9a51-000000000013",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -525,8 +675,8 @@
         "Criticality": 3
     },
     {
-        "DocumentReferenceUUID": "9e3f4c30-0432-4a5b-9c6d-000000000432",
-        "ExecutionUUID": "9e3f4c30-0426-4a5b-9c6d-000000000426",
+        "DocumentReferenceUUID": "9e3f4c30-0493-4a5b-9c6d-000000000493",
+        "ExecutionUUID": "9e3f4c30-0487-4a5b-9c6d-000000000487",
         "TestCaseUUID": "6f1c2a10-0013-4c3e-9a51-000000000013",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -550,8 +700,8 @@
         "Criticality": 3
     },
     {
-        "DocumentReferenceUUID": "9e3f4c30-0478-4a5b-9c6d-000000000478",
-        "ExecutionUUID": "9e3f4c30-0474-4a5b-9c6d-000000000474",
+        "DocumentReferenceUUID": "9e3f4c30-0540-4a5b-9c6d-000000000540",
+        "ExecutionUUID": "9e3f4c30-0536-4a5b-9c6d-000000000536",
         "TestCaseUUID": "6f1c2a10-0014-4c3e-9a51-000000000014",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -575,8 +725,8 @@
         "Criticality": 3
     },
     {
-        "DocumentReferenceUUID": "9e3f4c30-0479-4a5b-9c6d-000000000479",
-        "ExecutionUUID": "9e3f4c30-0474-4a5b-9c6d-000000000474",
+        "DocumentReferenceUUID": "9e3f4c30-0541-4a5b-9c6d-000000000541",
+        "ExecutionUUID": "9e3f4c30-0536-4a5b-9c6d-000000000536",
         "TestCaseUUID": "6f1c2a10-0014-4c3e-9a51-000000000014",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -600,8 +750,8 @@
         "Criticality": 3
     },
     {
-        "DocumentReferenceUUID": "9e3f4c30-0480-4a5b-9c6d-000000000480",
-        "ExecutionUUID": "9e3f4c30-0474-4a5b-9c6d-000000000474",
+        "DocumentReferenceUUID": "9e3f4c30-0542-4a5b-9c6d-000000000542",
+        "ExecutionUUID": "9e3f4c30-0536-4a5b-9c6d-000000000536",
         "TestCaseUUID": "6f1c2a10-0014-4c3e-9a51-000000000014",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -625,8 +775,8 @@
         "Criticality": 3
     },
     {
-        "DocumentReferenceUUID": "9e3f4c30-0481-4a5b-9c6d-000000000481",
-        "ExecutionUUID": "9e3f4c30-0474-4a5b-9c6d-000000000474",
+        "DocumentReferenceUUID": "9e3f4c30-0543-4a5b-9c6d-000000000543",
+        "ExecutionUUID": "9e3f4c30-0536-4a5b-9c6d-000000000536",
         "TestCaseUUID": "6f1c2a10-0014-4c3e-9a51-000000000014",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -650,8 +800,8 @@
         "Criticality": 3
     },
     {
-        "DocumentReferenceUUID": "9e3f4c30-0482-4a5b-9c6d-000000000482",
-        "ExecutionUUID": "9e3f4c30-0474-4a5b-9c6d-000000000474",
+        "DocumentReferenceUUID": "9e3f4c30-0544-4a5b-9c6d-000000000544",
+        "ExecutionUUID": "9e3f4c30-0536-4a5b-9c6d-000000000536",
         "TestCaseUUID": "6f1c2a10-0014-4c3e-9a51-000000000014",
         "IsActiveEntity": true,
         "HasActiveEntity": false,
@@ -675,8 +825,8 @@
         "Criticality": 3
     },
     {
-        "DocumentReferenceUUID": "9e3f4c30-0483-4a5b-9c6d-000000000483",
-        "ExecutionUUID": "9e3f4c30-0474-4a5b-9c6d-000000000474",
+        "DocumentReferenceUUID": "9e3f4c30-0545-4a5b-9c6d-000000000545",
+        "ExecutionUUID": "9e3f4c30-0536-4a5b-9c6d-000000000536",
         "TestCaseUUID": "6f1c2a10-0014-4c3e-9a51-000000000014",
         "IsActiveEntity": true,
         "HasActiveEntity": false,

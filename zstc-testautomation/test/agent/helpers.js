@@ -146,6 +146,31 @@ function createMemoryGateway(repo) {
             const { testCase } = await service.startExecution(repo, activeKeys(uuid));
             return { externalExecutionId: testCase.ExternalExecutionID };
         },
+        async readResult(uuid) {
+            calls.push(['readResult']);
+            const keys = activeKeys(uuid);
+            const testCase = await repo.findOne('TestCase', keys);
+            const values = await repo.findOne('TestCaseData', keys);
+            if (!testCase.LatestExecutionUUID) {
+                return { testCase, values, execution: null, steps: [], assertions: [], documents: [], findings: [], history: [] };
+            }
+            const run = { ExecutionUUID: testCase.LatestExecutionUUID, IsActiveEntity: true };
+            const bySequence = (rows) => rows.sort((a, b) => a.Sequence - b.Sequence);
+            return {
+                testCase,
+                values,
+                execution: await repo.findOne('Execution', run),
+                steps: bySequence(await repo.find('ExecutionStep', run)),
+                assertions: bySequence(await repo.find('TestAssertion', run)),
+                documents: bySequence(await repo.find('DocumentReference', run)),
+                findings: bySequence(await repo.find('ResultFinding', run)),
+                history: (await repo.find('Execution', keys)).sort((a, b) => String(b.StartedAt).localeCompare(String(a.StartedAt)))
+            };
+        },
+        async findTestCase(caseId) {
+            const found = await repo.find('TestCase', { CaseID: caseId, IsActiveEntity: true });
+            return found.length ? found[0].TestCaseUUID : undefined;
+        },
         async discardDraft(uuid) {
             calls.push(['discard']);
             for (const row of await repo.find('ValidationResult', draftKeys(uuid))) {

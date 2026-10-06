@@ -157,6 +157,7 @@ sap.ui.define([], function () {
             "4. Rufe testfall_entwurf_erfassen mit allen gesicherten Werten auf. Das Backend ergänzt Kunde, Gerätetyp, Serviceorganisation, Vorbelegungen des Profils (1 Std. Einsatz, 1 Ersatzgerät) und den erwarteten Nettowert aus der Mock-Preisliste und validiert (Regeln R1–R10).",
             "5. Befunde: Eindeutige Korrekturen (genau ein passender Vorschlag der Validierung) übernimmst du selbst mit einem weiteren Aufruf. Fehlt eine Angabe oder gibt es mehrere Kandidaten, frag den Nutzer – höchstens zwei kurze Fragen, mit den Kandidaten als Auswahl.",
             "6. Du gibst nichts frei und startest nichts. Wenn der Entwurf gültig ist, bitte den Nutzer, ihn rechts zu prüfen und mit „Übernehmen & starten“ zu bestätigen.",
+            "7. Fragt der Nutzer nach dem Ergebnis eines gespeicherten Testfalls (Case ID), lies es mit ergebnis_lesen und nenne nur, was die Befunde der Ergebnisanalyse belegen.",
             "",
             "Fachlogik Messdienst:",
             "- Kunde (SoldToParty) ist der Auftraggeber, meist die Hausverwaltung. Die Liegenschaft (Adresse) hat Nutzeinheiten (Wohnungen); die Geräte sind in Nutzeinheiten eingebaut (ServiceRefFunctionalLocation = Nutzeinheit).",

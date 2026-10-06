@@ -43,10 +43,11 @@ Fachlich ist der Agent auf **Messdienst-Störungen** ausgerichtet: Heizkostenver
 
 ```
 Service-Assistent (Startseite, FPM Custom Page)          webapp/ext/agent/
-  Chat · Entwurfskarte · Agent-Protokoll                   AgentPage.view.xml / .controller.js
+  Chat · Entwurfskarte bzw. Ergebnis-Panel · Protokoll     AgentPage.view.xml / .controller.js
+  Absprung ?analyze=<TestCaseUUID> aus Testfall/Auswertung ext/controller/ResultActions.js, ext/analytics/
         │
         ▼
-  AgentSession (Unterhaltung, Entwurf, Schritte)          core/AgentSession.js
+  AgentSession (Unterhaltung, Entwurf oder Ergebnis)     core/AgentSession.js, core/resultReport.js
     ├─ Transport „claude“ ─ claude.ai-Capability sample   transports.js  (Hosted-Variante im claude.ai-Viewer)
     │                     └ lokaler Proxy /agent-api      tools/agent-proxy/middleware.js (npm start, Key nur serverseitig)
     └─ Transport „rules“  ─ Mock-Agent (regelbasiert)     core/RuleBasedAgent.js
@@ -56,7 +57,7 @@ Service-Assistent (Startseite, FPM Custom Page)          webapp/ext/agent/
         │
         ▼
   TestCaseGateway: OData-V4-Modell der App                TestCaseGateway.js
-        │  Wertehilfen · POST/PATCH (Draft) · validate · Prepare/Activate · approve · startExecution
+        │  Wertehilfen · POST/PATCH (Draft) · validate · Prepare/Activate · approve · startExecution · Ergebnis lesen
         ▼
   ZUI_STC_TEST_CASE_O4 (Mock-Service; Logik in mock-backend/)
 ```
@@ -71,7 +72,8 @@ Service-Assistent (Startseite, FPM Custom Page)          webapp/ext/agent/
 |---|---|---|---|
 | `stammdaten_suchen` | 1–6 Suchen je Aufruf. Typen: `geraet` (auch über Adresse, Bewohner, Geschoss, Raum), `nutzeinheit`, `liegenschaft`, `kunde`, `ansprechpartner`, `serviceteam`, `produkt` | GET auf `CustomerVH`, `FunctionalLocationVH`, `EquipmentVH`, `ContactPersonVH`, `ServiceTeamVH`, `ProductVH` … | bis zu 8 Treffer je Suche (ID, Bezeichnung, Beziehungen) und `eindeutig` |
 | `stammdaten_suchen` (Typ `servicevertrag`) | Servicevertrag zu Kunde, Liegenschaft oder Gerät (Weg 3) | GET `ServiceContractVH` | Vertrag mit Gültigkeit und Freigabe |
-| `testfall_entwurf_erfassen` | Entwurf anlegen oder aktualisieren und validieren; mit `prozessvariante` (Weg), `bis_objekt` (Endobjekt), `prozessteam` und `voraussetzungen` | POST `TestCase` (Draft, mit Prozessprofil) · PATCH `TestCase` (Prozessbezug, zuerst) · PATCH `TestCaseData` · Aktion `validate` · GET `_TestCaseData`, `_ValidationResult` | aktuelle Werte (mit Texten), Prozessbezug (Team, Weg, Lauf bis, Teststufe, Zuordnung), Validierungsstatus, Befunde mit Vorschlägen |
+| `testfall_entwurf_erfassen` | Entwurf anlegen oder aktualisieren und validieren; mit `prozessvariante` (Weg), `start_objekt` (Start ab), `bis_objekt` (Endobjekt), `vorgaenger_testfall`, `prozessteam` und `voraussetzungen` | POST `TestCase` (Draft, mit Prozessprofil) · PATCH `TestCase` (Prozessbezug, zuerst; Vorgänger danach) · PATCH `TestCaseData` · Aktion `validate` · GET `_TestCaseData`, `_ValidationResult` | aktuelle Werte (mit Texten), Prozessbezug (Team, Weg, Start ab, Lauf bis, Vorgänger, Teststufe, Zuordnung), Validierungsstatus, Befunde mit Vorschlägen |
+| `ergebnis_lesen` | Ergebnis des letzten Laufs eines gespeicherten Testfalls lesen (ohne `case_id`: der besprochene Testfall); ändert nichts | GET `TestCase` (Filter `CaseID`) · `_LatestExecution`, `_LatestExecutionStep`, `_LatestTestAssertion`, `_LatestDocumentReference`, `_LatestResultFinding`, `_Execution` | Lauf (Release, Version, Ergebnis), Schritte, abweichende Prüfungen, Belege mit Herkunft, Befunde der Ergebnisanalyse (Ursache, Konfidenz, Evidenz, Team, Empfehlung), Historie |
 
 Die Übergabe ist **kein Tool**. Speichern (`Prepare`, `Activate`), `approve` und `startExecution` löst allein die Schaltfläche **Übernehmen & starten** aus. So bleibt der Mensch im Prozess. Auch die Plattformhinweise zu page tools verlangen das: Destruktives gehört hinter einen eigenen Bestätigungsschritt.
 
@@ -93,6 +95,15 @@ Die Übergabe ist **kein Tool**. Speichern (`Prepare`, `Activate`), `approve` un
 - **Kontext:** Jede Nutzernachricht beginnt mit einem Kontextblock der App (aktueller Entwurf, Befunde). So bleibt der Stand auch bei zustandslosen Aufrufen erhalten.
 - **Prozessbezug:** Weg nach Wortlaut wählen: Angebot → `W2_QUOTATION`, Angebot abgelehnt → `W2_REJECTED`, Wartungs-, Service- oder Mietvertrag → `W3_CONTRACT`, Rechnungsplan → `W3_BILLING_PLAN`, Störung ohne Angebot → `W1_REQUEST`. `bis_objekt` nur auf ausdrücklichen Wunsch („bis zum Auftrag“). Garantie, Requote und In-House Repair sind nicht ausführbar.
 - **Keine Freigabe und kein Start durch den Agenten.** Freigabe und Start prüfen die Rollen im Prozessteam serverseitig. Die Ausführung gehört automatisch zum Release, der für Team und Prozess im Test ist.
+- **Start und Übergabe:** `start_objekt` nur auf ausdrücklichen Wunsch („direkt ab dem Angebot“); ohne Angabe startet der Lauf beim Einstieg des Teams. Braucht der Start einen Vorgänger (Regel R12), nimmt der Agent einen Vorschlag des Befunds oder fragt nach.
+
+### 3.3a Ergebnis besprechen (Absprung „hinten raus“)
+
+- **Einstieg:** Kopfaktion **Ergebnis besprechen** auf dem Testfall, **Besprechen** auf der Seite *Analytics* oder im Chat „Ergebnis von STC-… besprechen“. Die Seite öffnet sich mit `?analyze=<TestCaseUUID>&n=<Nonce>`; die Nonce verhindert, dass die Zurück-Navigation die Besprechung erneut öffnet.
+- **Grundlage:** die deterministische Ergebnisanalyse des Backends (`ResultFinding`). Der erste Bericht kommt immer aus diesen Befunden (gekennzeichnet „Ergebnisanalyse (deterministisch)“), unabhängig vom Modus.
+- **Mock-Agent:** beantwortet Fragen zu Ursache, Zuständigkeit, Vergleich mit dem letzten Lauf, Sicherheit, Empfehlung, Nettowert, Belegen, Schritten, Prüfungen, Übergabe und Testdaten – ausschließlich aus den Befunden (`core/resultReport.js`).
+- **Claude:** eigene Instruktionen (`resultReport.instructions`): Ursachen nur mit Evidenz nennen, Vermutungen als Vermutung kennzeichnen und sagen, wie man sie prüft; keine Belege, Transaktionen, Customizing-Einstellungen oder Systemmeldungen erfinden; nichts ändern. Kontextblock = Befunde des Laufs; einziges Tool = `ergebnis_lesen`.
+- **Grenze:** Der Assistent ändert in der Besprechung nichts. Korrekturen macht der Mensch im Testfall (neue Version, neue Validierung und Freigabe).
 
 ### 3.4 Transports
 
@@ -119,7 +130,8 @@ Die Tool-Schleife läuft in der Seite (`core/messagesLoop.js`), weil die Tools d
 |---|---|---|
 | Service-Assistent als FPM Custom Page (Startseite) | Joule-Panel im Fiori Launchpad; die App bleibt unverändert | ⚠ |
 | Claude über claude.ai `sample` bzw. lokalen Proxy | Joule Agent (Joule Studio); Sprachmodell über SAP Generative AI Hub | ⚠ |
-| Tools `stammdaten_suchen`, `testfall_entwurf_erfassen` | Joule Skills/Actions auf dem Web-API-Binding von `ZUI_STC_TEST_CASE_O4`; Wertehilfen über `$search` | ⚠ |
+| Tools `stammdaten_suchen`, `testfall_entwurf_erfassen`, `ergebnis_lesen` | Joule Skills/Actions auf dem Web-API-Binding von `ZUI_STC_TEST_CASE_O4`; Wertehilfen über `$search` | ⚠ |
+| Ergebnisanalyse (`ResultAnalysisService`) als Grundlage der Besprechung | Determination im RAP-BO nach Laufende; der Agent bespricht nur deren Befunde | ⚠ Datenzugriff |
 | Mock-Agent (Backend-`analyze` mit Stichwortabgleich) | `ITestCaseExtractionService` mit LLM im Backend (z. B. ABAP-KI-Funktionen) – Alternative oder Ergänzung zum Agenten | ⚠ |
 | Übergabe per Schaltfläche (Prepare, Activate, approve, startExecution) | dieselben RAP-Aktionen, ausgelöst durch die Nutzerin in der App oder per Joule-Bestätigungsdialog | Vertrag steht |
 | Fiktive Messdienst-Stammdaten | Stammdaten des Messdienstleisters (Liegenschaften, Nutzeinheiten, Geräte) in S/4HANA bzw. im Vorsystem | ⚠ |
@@ -128,8 +140,8 @@ Die Tool-Schleife läuft in der Seite (`core/messagesLoop.js`), weil die Tools d
 
 | Was | Wie |
 |---|---|
-| Unit-Tests (`npm test`, 64 gesamt) | Proxy (Status, Bereinigung der Anfrage, eine Runde über das SDK gegen einen Fake-Upstream), Stammdatensuche, Mock-Agent (gültig, Rückfragen, Auto-Korrektur R10, kein Entwurf ohne Ort/Gerät, Prozessbezug, Wegwechsel per Antwort, Wartungsvertrag mit Vertragsfindung bis zum Start), Tool-Normalisierung (inkl. Weg und Endobjekt), Rechnungsplan-Weg über das Tool, Messages-API-Schleife (nur ergänzen, `is_error`, Refusal), `sample`-Transport mit simulierter Plattform |
-| E2E (Playwright, lokal) | **Mock-Agent:** deutsche Meldung → Gültig → Übernehmen & starten → Object Page `Passed` (108,00 EUR). **Rückfragen:** Gerät mehrdeutig, Meldender fehlt → Antwort → Gültig, Entwurf im Formular, Chat bleibt erhalten. **Lokaler Proxy:** gegen einen skriptgesteuerten Fake-Upstream mit echter SDK-Anfrage (`x-api-key`, Fallback-Beta, Caching) → `Passed` (94,00 EUR). **claude.ai `sample`:** simuliertes `window.claude` ruft die Tools der Seite auf. **Prozessbezug:** Beispiel „Weg 3: Rauchwarnmelder laut Wartungsvertrag“ → Vertrag `4100000001`, Gültig → „nur bis zum Auftrag“ → Lauf bis Serviceauftrag → Übernehmen & starten → `Passed` |
+| Unit-Tests (`npm test`, 78 gesamt) | Proxy (Status, Bereinigung der Anfrage, eine Runde über das SDK gegen einen Fake-Upstream), Stammdatensuche, Mock-Agent (gültig, Rückfragen, Auto-Korrektur R10, kein Entwurf ohne Ort/Gerät, Prozessbezug, Wegwechsel per Antwort, Start ab Angebot, Vorgänger-Testfall, Wartungsvertrag mit Vertragsfindung bis zum Start), Tool-Normalisierung (inkl. Weg, Start und Endobjekt), Rechnungsplan-Weg über das Tool, Messages-API-Schleife (nur ergänzen, `is_error`, Refusal), `sample`-Transport mit simulierter Plattform, **Ergebnis besprechen** (Bericht, Rückfragen, Übergabefall, Absprung aus dem Chat, `ergebnis_lesen` mit eigenen Instruktionen) |
+| E2E (Playwright, lokal) | **Ergebnis besprechen:** Testfall `STC-2026-000007` → Kopfaktion → Bericht mit Ursache, Konfidenz und Team → Fragen „Wer ist zuständig?“ und „Was hat sich seit dem letzten Lauf geändert?“ → Auswertung → Besprechen → zurück zum Assistenten (DE und EN). **Mock-Agent:** deutsche Meldung → Gültig → Übernehmen & starten → Object Page `Passed` (108,00 EUR). **Rückfragen:** Gerät mehrdeutig, Meldender fehlt → Antwort → Gültig, Entwurf im Formular, Chat bleibt erhalten. **Lokaler Proxy:** gegen einen skriptgesteuerten Fake-Upstream mit echter SDK-Anfrage (`x-api-key`, Fallback-Beta, Caching) → `Passed` (94,00 EUR). **claude.ai `sample`:** simuliertes `window.claude` ruft die Tools der Seite auf. **Prozessbezug:** Beispiel „Weg 3: Rauchwarnmelder laut Wartungsvertrag“ → Vertrag `4100000001`, Gültig → „nur bis zum Auftrag“ → Lauf bis Serviceauftrag → Übernehmen & starten → `Passed` |
 | Nicht geprüft | echte Antworten von Claude. In dieser Umgebung gibt es keinen API-Schlüssel, und der claude.ai-Viewer ist nicht automatisierbar. |
 
 ## 6. Quellen (Suchergebnisse, keine Primärquellen)

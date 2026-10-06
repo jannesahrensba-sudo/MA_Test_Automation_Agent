@@ -1,4 +1,4 @@
-sap.ui.define(["./prompts", "./agentTools", "./RuleBasedAgent", "./messagesLoop"], function (prompts, agentTools, RuleBasedAgent, messagesLoop) {
+sap.ui.define(["./prompts", "./agentTools", "./RuleBasedAgent", "./messagesLoop", "./resultReport"], function (prompts, agentTools, RuleBasedAgent, messagesLoop, resultReport) {
     "use strict";
 
     const MAX_CHAT_TURNS = 16;
@@ -9,6 +9,8 @@ sap.ui.define(["./prompts", "./agentTools", "./RuleBasedAgent", "./messagesLoop"
      *   - "sample": Claude through the claude.ai sample capability of the hosted artifact (viewer's own account)
      *   - "proxy": Claude through the local development proxy /agent-api (Claude API, key only on the server)
      *   - "rules": rule-based mock agent (no language model): backend analyze + deterministic follow-up questions
+     * Two topics: capturing a test case from a fault report (draft) and discussing the result of a test run (analysis,
+     * "Ergebnis besprechen"). An open analysis takes precedence; closing it returns to the draft.
      */
     class AgentSession {
         /**
@@ -18,6 +20,7 @@ sap.ui.define(["./prompts", "./agentTools", "./RuleBasedAgent", "./messagesLoop"
          * @param {Function} [options.onStep] step callback (UI)
          * @param {Function} [options.onDraft] draft state callback (UI)
          * @param {Function} [options.onText] streamed answer text callback (UI)
+         * @param {Function} [options.onAnalysis] analysis state callback (UI)
          */
         constructor(options) {
             this.gateway = options.gateway;
@@ -25,13 +28,19 @@ sap.ui.define(["./prompts", "./agentTools", "./RuleBasedAgent", "./messagesLoop"
             this.onStepCallback = options.onStep || function () {};
             this.onDraft = options.onDraft || function () {};
             this.onText = options.onText || function () {};
+            this.onAnalysis = options.onAnalysis || function () {};
             this.chat = []; // {role, content} for the sample capability
             this.apiMessages = []; // Messages API history of the proxy transport (append-only)
             this.draft = undefined;
+            this.analysis = undefined;
             this.originalText = "";
             this.userStatedNetAmount = false;
             this.ruleAgent = new RuleBasedAgent(this.gateway, this);
             this.tools = agentTools.createTools(this.gateway, this);
+            // discussion of a result: reading results only (no draft changes)
+            this.analysisTools = this.tools.filter(function (tool) {
+                return tool.name === "ergebnis_lesen";
+            });
         }
 
         step(step) {
@@ -112,6 +121,57 @@ sap.ui.define(["./prompts", "./agentTools", "./RuleBasedAgent", "./messagesLoop"
         }
 
         /**
+         * Opens the discussion of the latest run of a test case: reads the result with its deterministic analysis.
+         *
+         * @param {string} uuid TestCaseUUID (active test case)
+         * @param {object} [options] options
+         * @param {boolean} [options.keepChat] keep the conversation of the language model (tool call within a turn)
+         * @returns {Promise<object>} analysis (see resultReport.fromRead)
+         */
+        async openResult(uuid, options) {
+            const analysis = resultReport.fromRead(await this.gateway.readResult(uuid));
+            this.setAnalysis(analysis, options);
+            return analysis;
+        }
+
+        /**
+         * @param {string} caseId Case ID, e.g. STC-2026-000007
+         * @param {object} [options] see openResult
+         * @returns {Promise<object>} analysis
+         */
+        async openResultByCaseId(caseId, options) {
+            const uuid = await this.gateway.findTestCase(caseId);
+            if (!uuid) {
+                throw new Error("Testfall " + caseId + " nicht gefunden (nur gespeicherte Testfälle haben Ergebnisse).");
+            }
+            return this.openResult(uuid, options);
+        }
+
+        setAnalysis(analysis, options) {
+            this.analysis = analysis;
+            if (!(options && options.keepChat)) {
+                // a new topic: the language model starts a new conversation about the result
+                this.chat = [];
+                this.apiMessages = [];
+            }
+            this.step({
+                icon: "sap-icon://inspection",
+                text:
+                    "Ergebnis gelesen: " + analysis.caseId + (analysis.run ? " · Lauf " + analysis.run.id + " · " + (resultReport.RESULT_TEXT[analysis.run.result] || analysis.run.status) : " · noch kein Lauf") +
+                    " · " + analysis.findings.length + (analysis.findings.length === 1 ? " Befund" : " Befunde")
+            });
+            this.onAnalysis(analysis);
+        }
+
+        /** Ends the discussion of a result: back to the draft (if any) */
+        closeAnalysis() {
+            this.analysis = undefined;
+            this.chat = [];
+            this.apiMessages = [];
+            this.onAnalysis(undefined);
+        }
+
+        /**
          * Handles one user message: the transport decides whether a language model or the rule-based agent answers.
          *
          * @param {string} text user message
@@ -119,19 +179,25 @@ sap.ui.define(["./prompts", "./agentTools", "./RuleBasedAgent", "./messagesLoop"
          * @returns {Promise<{text: string, mode: string}>} answer
          */
         async send(text, signal) {
-            if (!this.originalText) {
-                this.originalText = text;
-            }
-            if (/\d[\d.,]*\s*(eur|€)/i.test(text)) {
-                this.userStatedNetAmount = true;
+            if (!this.analysis) {
+                // the fault report and a stated net value belong to the draft, not to the discussion of a result
+                if (!this.originalText) {
+                    this.originalText = text;
+                }
+                if (/\d[\d.,]*\s*(eur|€)/i.test(text)) {
+                    this.userStatedNetAmount = true;
+                }
             }
             if (this.transport.kind === "rules") {
                 return { text: await this.ruleAgent.respond(text), mode: "rules" };
             }
             const masterData = await this.gateway.masterData();
-            const context = prompts.contextBlock(this.draft, masterData.describe);
+            const analysis = this.analysis;
+            const context = analysis ? resultReport.contextBlock(analysis, masterData.describe) : prompts.contextBlock(this.draft, masterData.describe);
             const message = context + "\n\n" + text;
-            const system = prompts.instructions(await this.gateway.catalog());
+            const catalog = await this.gateway.catalog();
+            const system = analysis ? resultReport.instructions(catalog) : prompts.instructions(catalog);
+            const tools = analysis ? this.analysisTools : this.tools;
             if (this.transport.kind === "sample") {
                 this.chat.push({ role: "user", content: message });
                 // standing instructions are the leading user turn (the sample capability has no system prompt); oldest turns go first
@@ -141,7 +207,7 @@ sap.ui.define(["./prompts", "./agentTools", "./RuleBasedAgent", "./messagesLoop"
                 const turns = [{ role: "user", content: system }].concat(this.chat);
                 try {
                     const result = await this.transport.sample(turns, {
-                        tools: this.tools,
+                        tools: tools,
                         signal: signal,
                         onText: this.onText
                     });
@@ -159,7 +225,7 @@ sap.ui.define(["./prompts", "./agentTools", "./RuleBasedAgent", "./messagesLoop"
                 system: system,
                 history: this.apiMessages,
                 userContent: message,
-                tools: this.tools,
+                tools: tools,
                 signal: signal,
                 onStep: this.step.bind(this)
             });
@@ -207,6 +273,10 @@ sap.ui.define(["./prompts", "./agentTools", "./RuleBasedAgent", "./messagesLoop"
             this.userStatedNetAmount = false;
             this.ruleAgent = new RuleBasedAgent(this.gateway, this);
             this.onDraft(undefined);
+            if (this.analysis) {
+                this.analysis = undefined;
+                this.onAnalysis(undefined);
+            }
         }
     }
 

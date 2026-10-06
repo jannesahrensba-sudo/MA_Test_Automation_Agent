@@ -1,0 +1,179 @@
+<mvc:View
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:l="sap.ui.layout"
+    xmlns:mc="sap.suite.ui.microchart"
+    xmlns:macros="sap.fe.macros"
+    controllerName="zstc.testautomation.ext.analytics.Analytics">
+    <!-- Analytics (FPM custom page): results of a release per process team and process step, failure patterns from the
+         deterministic result analysis with the jump-off to the service assistant. Standard controls only (sap.m,
+         sap.suite.ui.microchart); data through the OData V4 model of the app. -->
+    <!-- the Page building block evaluates title/description once when it is created: literal texts, not i18n bindings -->
+    <macros:Page id="analyticsPage" title="Analytics" description="Results per release, process team and process step · failure patterns from the result analysis">
+        <VBox id="analyticsIntro">
+            <MessageStrip id="analyticsHint" text="{i18n>analyticsHint}" type="Information" showIcon="true" class="sapUiTinyMarginBottom" />
+            <OverflowToolbar id="analyticsToolbar" style="Clear">
+                <Label id="analyticsReleaseLabel" text="{i18n>analyticsRelease}" labelFor="analyticsRelease" />
+                <Select id="analyticsRelease" items="{dash>/releases}" selectedKey="{dash>/releaseId}" change=".onReleaseChange" width="24rem">
+                    <core:Item key="{dash>ReleaseID}" text="{dash>text}" />
+                </Select>
+                <ToolbarSpacer id="analyticsToolbarSpacer" />
+                <Button id="analyticsRefresh" text="{i18n>analyticsRefresh}" icon="sap-icon://refresh" press=".onRefresh" />
+                <Button id="analyticsOpenRelease" text="{i18n>analyticsOpenRelease}" icon="sap-icon://calendar" press=".onOpenRelease" enabled="{= !!${dash>/releaseId} }" />
+                <Button id="analyticsAssistant" text="{i18n>agentName}" icon="sap-icon://ai" press=".onShowAssistant" />
+                <Button id="analyticsOverview" text="{i18n>agentToOverview}" icon="sap-icon://overview-chart" press=".onShowOverview" />
+            </OverflowToolbar>
+            <Text id="analyticsReleaseInfo" text="{dash>/releaseInfo}" visible="{= !!${dash>/releaseInfo} }" class="sapUiTinyMarginTop sapUiSmallMarginBottom" />
+        </VBox>
+        <!-- key figures -->
+        <FlexBox id="analyticsKpis" wrap="Wrap" visible="{dash>/loaded}" class="sapUiSmallMarginBottom">
+            <GenericTile id="kpiPassRate" header="{i18n>analyticsPassRate}" subheader="{i18n>analyticsPassRateSub}" frameType="OneByOne" sizeBehavior="Small" press=".onOpenRelease" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                <TileContent id="kpiPassRateContent" footer="{i18n>analyticsPassRateFooter}">
+                    <mc:RadialMicroChart id="kpiPassRateChart" percentage="{dash>/kpis/passRate}" valueColor="{dash>/kpis/passRateColor}" size="Responsive" />
+                </TileContent>
+            </GenericTile>
+            <GenericTile id="kpiCoverage" header="{i18n>analyticsCoverage}" subheader="{i18n>analyticsCoverageSub}" frameType="OneByOne" sizeBehavior="Small" press=".onScrollToSteps" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                <TileContent id="kpiCoverageContent" footer="{i18n>analyticsCoverageFooter}">
+                    <mc:RadialMicroChart id="kpiCoverageChart" percentage="{dash>/kpis/stepCoverage}" valueColor="{dash>/kpis/stepCoverageColor}" size="Responsive" />
+                </TileContent>
+            </GenericTile>
+            <GenericTile id="kpiInScope" header="{i18n>analyticsInScope}" subheader="{i18n>analyticsInScopeSub}" frameType="OneByOne" sizeBehavior="Small" press=".onOpenRelease" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                <TileContent id="kpiInScopeContent" footer="{= ${i18n>analyticsApproved} + ': ' + ${dash>/kpis/approved} }">
+                    <NumericContent id="kpiInScopeValue" value="{dash>/kpis/inScope}" icon="sap-icon://checklist" withMargin="false" />
+                </TileContent>
+            </GenericTile>
+            <GenericTile id="kpiExecuted" header="{i18n>analyticsExecuted}" subheader="{i18n>analyticsExecutedSub}" frameType="OneByOne" sizeBehavior="Small" press=".onOpenRelease" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                <TileContent id="kpiExecutedContent" footer="{= ${i18n>analyticsNotExecuted} + ': ' + ${dash>/kpis/notExecuted} }">
+                    <NumericContent id="kpiExecutedValue" value="{dash>/kpis/executed}" icon="sap-icon://process" withMargin="false" />
+                </TileContent>
+            </GenericTile>
+            <GenericTile id="kpiFailed" header="{i18n>analyticsFailed}" subheader="{i18n>analyticsFailedSub}" frameType="OneByOne" sizeBehavior="Small" press=".onScrollToFailures" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                <TileContent id="kpiFailedContent" footer="{i18n>analyticsFailedFooter}">
+                    <NumericContent id="kpiFailedValue" value="{dash>/kpis/failed}" valueColor="{= ${dash>/kpis/failed} > 0 ? 'Error' : 'Good' }" icon="sap-icon://message-error" withMargin="false" />
+                </TileContent>
+            </GenericTile>
+            <GenericTile id="kpiFindings" header="{i18n>analyticsOpenFindings}" subheader="{i18n>analyticsOpenFindingsSub}" frameType="OneByOne" sizeBehavior="Small" press=".onScrollToFailures" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                <TileContent id="kpiFindingsContent" footer="{i18n>analyticsOpenFindingsFooter}">
+                    <NumericContent id="kpiFindingsValue" value="{dash>/kpis/openFindings}" valueColor="{= ${dash>/kpis/openFindings} > 0 ? 'Critical' : 'Good' }" icon="sap-icon://inspection" withMargin="false" />
+                </TileContent>
+            </GenericTile>
+        </FlexBox>
+        <l:Grid id="analyticsGrid" defaultSpan="XL6 L6 M12 S12" hSpacing="1" vSpacing="0" containerQuery="true" visible="{dash>/loaded}">
+            <!-- results per process team -->
+            <Panel id="teamPanel" headerText="{i18n>analyticsTeams}" class="sapUiNoContentPadding">
+                <List id="teamList" items="{dash>/teams}" noDataText="{i18n>analyticsNoData}" showSeparators="Inner">
+                    <CustomListItem>
+                        <VBox class="sapUiSmallMarginBeginEnd sapUiTinyMarginTopBottom">
+                            <HBox justifyContent="SpaceBetween" alignItems="Center" wrap="Wrap">
+                                <Title text="{dash>name}" level="H4" wrapping="true" />
+                                <ObjectStatus text="{dash>status}" state="{dash>state}" />
+                            </HBox>
+                            <Text text="{dash>summary}" class="sapUiTinyMarginBottom" />
+                            <mc:StackedBarMicroChart size="Responsive" height="1.75rem" showLabels="true" bars="{path: 'dash>bars', templateShareable: false}" visible="{= ${dash>total} > 0 }">
+                                <mc:bars>
+                                    <mc:StackedBarMicroChartBar value="{dash>value}" valueColor="{dash>color}" displayValue="{dash>displayValue}" />
+                                </mc:bars>
+                            </mc:StackedBarMicroChart>
+                        </VBox>
+                    </CustomListItem>
+                </List>
+                <Text id="teamLegend" text="{i18n>analyticsTeamLegend}" class="sapUiSmallMarginBeginEnd sapUiTinyMarginBottom" />
+            </Panel>
+            <!-- result distribution and pass rate over time -->
+            <VBox id="analyticsChartsColumn">
+                <Panel id="distributionPanel" headerText="{i18n>analyticsDistribution}">
+                    <mc:InteractiveDonutChart id="distributionChart" selectionEnabled="false" displayedSegments="3" segments="{dash>/distribution}">
+                        <mc:segments>
+                            <mc:InteractiveDonutChartSegment label="{dash>label}" value="{dash>value}" displayedValue="{dash>displayedValue}" color="{dash>color}" />
+                        </mc:segments>
+                    </mc:InteractiveDonutChart>
+                </Panel>
+                <Panel id="trendPanel" headerText="{i18n>analyticsTrend}" class="sapUiSmallMarginTop">
+                    <!-- the interactive line chart takes the height of its parent (at least 106px) -->
+                    <FlexBox id="trendBox" height="15rem" width="100%" renderType="Bare" visible="{= ${dash>/trend}.length > 0 }">
+                        <mc:InteractiveLineChart id="trendChart" selectionEnabled="false" points="{dash>/trend}">
+                            <mc:points>
+                                <mc:InteractiveLineChartPoint label="{dash>label}" secondaryLabel="{dash>secondaryLabel}" value="{dash>value}" displayedValue="{dash>displayedValue}" color="{dash>color}" />
+                            </mc:points>
+                        </mc:InteractiveLineChart>
+                    </FlexBox>
+                    <Text id="trendEmpty" text="{i18n>analyticsTrendEmpty}" visible="{= ${dash>/trend}.length === 0 }" />
+                    <List id="runList" items="{dash>/runs}" visible="{= ${dash>/runs}.length > 0 }" headerText="{i18n>analyticsRuns}" class="sapUiTinyMarginTop">
+                        <StandardListItem title="{dash>runId}" description="{dash>text}" highlight="{dash>state}" />
+                    </List>
+                </Panel>
+            </VBox>
+        </l:Grid>
+        <!-- failure patterns and failed test cases with the jump-off to the service assistant -->
+        <Panel id="patternPanel" headerText="{i18n>analyticsPatterns}" class="sapUiSmallMarginTop sapUiNoContentPadding">
+            <List id="patternList" items="{dash>/patterns}" noDataText="{i18n>analyticsNoPatterns}" showSeparators="Inner">
+                <CustomListItem highlight="{dash>state}">
+                    <VBox class="sapUiSmallMarginBeginEnd sapUiTinyMarginTopBottom">
+                        <HBox justifyContent="SpaceBetween" alignItems="Center" wrap="Wrap">
+                            <Title text="{= ${dash>title} + ' (' + ${dash>count} + ')' }" level="H4" wrapping="true" />
+                            <Button text="{i18n>analyticsDiscuss}" icon="sap-icon://ai" type="Emphasized" press=".onDiscussPattern" />
+                        </HBox>
+                        <Text text="{dash>example}" class="sapUiTinyMarginTop" />
+                        <Text text="{= ${i18n>analyticsCause} + ': ' + ${dash>cause} }" visible="{= !!${dash>cause} }" class="sapUiTinyMarginTop" />
+                        <Text text="{= ${i18n>analyticsRecommendation} + ': ' + ${dash>recommendation} }" visible="{= !!${dash>recommendation} }" class="sapUiTinyMarginTop" />
+                        <HBox wrap="Wrap" class="sapUiTinyMarginTop">
+                            <ObjectStatus title="{i18n>analyticsCases}" text="{dash>cases}" class="sapUiSmallMarginEnd" />
+                            <ObjectStatus title="{i18n>analyticsStep}" text="{dash>step}" visible="{= !!${dash>step} }" class="sapUiSmallMarginEnd" />
+                            <ObjectStatus title="{i18n>analyticsTeam}" text="{dash>team}" class="sapUiSmallMarginEnd" />
+                            <ObjectStatus title="{i18n>analyticsConfidence}" text="{dash>confidence}" />
+                        </HBox>
+                    </VBox>
+                </CustomListItem>
+            </List>
+        </Panel>
+        <Panel id="failedPanel" headerText="{i18n>analyticsFailedCases}" class="sapUiSmallMarginTop sapUiNoContentPadding">
+            <Table id="failedTable" items="{dash>/failedCases}" noDataText="{i18n>analyticsNoFailures}" popinLayout="GridSmall">
+                <columns>
+                    <Column id="failedColCase"><Text text="{i18n>analyticsCase}" /></Column>
+                    <Column id="failedColResult" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>analyticsResult}" /></Column>
+                    <Column id="failedColHeadline" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>analyticsHeadline}" /></Column>
+                    <Column id="failedColTeam" minScreenWidth="Desktop" demandPopin="true"><Text text="{i18n>analyticsTeam}" /></Column>
+                    <Column id="failedColActions" hAlign="End"><Text text="" /></Column>
+                </columns>
+                <items>
+                    <ColumnListItem highlight="{dash>state}">
+                        <cells>
+                            <ObjectIdentifier title="{dash>caseId}" text="{dash>title}" />
+                            <ObjectStatus text="{dash>resultText}" state="{dash>state}" />
+                            <Text text="{dash>headline}" />
+                            <Text text="{dash>team}" />
+                            <HBox justifyContent="End" wrap="Wrap">
+                                <Button text="{i18n>analyticsDiscuss}" icon="sap-icon://ai" press=".onDiscussCase" class="sapUiTinyMarginEnd" />
+                                <Button text="{i18n>analyticsOpenCase}" icon="sap-icon://navigation-right-arrow" press=".onOpenCase" />
+                            </HBox>
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+        </Panel>
+        <!-- coverage along the process path (traceability down to the process step) -->
+        <Panel id="stepPanel" headerText="{i18n>analyticsSteps}" class="sapUiSmallMarginTop sapUiNoContentPadding">
+            <Table id="stepTable" items="{dash>/steps}" noDataText="{i18n>analyticsNoData}" popinLayout="GridSmall">
+                <columns>
+                    <Column id="stepColStep"><Text text="{i18n>analyticsStep}" /></Column>
+                    <Column id="stepColTeam" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>analyticsTeam}" /></Column>
+                    <Column id="stepColCoverage"><Text text="{i18n>analyticsCoverageColumn}" /></Column>
+                    <Column id="stepColCounts" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>analyticsStepResults}" /></Column>
+                    <Column id="stepColRemark" minScreenWidth="Desktop" demandPopin="true"><Text text="{i18n>analyticsRemark}" /></Column>
+                </columns>
+                <items>
+                    <ColumnListItem highlight="{dash>state}">
+                        <cells>
+                            <ObjectIdentifier title="{dash>stepName}" text="{= ${dash>stepId} + (${dash>handover} ? ' · ' + ${i18n>analyticsHandover} : '') }" />
+                            <Text text="{dash>teamName}" />
+                            <ObjectStatus text="{dash>statusText}" state="{dash>state}" />
+                            <Text text="{dash>counts}" />
+                            <Text text="{dash>remark}" />
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+        </Panel>
+    </macros:Page>
+</mvc:View>

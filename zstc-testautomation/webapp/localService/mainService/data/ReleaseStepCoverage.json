@@ -685,10 +685,10 @@
         "Automation": "AUTOMATED",
         "TestCaseCount": 10,
         "ExecutedCount": 4,
-        "PassedCount": 4,
-        "FailedCount": 0,
-        "CoverageStatus": "PASSED",
-        "CoverageCriticality": 3,
+        "PassedCount": 3,
+        "FailedCount": 1,
+        "CoverageStatus": "FAILED",
+        "CoverageCriticality": 1,
         "LatestDocumentID": "90000114",
         "Remark": ""
     },
@@ -710,7 +710,7 @@
         "FailedCount": 0,
         "CoverageStatus": "PASSED",
         "CoverageCriticality": 3,
-        "LatestDocumentID": "1400000097",
+        "LatestDocumentID": "1400000095",
         "Remark": ""
     }
 ]

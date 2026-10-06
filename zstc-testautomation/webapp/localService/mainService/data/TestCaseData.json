@@ -382,7 +382,7 @@
         "ReferenceProduct": "MD-WZ-FUNK",
         "ServiceContract": null,
         "ServiceProduct": "MD-SRV-STOER",
-        "ServiceDuration": 1,
+        "ServiceDuration": 2,
         "ServiceDurationUnit": "HR",
         "ServicePart": "MD-ERS-WZ",
         "ServicePartQuantity": 1,

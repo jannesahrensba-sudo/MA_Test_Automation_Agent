@@ -13,7 +13,7 @@ test('the first run of a session creates exactly the golden document numbers (SI
     t.after(() => teardown(tenantId));
     const provider = new MockExecutionProvider({ tenantId });
     const id = start(provider);
-    assert.match(id, /^MOCK-20260929-0007$/);
+    assert.match(id, /^MOCK-20260929-0008$/);
     assert.equal(provider.getStatus(id).status, 'RUNNING');
     assert.deepEqual(provider.getCreatedDocuments(id), [], 'no documents before the steps ran');
 
