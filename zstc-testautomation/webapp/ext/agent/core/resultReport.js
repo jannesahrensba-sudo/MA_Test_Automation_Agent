@@ -533,6 +533,22 @@ sap.ui.define(["./prompts", "./textMatching"], function (prompts, textMatching) 
         ["data", /testdaten|\bdaten\b|\bwerte\b/]
     ];
 
+    /** German names of the intents (agent log) */
+    const INTENT_LABEL = {
+        cause: "Ursache",
+        team: "Zuständigkeit",
+        compare: "Vergleich mit früheren Läufen",
+        confidence: "Sicherheit der Befunde",
+        action: "Empfehlung",
+        net: "Nettowert",
+        documents: "Belege",
+        steps: "Schritte",
+        assertions: "Prüfungen",
+        handover: "Übergabe",
+        rerun: "Erneut ausführen",
+        data: "Testdaten"
+    };
+
     function intentsOf(question) {
         const n = textMatching.normalize(question);
         return INTENTS.filter(function (intent) {
@@ -917,6 +933,7 @@ sap.ui.define(["./prompts", "./textMatching"], function (prompts, textMatching) 
         report: report,
         answer: answer,
         intentsOf: intentsOf,
+        INTENT_LABEL: INTENT_LABEL,
         summarize: summarize,
         contextBlock: contextBlock,
         instructions: instructions,

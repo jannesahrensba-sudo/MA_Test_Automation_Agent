@@ -140,7 +140,10 @@ sap.ui.define(["./prompts", "./textMatching", "./resultReport"], function (promp
                 return resultReport.report(analysis, masterData.describe);
             }
             const answer = resultReport.answer(text, this.session.analysis, masterData.describe);
-            this.session.step({ icon: "sap-icon://inspection", text: "Antwort aus der Ergebnisanalyse: " + (resultReport.intentsOf(text).join(", ") || "keine passende Frage erkannt") });
+            const topics = resultReport.intentsOf(text).map(function (intent) {
+                return resultReport.INTENT_LABEL[intent] || intent;
+            });
+            this.session.step({ icon: "sap-icon://inspection", text: "Antwort aus der Ergebnisanalyse: " + (topics.join(", ") || "keine passende Frage erkannt") });
             return answer;
         }
 

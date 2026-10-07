@@ -56,10 +56,11 @@ test('result of a failed run: verdict, cause with evidence and confidence, team,
 test('mock agent answers follow-up questions from the analysis only', async (t) => {
     const { repo, tenantId } = setup();
     t.after(() => teardown(tenantId));
-    const { session } = newSession(repo);
+    const { session, steps } = newSession(repo);
     await session.openResultByCaseId('STC-2026-000007');
 
     const team = await session.send('Wer ist zuständig?');
+    assert.equal(steps.at(-1).text, 'Antwort aus der Ergebnisanalyse: Zuständigkeit');
     assert.match(team.text, /Zuständig laut Analyse/);
     assert.match(team.text, /\*\*PT-REPARATUR · Prozessteam Reparatur\*\*/);
     assert.match(team.text, /kein Team festgelegt \(Vergleich bzw\. Gesamtergebnis\)/);
