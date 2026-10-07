@@ -96,6 +96,7 @@
                             <ObjectStatus id="agentResultVersion" title="{i18n>agentResultVersion}" text="{agent>/analysis/version}" visible="{= !!${agent>/analysis/version} }" />
                         </HBox>
                         <Text id="agentResultCounts" text="{agent>/analysis/counts}" visible="{= !!${agent>/analysis/counts} }" class="sapUiTinyMarginTop" />
+                        <ObjectStatus id="agentResultOlder" text="{agent>/analysis/olderRun}" state="Warning" icon="sap-icon://history" visible="{= !!${agent>/analysis/olderRun} }" class="sapUiTinyMarginTop" />
                         <MessageStrip
                             id="agentResultHeadline"
                             text="{agent>/analysis/headline}"

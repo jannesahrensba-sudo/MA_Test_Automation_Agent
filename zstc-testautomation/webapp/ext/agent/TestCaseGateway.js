@@ -286,25 +286,41 @@ sap.ui.define(["sap/ui/model/Sorter", "sap/ui/model/Filter", "sap/ui/model/Filte
         }
 
         /**
-         * Result of the latest run of a saved test case with the findings of the result analysis (read-only).
+         * Result of a run of a saved test case with the findings of the result analysis (read-only): the given run
+         * (External Execution ID, e.g. from the analytics of a release) or the latest one.
          *
          * @param {string} uuid TestCaseUUID
+         * @param {string} [runId] External Execution ID
          * @returns {Promise<object>} {testCase, values, execution, steps, assertions, documents, findings, history}
          */
-        async readResult(uuid) {
+        async readResult(uuid, runId) {
             const path = this.activePath(uuid);
             const testCase = await this.readObject(path, RESULT_SELECT.header);
             const values = await this.readObject(path + "/_TestCaseData", DATA_FIELDS.join(","));
-            if (!testCase.LatestExecutionUUID) {
+            let run = testCase.LatestExecutionUUID
+                ? { self: path + "/_LatestExecution", steps: path + "/_LatestExecutionStep", assertions: path + "/_LatestTestAssertion", documents: path + "/_LatestDocumentReference", findings: path + "/_LatestResultFinding" }
+                : undefined;
+            if (runId) {
+                const found = await this.readList("/Execution", "ExecutionUUID,IsActiveEntity,ExternalExecutionID", undefined, [
+                    new Filter("TestCaseUUID", FilterOperator.EQ, uuid),
+                    new Filter("ExternalExecutionID", FilterOperator.EQ, runId),
+                    new Filter("IsActiveEntity", FilterOperator.EQ, true)
+                ]);
+                if (found.length) {
+                    const self = "/Execution(ExecutionUUID=" + found[0].ExecutionUUID + ",IsActiveEntity=true)";
+                    run = { self: self, steps: self + "/_ExecutionStep", assertions: self + "/_TestAssertion", documents: self + "/_DocumentReference", findings: self + "/_ResultFinding" };
+                }
+            }
+            if (!run) {
                 return { testCase: testCase, values: values, execution: null, steps: [], assertions: [], documents: [], findings: [], history: [] };
             }
             const bySequence = [new Sorter("Sequence")];
             const [execution, steps, assertions, documents, findings, history] = await Promise.all([
-                this.readObject(path + "/_LatestExecution", RESULT_SELECT.execution),
-                this.readList(path + "/_LatestExecutionStep", RESULT_SELECT.steps, bySequence),
-                this.readList(path + "/_LatestTestAssertion", RESULT_SELECT.assertions, bySequence),
-                this.readList(path + "/_LatestDocumentReference", RESULT_SELECT.documents, bySequence),
-                this.readList(path + "/_LatestResultFinding", RESULT_SELECT.findings, bySequence),
+                this.readObject(run.self, RESULT_SELECT.execution),
+                this.readList(run.steps, RESULT_SELECT.steps, bySequence),
+                this.readList(run.assertions, RESULT_SELECT.assertions, bySequence),
+                this.readList(run.documents, RESULT_SELECT.documents, bySequence),
+                this.readList(run.findings, RESULT_SELECT.findings, bySequence),
                 this.readList(path + "/_Execution", RESULT_SELECT.history, [new Sorter("StartedAt", true)])
             ]);
             return { testCase: testCase, values: values, execution: execution, steps: steps, assertions: assertions, documents: documents, findings: findings, history: history };

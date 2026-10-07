@@ -146,15 +146,17 @@ function createMemoryGateway(repo) {
             const { testCase } = await service.startExecution(repo, activeKeys(uuid));
             return { externalExecutionId: testCase.ExternalExecutionID };
         },
-        async readResult(uuid) {
-            calls.push(['readResult']);
+        async readResult(uuid, runId) {
+            calls.push(['readResult', runId]);
             const keys = activeKeys(uuid);
             const testCase = await repo.findOne('TestCase', keys);
             const values = await repo.findOne('TestCaseData', keys);
-            if (!testCase.LatestExecutionUUID) {
+            const chosen = runId && (await repo.find('Execution', keys)).find((e) => e.ExternalExecutionID === runId);
+            const executionUUID = chosen ? chosen.ExecutionUUID : testCase.LatestExecutionUUID;
+            if (!executionUUID) {
                 return { testCase, values, execution: null, steps: [], assertions: [], documents: [], findings: [], history: [] };
             }
-            const run = { ExecutionUUID: testCase.LatestExecutionUUID, IsActiveEntity: true };
+            const run = { ExecutionUUID: executionUUID, IsActiveEntity: true };
             const bySequence = (rows) => rows.sort((a, b) => a.Sequence - b.Sequence);
             return {
                 testCase,

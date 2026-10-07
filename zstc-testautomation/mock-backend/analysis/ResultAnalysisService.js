@@ -79,7 +79,7 @@ function explainDelta(delta, data) {
  * @param {object[]} input.steps ExecutionStep rows {Sequence, BusinessObjectType, ExecutionStatus, ExpectedStatus, ActualStatus, Message, ProcessStepID, StepName, ResponsibleTeam}
  * @param {object[]} input.assertions TestAssertion rows
  * @param {object[]} input.documents DocumentReference rows
- * @param {object} [input.previous] previous finished run of the same test case {execution, changes: string[]}
+ * @param {object} [input.previous] previous finished run of the same test case {execution, changes: string[], lastPassed?, changesSincePassed?}
  * @param {Function} [input.teamOf] processStepID → responsible team
  * @returns {{headline: string, findings: object[]}} analysis
  */
@@ -341,6 +341,26 @@ function analyzeRun({ testCase, data, execution, steps, assertions, documents, p
                 confidence: CONFIDENCE.HIGH,
                 params: { previous: before.ExternalExecutionID, previousResult: before.FunctionalResult }
             });
+            // the deviation persists over several runs: what changed since the last passed run is still the best hint
+            const passed = previous.lastPassed;
+            if (!now && passed) {
+                const changes = previous.changesSincePassed || [];
+                const since = `${passed.ExternalExecutionID}${passed.ReleaseID ? ` (release ${passed.ReleaseID})` : ''}`;
+                add({
+                    category: CATEGORY.REGRESSION,
+                    severity: SEVERITY.WARNING,
+                    code: 'REGRESSION',
+                    team: '',
+                    finding: `Regression: the last passed run ${since} used version ${passed.TestCaseVersion}; this run fails with version ${execution.TestCaseVersion}.`,
+                    cause: changes.length
+                        ? `Changed since the passed run: ${changes.join('; ')}.`
+                        : `The test case is unchanged${passed.ReleaseID !== execution.ReleaseID ? `; the release changed from ${passed.ReleaseID || '–'} to ${execution.ReleaseID || '–'}` : ''}: look for changes in the system (customizing, transport, upgrade).`,
+                    recommendation: changes.length ? 'Check whether the change of the test case is intended; otherwise revert it.' : 'Compare the configuration of the releases; report the deviation to the team of the failing step.',
+                    evidence: `Last passed run ${passed.ExternalExecutionID}: ${passed.FunctionalResult}`,
+                    confidence: changes.length ? CONFIDENCE.MEDIUM : CONFIDENCE.LOW,
+                    params: { previous: passed.ExternalExecutionID, previousRelease: passed.ReleaseID || '', previousVersion: passed.TestCaseVersion, changes, lastPassed: true }
+                });
+            }
         }
     }
 

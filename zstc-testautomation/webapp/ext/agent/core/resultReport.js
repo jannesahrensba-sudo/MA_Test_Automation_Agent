@@ -254,6 +254,7 @@ sap.ui.define(["./prompts", "./textMatching"], function (prompts, textMatching) 
                     evidence: f.Evidence || ""
                 };
             }),
+            latestRunId: read.history && read.history.length ? read.history[0].ExternalExecutionID || "" : "",
             history: (read.history || []).map(function (e) {
                 return {
                     id: e.ExternalExecutionID || "",
@@ -378,8 +379,8 @@ sap.ui.define(["./prompts", "./textMatching"], function (prompts, textMatching) 
                 const releaseChanged = p.previousRelease && run.release && p.previousRelease !== run.release;
                 return {
                     titel:
-                        "Regression: Der vorige Lauf " + p.previous + (p.previousRelease ? " (Release " + p.previousRelease + ")" : "") + " war mit Version " + p.previousVersion +
-                        " erfolgreich; dieser Lauf scheitert mit Version " + (run.version || "?") + ".",
+                        "Regression: Der " + (p.lastPassed ? "letzte erfolgreiche" : "vorige") + " Lauf " + p.previous + (p.previousRelease ? " (Release " + p.previousRelease + ")" : "") +
+                        " war mit Version " + p.previousVersion + " erfolgreich; dieser Lauf scheitert mit Version " + (run.version || "?") + ".",
                     ursache: changes.length
                         ? "Seit dem erfolgreichen Lauf geändert: " + changes.join("; ") + "."
                         : "Der Testfall ist unverändert" + (releaseChanged ? "; das Release wechselte von " + p.previousRelease + " auf " + run.release : "") +
@@ -489,6 +490,9 @@ sap.ui.define(["./prompts", "./textMatching"], function (prompts, textMatching) 
             "Lauf **" + run.id + "**" + (run.release ? " im Release " + run.release : "") + " mit Version " + run.version + ": **" + resultText(run.result) + "** – " +
                 assertionCounts(analysis) + ", " + documentCounts(analysis) + "."
         );
+        if (analysis.latestRunId && analysis.latestRunId !== run.id) {
+            lines.push("Hinweis: Das ist nicht der neueste Lauf des Testfalls; neuester Lauf ist **" + analysis.latestRunId + "**.");
+        }
         const findings = germanFindings(analysis);
         if (!findings.length) {
             lines.push("Zu diesem Lauf liegt keine Ergebnisanalyse vor (z. B. Lauf nach einem Neustart des Mockservers verloren). Bitte erneut ausführen.");
@@ -890,6 +894,7 @@ sap.ui.define(["./prompts", "./textMatching"], function (prompts, textMatching) 
             resultText: run ? (run.status === "RUNNING" ? "Lauf läuft" : resultText(run.result)) : "Nicht ausgeführt",
             resultState: run ? RESULT_STATE[run.result] || "None" : "None",
             counts: run ? assertionCounts(analysis) + " · " + documentCounts(analysis) : "",
+            olderRun: run && analysis.latestRunId && analysis.latestRunId !== run.id ? "Nicht der neueste Lauf – neuester Lauf: " + analysis.latestRunId : "",
             headline: main ? (main.ursache && main.severity !== "SUCCESS" ? main.ursache : main.titel) : "",
             findings: findings.map(function (f) {
                 return {

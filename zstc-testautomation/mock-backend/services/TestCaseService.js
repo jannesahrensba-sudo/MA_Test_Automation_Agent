@@ -1509,28 +1509,39 @@ async function startExecution(repo, keys, { user = CURRENT_USER, releaseId, runT
 }
 
 /**
- * Previous finished run of the same test case and what changed since (test case versions, process version).
+ * Previous finished run of the same test case and what changed since (test case versions, process version); for a
+ * deviation that persists over several runs also the last passed run and what changed since that one.
  *
  * @param {object} repo repository
  * @param {object} tc TestCase entry (active)
  * @param {object} execution current execution
- * @returns {Promise<{execution: object, changes: string[]}|undefined>} previous run
+ * @returns {Promise<{execution: object, changes: string[], lastPassed?: object, changesSincePassed?: string[]}|undefined>} previous run
  */
 async function previousRun(repo, tc, execution) {
-    const before = (await repo.find('Execution', { TestCaseUUID: tc.TestCaseUUID, IsActiveEntity: true }))
+    const earlier = (await repo.find('Execution', { TestCaseUUID: tc.TestCaseUUID, IsActiveEntity: true }))
         .filter((e) => e.ExecutionUUID !== execution.ExecutionUUID && e.Status !== EXECUTION.RUNNING && e.FunctionalResult && String(e.StartedAt) < String(execution.StartedAt))
-        .sort((a, b) => String(b.StartedAt).localeCompare(String(a.StartedAt)))[0];
+        .sort((a, b) => String(b.StartedAt).localeCompare(String(a.StartedAt)));
+    const before = earlier[0];
     if (!before) {
         return undefined;
     }
-    const changes = (await repo.find('TestCaseVersion', { TestCaseUUID: tc.TestCaseUUID }))
-        .filter((v) => Number(v.Version) > Number(before.TestCaseVersion) && Number(v.Version) <= Number(execution.TestCaseVersion))
-        .sort((a, b) => a.Version - b.Version)
-        .map((v) => `test case version ${v.Version}: ${v.ChangeSummary}`);
-    if (Number(before.ProcessVersion) && Number(execution.ProcessVersion) && Number(before.ProcessVersion) !== Number(execution.ProcessVersion)) {
-        changes.push(`process version ${before.ProcessVersion} → ${execution.ProcessVersion}`);
-    }
-    return { execution: before, changes };
+    const versions = (await repo.find('TestCaseVersion', { TestCaseUUID: tc.TestCaseUUID })).sort((a, b) => a.Version - b.Version);
+    const changesSince = (run) => {
+        const changes = versions
+            .filter((v) => Number(v.Version) > Number(run.TestCaseVersion) && Number(v.Version) <= Number(execution.TestCaseVersion))
+            .map((v) => `test case version ${v.Version}: ${v.ChangeSummary}`);
+        if (Number(run.ProcessVersion) && Number(execution.ProcessVersion) && Number(run.ProcessVersion) !== Number(execution.ProcessVersion)) {
+            changes.push(`process version ${run.ProcessVersion} → ${execution.ProcessVersion}`);
+        }
+        return changes;
+    };
+    const lastPassed = earlier.find((e) => HANDOVER_RESULTS.has(e.FunctionalResult));
+    return {
+        execution: before,
+        changes: changesSince(before),
+        lastPassed: lastPassed && lastPassed !== before ? lastPassed : undefined,
+        changesSincePassed: lastPassed && lastPassed !== before ? changesSince(lastPassed) : undefined
+    };
 }
 
 /** Runs the result analysis of a finished execution and stores its findings */

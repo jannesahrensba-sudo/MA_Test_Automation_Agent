@@ -322,7 +322,7 @@ Jeder Befund (`ResultFinding`) enthält:
 | Prozessschritt, zuständiges Team | wo der Fehler auftritt und wer ihn klärt; Abweichungen zwischen Testdaten und Erwartung pflegt das Team des Testfalls |
 | Empfehlung | nächster Schritt, z. B. Erwartung anpassen oder Material entsperren |
 
-Erkannte Muster: Nettowert außerhalb oder innerhalb der Toleranz, Status- und Feldabweichung, unvollständiger Belegfluss, gesperrtes Ersatzteil, fehlende FI-Übergabe, ungültiger Servicevertrag, technischer Schrittfehler, Abbruch, Übergabe von einem Vorgänger, Regression, behoben, unverändert.
+Erkannte Muster: Nettowert außerhalb oder innerhalb der Toleranz, Status- und Feldabweichung, unvollständiger Belegfluss, gesperrtes Ersatzteil, fehlende FI-Übergabe, ungültiger Servicevertrag, technischer Schrittfehler, Abbruch, Übergabe von einem Vorgänger, Regression, behoben, unverändert. Scheitert ein Testfall mehrmals hintereinander, vergleicht die Analyse zusätzlich mit dem **letzten erfolgreichen Lauf** und nennt, was sich seitdem am Testfall oder am Prozess geändert hat – sonst ginge dieser Hinweis nach dem zweiten Fehlschlag verloren.
 
 **Absprung zum Agenten („hinten raus“):**
 
@@ -346,7 +346,7 @@ Die FPM-Seite **Analytics** (deutsch: Auswertung) zeigt je Release:
 - **Kennzahlen:** Bestehensquote und Schrittabdeckung als Ringdiagramm, Testfälle im Umfang, ausgeführt, fehlgeschlagen, offene Befunde.
 - **Ergebnis je Prozessteam:** gestapelter Balken bestanden / fehlgeschlagen / nicht ausgeführt. Teams ohne Testfall im Umfang erscheinen mit Hinweis.
 - **Ergebnisverteilung** und **Bestehensquote im Verlauf** (Stand je Tag mit Läufen, letzter Lauf je Testfall).
-- **Fehlerbilder:** gleiche Befunde (Code, Prozessschritt, Team) über alle Testfälle des Release zusammengefasst, mit Ursache, Empfehlung, Konfidenz und Button **Besprechen** zum Service-Assistenten.
+- **Fehlerbilder:** gleiche Befunde (Code, Prozessschritt, Team) über alle Testfälle des Release zusammengefasst, mit Ursache, Empfehlung, Konfidenz und Button **Besprechen** zum Service-Assistenten – besprochen wird genau der Lauf, der für dieses Release zählt.
 - **Fehlgeschlagene Testfälle** mit Kernaussage der Analyse, **Besprechen** und **Öffnen**.
 - **Abdeckung entlang des Prozesses** bis zum Prozessschritt (Rückverfolgung).
 

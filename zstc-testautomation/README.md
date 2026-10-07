@@ -243,7 +243,7 @@ Eine abgeschlossene Ausführung lässt sich mit *Start Execution* wiederholen; a
 | Befehl | Zweck |
 |---|---|
 | `npm start` | lokaler Server mit FLP-Sandbox, OData-V4-Mockserver und Agent-Proxy `/agent-api` |
-| `npm test` | Unit-Tests (`node --test`, 81 Tests): ValidationEngine, Extraction (inkl. Deutsch/Messdienst), MockExecutionProvider, VerificationService, TestCaseService, Messdienst-Szenarien, Prozesse/Releases (Wege, Start und Übergabe, Versionen, Rollen, Regressionslauf), Ergebnisanalyse, Agent-Kern (Mock-Agent, Tools, Messages-API-Schleife, `sample`-Transport, Ergebnis besprechen), Auswertungsmodell, lokaler Claude-Proxy gegen Fake-Upstream |
+| `npm test` | Unit-Tests (`node --test`, 80 Tests): ValidationEngine, Extraction (inkl. Deutsch/Messdienst), MockExecutionProvider, VerificationService, TestCaseService, Messdienst-Szenarien, Prozesse/Releases (Wege, Start und Übergabe, Versionen, Rollen, Regressionslauf), Ergebnisanalyse, Agent-Kern (Mock-Agent, Tools, Messages-API-Schleife, `sample`-Transport, Ergebnis besprechen), Auswertungsmodell, lokaler Claude-Proxy gegen Fake-Upstream |
 | `npm run build` | UI5-Build der App nach `dist/` (ohne Mock-Service) |
 | `npm run build:hosted` | statische Hosted-Variante nach `dist-hosted/site/`: SAPUI5-Preloads, Themes mit eingebetteten Schriften, Browser-Mockserver |
 | `npm run metadata` | erzeugt `webapp/localService/mainService/metadata.xml` aus `tools/metadata/contract.js` |

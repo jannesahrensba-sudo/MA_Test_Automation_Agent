@@ -121,15 +121,17 @@ sap.ui.define(["./prompts", "./agentTools", "./RuleBasedAgent", "./messagesLoop"
         }
 
         /**
-         * Opens the discussion of the latest run of a test case: reads the result with its deterministic analysis.
+         * Opens the discussion of a run of a test case (the latest one unless a run is given): reads the result with its
+         * deterministic analysis.
          *
          * @param {string} uuid TestCaseUUID (active test case)
          * @param {object} [options] options
+         * @param {string} [options.run] External Execution ID of the run (e.g. the run shown in the analytics of a release)
          * @param {boolean} [options.keepChat] keep the conversation of the language model (tool call within a turn)
          * @returns {Promise<object>} analysis (see resultReport.fromRead)
          */
         async openResult(uuid, options) {
-            const analysis = resultReport.fromRead(await this.gateway.readResult(uuid));
+            const analysis = resultReport.fromRead(await this.gateway.readResult(uuid, options && options.run));
             this.setAnalysis(analysis, options);
             return analysis;
         }

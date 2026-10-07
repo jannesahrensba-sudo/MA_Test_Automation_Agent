@@ -76,3 +76,25 @@ test('blocked run: no valid service contract is a missing precondition, not a te
     assert.equal(JSON.parse(contract.Parameters).reason, 'expired or not yet valid');
     assert.match(contract.Recommendation, /Extend or release the contract/);
 });
+
+test('a deviation that persists: same result as the previous run, regression since the last passed run', async (t) => {
+    const { repo, tenantId, tick } = setup();
+    t.after(() => teardown(tenantId));
+    // third run of STC-7 (version 2, expectation still not updated), after the seeded second run of 01.10.2026
+    tick(3 * 24 * 3600 * 1000);
+    const started = await service.startExecution(repo, W1_FI);
+    tick(20000);
+    const finished = await service.refreshExecution(repo, W1_FI);
+    assert.equal(finished.testCase.FinalResult, 'FAILED_FUNCTIONAL');
+    const rows = await findings(repo, started.testCase.LatestExecutionUUID);
+    assert.deepEqual(
+        rows.map((f) => f.FindingCode),
+        ['NET_VALUE_DEVIATION', 'REGRESSION', 'SAME_AS_BEFORE']
+    );
+    const same = rows.find((f) => f.FindingCode === 'SAME_AS_BEFORE');
+    assert.match(same.Finding, /Same result as the previous run MOCK-20261001-0007/);
+    const regression = rows.find((f) => f.FindingCode === 'REGRESSION');
+    assert.match(regression.Finding, /the last passed run MOCK-20260928-0003 \(release INT-2026.10\) used version 1/);
+    assert.match(regression.ProbableCause, /test case version 2: Changed: ServiceDuration/);
+    assert.equal(JSON.parse(regression.Parameters).lastPassed, true);
+});

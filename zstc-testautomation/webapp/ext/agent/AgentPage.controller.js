@@ -46,7 +46,8 @@ sap.ui.define(
          * validated test case draft through the OData service (tools), asks back when something is ambiguous and hands
          * the test case over to the app — saving, approval and start only on the user's confirmation.
          * Jump-off "Ergebnis besprechen": the header action of the test case (and the analytics page) open this page with
-         * ?analyze=<TestCaseUUID>; the assistant then discusses the result of the latest run with its deterministic analysis.
+         * ?analyze=<TestCaseUUID>[&run=<External Execution ID>]; the assistant then discusses the result of that run (default:
+         * the latest one) with its deterministic analysis.
          */
         return PageController.extend("zstc.testautomation.ext.agent.AgentPage", {
             onInit: function () {
@@ -96,13 +97,13 @@ sap.ui.define(
                     return;
                 }
                 this._handledQuery = key;
-                this._openResult(uuid);
+                this._openResult(uuid, query.run);
             },
 
-            /** discussion of the result of the latest run of a test case */
-            _openResult: async function (uuid) {
+            /** discussion of the result of a run of a test case (the latest one unless a run is given) */
+            _openResult: async function (uuid, run) {
                 if (this.state.getProperty("/busy")) {
-                    this._pendingResult = uuid;
+                    this._pendingResult = { uuid: uuid, run: run };
                     return;
                 }
                 this.state.setProperty("/busy", true);
@@ -110,7 +111,7 @@ sap.ui.define(
                 try {
                     const session = this._session();
                     this.masterData = await this._gateway().masterData();
-                    const analysis = await session.openResult(uuid);
+                    const analysis = await session.openResult(uuid, { run: run });
                     this._addMessage("assistant", resultReport.report(analysis, this.masterData.describe), this._text("agentResultSource"));
                 } catch (error) {
                     this._addMessage("assistant", this._text("agentResultError", [transports.describeError(error).text]));
@@ -382,7 +383,7 @@ sap.ui.define(
                     if (this._pendingResult) {
                         const pending = this._pendingResult;
                         this._pendingResult = undefined;
-                        this._openResult(pending);
+                        this._openResult(pending.uuid, pending.run);
                     }
                 }
             },
@@ -488,8 +489,10 @@ sap.ui.define(
                 this._addMessage("assistant", this._text("agentResultClosed"));
             },
 
+            /** analytics of the release of the discussed run (otherwise of the release in test) */
             onShowDashboard: function () {
-                return this.routing.navigateToRoute("Analytics");
+                const release = this.state.getProperty("/analysis/release");
+                return this.routing.navigateToRoute("Analytics", release ? { "?query": { release: release } } : {});
             }
         });
     }

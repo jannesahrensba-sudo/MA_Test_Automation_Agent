@@ -42,7 +42,7 @@ sap.ui.define(
                 return this.getView().getModel() || this.getAppComponent().getModel();
             },
 
-            async _read(path, select, filter, orderby) {
+            _read: async function (path, select, filter, orderby) {
                 const parameters = { $$groupId: "$direct", $select: select };
                 if (filter) {
                     parameters.$filter = filter;
@@ -178,19 +178,20 @@ sap.ui.define(
                 this._scrollTo("patternPanel");
             },
 
-            /** jump-off to the service assistant: discussion of the latest run of the test case */
-            _discuss: function (testCaseUUID) {
-                if (testCaseUUID) {
-                    return this.routing.navigateToRoute("AgentPage", { "?query": { analyze: testCaseUUID, n: String(Date.now()) } });
+            /** jump-off to the service assistant: discussion of exactly the run shown for this release */
+            _discuss: function (event) {
+                const row = event.getSource().getBindingContext("dash").getObject();
+                if (row.testCaseUUID) {
+                    return this.routing.navigateToRoute("AgentPage", { "?query": { analyze: row.testCaseUUID, run: row.run, n: String(Date.now()) } });
                 }
             },
 
             onDiscussPattern: function (event) {
-                return this._discuss(event.getSource().getBindingContext("dash").getProperty("testCaseUUID"));
+                return this._discuss(event);
             },
 
             onDiscussCase: function (event) {
-                return this._discuss(event.getSource().getBindingContext("dash").getProperty("testCaseUUID"));
+                return this._discuss(event);
             },
 
             onOpenCase: function (event) {

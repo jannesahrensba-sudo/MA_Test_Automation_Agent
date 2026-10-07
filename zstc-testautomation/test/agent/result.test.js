@@ -163,3 +163,22 @@ test('German change texts of the version history', () => {
     assert.equal(resultReport.changeText('process version 1 → 2'), 'Prozessversion 1 → 2');
     assert.equal(resultReport.changeText('test case version 1: Initial version'), 'Testfall-Version 1: erste Version');
 });
+
+test('jump-off with a given run (analytics of a release): that run is discussed, with a hint to the newest run', async (t) => {
+    const { repo, tenantId } = setup();
+    t.after(() => teardown(tenantId));
+    const { session, gateway } = newSession(repo);
+    const { describe } = await gateway.masterData();
+    const uuid = await gateway.findTestCase('STC-2026-000007');
+    const older = await session.openResult(uuid, { run: 'MOCK-20260928-0003' });
+    assert.equal(older.run.id, 'MOCK-20260928-0003');
+    assert.equal(older.run.result, 'PASSED');
+    assert.deepEqual(older.findings.map((f) => f.code), ['ALL_PASSED']);
+    const report = resultReport.report(older, describe);
+    assert.match(report, /\*\*Bestanden\*\*/);
+    assert.match(report, /Hinweis: Das ist nicht der neueste Lauf des Testfalls; neuester Lauf ist \*\*MOCK-20261001-0007\*\*/);
+    // unknown run: the latest run is discussed
+    const latest = await session.openResult(uuid, { run: 'MOCK-19990101-9999' });
+    assert.equal(latest.run.id, 'MOCK-20261001-0007');
+    assert.doesNotMatch(resultReport.report(latest, describe), /nicht der neueste Lauf/);
+});

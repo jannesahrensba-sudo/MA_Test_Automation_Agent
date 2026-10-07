@@ -77,6 +77,7 @@ test('failure patterns and failed test cases carry the analysis and the jump-off
     assert.match(net.example, /Nettowert 183,00 EUR statt 114,00 EUR/);
     assert.match(net.cause, /weicht um 1 Std\. MD-SRV-STOER/);
     assert.equal(net.testCaseUUID, stc7.TestCaseUUID);
+    assert.equal(net.run, 'MOCK-20261001-0007', 'the jump-off discusses the run shown for this release');
     assert.equal(german.patterns[1].team, 'analyticsNoTeam');
 
     assert.equal(german.failedCases.length, 1);

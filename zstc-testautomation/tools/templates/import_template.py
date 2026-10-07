@@ -150,7 +150,7 @@ def main():
     guide.title = "Anleitung"
     lines = [
         ("Importvorlage für bestehende Testfälle – Service-to-Cash Test Automation Assistant (Mockup)", Font(bold=True, size=14)),
-        ("Zielsystem: SAP S/4HANA 2025 (Releasezyklus mit Feature Pack Stacks). Die Codes in den Auswahllisten stammen aus dem Mockup; Kunden-, Geräte- und Belegdaten sind fiktiv.", None),
+        ("Zielsystem: SAP S/4HANA 2025 (Releasezyklus mit Feature Package Stacks). Die Codes in den Auswahllisten stammen aus dem Mockup; Kunden-, Geräte- und Belegdaten sind fiktiv.", None),
         ("", None),
         ("So füllen Sie die Vorlage aus", Font(bold=True)),
         ("1. Blatt „Testfälle“: eine Zeile je Testfall (Kopf). Pflichtspalten sind dunkelblau.", None),

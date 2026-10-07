@@ -201,7 +201,8 @@ sap.ui.define(["../agent/core/resultReport"], function (resultReport) {
                     cause: texts.cause,
                     recommendation: texts.recommendation,
                     confidence: text("confidence" + confidence) || confidence,
-                    testCaseUUID: first.TestCaseUUID
+                    testCaseUUID: first.TestCaseUUID,
+                    run: first.ExternalExecutionID
                 };
             })
             .sort((a, b) => (a.severity === b.severity ? b.count - a.count : a.severity === "ERROR" ? -1 : 1));
