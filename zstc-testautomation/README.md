@@ -160,7 +160,7 @@ Neue Testfälle bekommen ab `STC-2026-000022` fortlaufende Nummern, neue Läufe 
 
    > Möchte den Standardreparaturprozess testen, habe dort was im Coding angepasst. Nimm alle Testfälle, die dem Prozessteam zugeordnet sind, vor.
 
-2. Der Agent erkennt `SRV-REP` und das Team Reparatur, nimmt das Release in Test (`INT-2026.10`) und zeigt die **Vorschau**: 11 laufen, 5 werden übersprungen (Grund je Testfall). *Mit abhängigen Testfällen* nimmt `STC-2026-000014` (Team New End to End Prozess, wartet auf `STC-2026-000013`) mit.
+2. Der Agent erkennt `SRV-REP` und das Team Reparatur, nimmt das Release in Test (`INT-2026.10`) und zeigt die **Vorschau**: im Ausgangszustand 11 laufen, 5 werden übersprungen (Grund je Testfall); nach dem gespeicherten Testpaket laufen dessen freigegebene Testfälle mit. *Mit abhängigen Testfällen* nimmt `STC-2026-000014` (Team New End to End Prozess, wartet auf `STC-2026-000013`) mit.
 3. **Teamlauf starten**. Der Fortschritt aktualisiert sich alle 2 s; am Ende: bestanden, fehlgeschlagen (`STC-2026-000007`), übersprungen. **Besprechen** öffnet genau diesen Lauf in der Ergebnisanalyse, **Auswertung** das Release.
 4. In der App: **Release `INT-2026.10` → Start Team Run** (Parameterdialog mit Wertehilfen für Prozessteam und Prozess, Anlass, abhängige Testfälle). Ein Lauf für das Team Angebot zeigt, dass `DEMO_USER` dort keine Ausführungsrolle hat (Warnung, 0 von 2 gestartet).
 
