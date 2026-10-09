@@ -1,6 +1,6 @@
 # Messdienst-Szenarien: Heizkostenverteiler und Rauchwarnmelder
 
-Stand: 02.10.2026 · Fachdomäne des [Service-Assistenten](agent-konzept.md) · Prozessteams und Releases: [prozessteams-releases.md](prozessteams-releases.md)
+Stand: 09.10.2026 · Fachdomäne des [Service-Assistenten](agent-konzept.md) · Prozessteams und Releases: [prozessteams-releases.md](prozessteams-releases.md)
 
 ## 1. Fachlicher Bezug
 
@@ -45,6 +45,24 @@ Die Belegkette folgt dem **Weg** des Testfalls durch den Service-Reparaturprozes
 | Messdienst | S/4HANA-Service-Objekt | Mock-Daten |
 |---|---|---|
 | Servicevertrag (Wartung, Gerätemiete) | Service Contract mit Objektliste (Liegenschaft) und Rechnungsplan | `4100000001` RWM-Service Musterstraße 12 (freigegeben, bis 31.12.2027, 118,80 EUR/Jahr) · `4100000002` Gerätemiete HKV Lindenallee 5 (abgelaufen 30.06.2026) · `4100000003` RWM-Service Parkweg 7 (nicht freigegeben) |
+
+### 2.1 Generierte Stammdaten (09.10.2026)
+
+Zusätzlich zu den handgeschriebenen Daten oben erzeugt `npm run masterdata` (`zstc-testautomation/tools/seed/generate-masterdata.js`) einen größeren, ebenfalls **fiktiven** Bestand. Der Generator ist deterministisch und ersetzt bei jedem Lauf nur die generierten Schlüsselbereiche.
+
+| Kunde | Stadt | Liegenschaften (je 3 Nutzeinheiten) | Serviceverträge | Monteurteam |
+|---|---|---|---|---|
+| `MD-200010` Hausverwaltung Beispielhof GmbH | Bremen | `LG-5101` Ahornweg 3, `LG-5102` Birkenhof 21 | `4100000101` RWM-Service, `4100000102` Gerätemiete HKV, `4100000103` RWM-Service Birkenhof 21 (abgelaufen 31.03.2026) | `MD-TEAM-BRE` |
+| `MD-200020` Wohnungsgenossenschaft Probestadt eG | Berlin | `LG-5201` Kastanienstraße 8, `LG-5202` Ulmenring 5 | `4100000104` RWM-Service | `MD-TEAM-BER` |
+| `MD-200030` Immobilienverwaltung Beispielgarten GmbH | Frankfurt am Main | `LG-5301` Erlenstraße 30 | `4100000105` RWM-Service (nicht freigegeben, ab 2027) | `MD-TEAM-FRA` |
+| `MD-200040` WEG Am Testpark 4 | Stuttgart | `LG-5401` Am Eichenpark 14 | `4100000106` RWM-Service, `4100000107` Gerätemiete HKV | `MD-TEAM-STR` |
+| `MD-200050` Hausverwaltung Exempla KG | Hannover | `LG-5501` Weidenweg 11 | `4100000108` RWM-Service | `MD-TEAM-HAJ` |
+| `MD-200060` Siedlungswerk Beispieltal eG | Dresden | `LG-5601` Ebereschenplatz 2 | `4100000109` Gerätemiete HKV | `MD-TEAM-DRS` |
+
+- **Ansprechpartner:** 2 je Kunde (`MD-CP-4…`); Bewohner der Nutzeinheiten mit eigenen, nicht kollidierenden Nachnamen.
+- **Geräte (144):** Heizkostenverteiler je Wohnraum (Wohnzimmer, Schlafzimmer, je nach Nutzeinheit Küche und Arbeitszimmer), Rauchwarnmelder in Schlafzimmer, Flur und ggf. Kinderzimmer, Warmwasserzähler im Bad; Schema `HKV-5101-011` = Gerätetyp, Liegenschaft, Nutzeinheit, Position.
+- **Serviceorganisation:** neu `SO-MD-NORD` (Bremen, Hannover); Berlin und Dresden gehören zu `SO-MD-OST`, Frankfurt zu `SO-MD-WEST`, Stuttgart zu `SO-MD-SUED`.
+- **Rechnungsplan:** RWM-Service 9,90 EUR je Melder und Jahr, Gerätemiete HKV 1,75 EUR je Gerät und Monat (z. B. `4100000101`: 69,30 EUR/Jahr).
 
 ## 3. Prozessprofile (Konfiguration, ohne Codeänderung anpassbar)
 
@@ -107,6 +125,18 @@ HKV-Störung: 1 Std. + 1 Ersatzgerät = **108,00 EUR**. RWM-Störung: **94,00 EU
 | `STC-2026-000013` | Team Reparatur: HKV-Tausch bis zur Rückmeldung (Übergabe an das Team „New End to End Prozess“) | ausgeführt, PASSED |
 | `STC-2026-000014` | Team „New End to End Prozess“: Rückmeldung von `STC-2026-000013` fakturieren bis zum FI-Beleg | ausgeführt, PASSED; Service Request, Service Order und Rückmeldung übernommen |
 
+**Generierter Bestand** (`npm run seed`, Testdesign des Service-Assistenten auf die generierten Stammdaten; alle validiert und freigegeben, noch nicht ausgeführt; Details in [prozessteams-releases.md, Abschnitt 14](prozessteams-releases.md#14-generierte-stammdaten-und-testfälle)):
+
+| Case ID | Szenario | Testdaten |
+|---|---|---|
+| `STC-2026-000015` | Weg 1 bis zum FI-Beleg | `HKV-5101-011` Heizkostenverteiler Wohnzimmer, Bremen, 108,00 EUR |
+| `STC-2026-000016` | Weg 2, Kunde nimmt das Angebot an | `RWM-5201-011` Rauchwarnmelder Schlafzimmer, Berlin, 94,00 EUR |
+| `STC-2026-000017` | Weg 2, Kunde lehnt ab (bis zum Angebot) | `WZ-5301-011` Warmwasserzähler Bad, Frankfurt am Main, 114,00 EUR (Ersatzteil nach R10 korrigiert) |
+| `STC-2026-000018` | Weg 3 aus dem Servicevertrag | `RWM-5401-011`, Vertrag `4100000106`, Stuttgart |
+| `STC-2026-000019` | Weg 3 über den Rechnungsplan | Vertrag `4100000108`, Hannover, 69,30 EUR |
+| `STC-2026-000020` | Team Angebot: nur das Angebot | `HKV-5601-011`, Dresden |
+| `STC-2026-000021` | Team „New End to End Prozess“: Fakturaanforderung aus dem Rechnungsplan bis zum FI-Beleg | Vertrag `4100000101`, Bremen, 69,30 EUR |
+
 ## 7. Beispielmeldungen für den Service-Assistenten
 
 | Meldung | Ergebnis |
@@ -118,6 +148,8 @@ HKV-Störung: 1 Std. + 1 Ersatzgerät = **108,00 EUR**. RWM-Störung: **94,00 EU
 | „Musterstraße 12, 1. OG links (Müller): der Warmwasserzähler im Bad ist defekt. Gemeldet von Petra Wagner.“ | Profil HKV → R10 korrigiert das Ersatzteil auf `MD-ERS-WZ`, Gültig |
 | „Laut Wartungsvertrag: Im Kinderzimmer der Wohnung Yilmaz (Musterstraße 12, EG rechts) piept der Rauchwarnmelder. Austausch im Rahmen des Vertrags, Test bis zur Faktura. Gemeldet von Hausmeister Stefan Brandl.“ | Weg 3, Vertrag `4100000001` ermittelt, Gültig; Antwort „nur bis zum Auftrag“ verkürzt den Lauf |
 | Rauchmelder-Meldung oben plus „Bitte direkt ab dem Angebot testen.“ | Weg 2, Start ab Angebot, Gültig, 94,00 EUR |
+| „Zum nächsten Release möchte ich jeden Prozess durchtesten. Leg mir dafür Testfälle an, welche auf die Prozessbeschreibung passen.“ | Testpaket für `S4-2025-FPS02`: 7 gültige Entwürfe mit Geräten und Verträgen, die noch kein Testfall nutzt (verteilt auf Kunden und Gerätetypen), Abdeckung 11 von 11 automatisierten Schritten; Montage, Angebotsprozess und Ablesung als „nicht modelliert“ gemeldet |
+| „Möchte den Standardreparaturprozess testen, habe dort was im Coding angepasst. Nimm alle Testfälle vor, die dem Prozessteam zugeordnet sind.“ | Teamlauf `PT-REPARATUR` / `SRV-REP` im Release in Test: Vorschau (laufen, übersprungen mit Grund, warten), Start über „Teamlauf starten“ |
 | „Ergebnis von STC-2026-000007 besprechen“ | Bericht der Ergebnisanalyse: Nettowert 183,00 statt 114,00 EUR, Ursache Erwartung (1 Std.), zuständig Prozessteam Reparatur, Regression |
 
 ## 8. Grenzen des Modells

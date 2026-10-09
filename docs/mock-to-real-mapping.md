@@ -53,7 +53,7 @@ Beim Wechsel auf das reale System passiert Folgendes:
 |---|---|---|---|
 | AI/Extraction | `MockTestCaseExtractionService` (`mock-backend/extraction/`): reines Keyword-/Token-Matching gegen die Pools (IDs und deutsches Messdienst-Vokabular, `germanMetering.js`), **kein Sprachmodell** | eigene Implementierung hinter `ITestCaseExtractionService`, z. B. über SAP AI Core oder einen anderen LLM-Dienst; kein SAP-Standard | 🧪 / ⚠ |
 | Agent vor der App | Service-Assistent (`webapp/ext/agent/`): Tools auf dem OData-Vertrag, Sprachmodell über die claude.ai-Capability `sample` (Hosted) bzw. lokalen Proxy zur Claude API; Mock-Agent (regelbasiert) als Rückfall | Joule-Agent (Joule Studio, SAP Build) mit Skills/Actions auf dem Web-API-Binding des Service; Details in [agent-konzept.md](agent-konzept.md) | ⚠ (F-14) |
-| OData/Validation | `ValidationEngine` (`mock-backend/validation/`), Regeln R1–R10 (R10: Leistung und Ersatzteil passen zum Gerätetyp), deterministisch | RAP-Validations und -Actions im Facade-BO, Lookups über released CDS (Abschnitt 4) | 🧪 · CDS ⚠ |
+| OData/Validation | `ValidationEngine` (`mock-backend/validation/`), Regeln R1–R11 (R10: Leistung und Ersatzteil passen zum Gerätetyp, R11: Servicevertrag), deterministisch; im `TestCaseService` zusätzlich R12 (Vorgänger-Testfall) und R13 (mögliche Dublette, nur Hinweis) | RAP-Validations und -Actions im Facade-BO, Lookups über released CDS (Abschnitt 4) | 🧪 · CDS ⚠ |
 | SAP Test Automation | `MockExecutionProvider` + `MockS4ServiceChain` (`mock-backend/execution/`) | Adapter hinter `ITestExecutionProvider`: Cloud ALM (`CALM_TEST_AUTOMATION`) mit Provider (TAT, Tricentis) oder ein API-Ketten-Provider nur für Testsysteme | ✅S / ⚠ (F-8) |
 | Verification | `VerificationService` (`mock-backend/verification/`) | dieselbe Logik; liest die realen Belege über released APIs (Abschnitt 5) | 🧪 · APIs ✅P |
 
@@ -120,6 +120,8 @@ Das UI kennt nur die Facade-Namen. Die reale Basis wird im Backend verdrahtet. D
 | „Test Case in Words“ | FPM Custom Subsection (Fragment + Formatter, reine Anzeige) | ✅P |
 | Document Flow | FPM Custom Section mit `sap.suite.ui.commons.ProcessFlow` | ✅P |
 | Status-Polling | Controller Extension der Object Page, `EditFlow.invokeAction` für `refreshExecution` | ✅P |
+| Prozessbild (Testfall, Geschäftsprozess, Service-Assistent) | App-Control `ext/process/ProcessPicture.js` (`sap.ui.core.Control`, SVG; Layout in `pictureLayout.js`), Daten per Aggregation-Binding an `_ProcessStep`, `_LatestExecutionStep`, `_LatestTestAssertion` bzw. `_Step`; in FPM Custom Subsection/Section | 🧪 · Standard-Alternative `sap.suite.ui.commons.networkgraph` ⚠ (P-18) |
+| Testpaket und Teamlauf im Service-Assistenten | Agenten-Kern `core/testDesign.js`, `core/testPackage.js`, `core/teamRun.js`; Zugriff nur über das OData-V4-Modell (`TestCaseGateway`) | 🧪 · Agent ⚠ |
 | FLP-Sandbox (lokal) | `@sap-ux/preview-middleware`; real: SAP Fiori launchpad mit Semantic Object `ServiceTestCase`, Action `manage` | ✅P · Intent 🧪 |
 
 ## 7. Prozessteams, Prozesse und Releases
@@ -147,4 +149,8 @@ Konzept und Validierung: [prozessteams-releases.md](prozessteams-releases.md).
 | `ResultAnalysisService` → `ResultFinding` (Befund, Ursache, Evidenz, Konfidenz, Team, Empfehlung) und `Execution.AnalysisHeadline` | dieselben Regeln als Determination nach Laufende im RAP-BO; Evidenz aus den Belegen (APIs wie in Abschnitt 5) und dem Protokoll des Testwerkzeugs bzw. Application Log | 🧪 · Datenzugriff ⚠ |
 | Kopfaktion „Ergebnis besprechen“ → Service-Assistent mit Tool `ergebnis_lesen` | Joule-Agent mit demselben Lese-Tool (OData-Lesezugriff auf Testfall, Lauf, Befunde) | 🧪 · Joule ⚠ |
 | FPM-Seite *Analytics* (Auswertung je Release) aus `Release`, `ReleaseScope`, `ReleaseTestCase`, `ReleaseStepCoverage`, `Execution`, `ResultFinding` | analytische CDS-Views (Cube/Query) mit Fiori-Analyseseite oder SAP Analytics Cloud; im Mockup bewusst Standard-Controls `sap.m` und `sap.suite.ui.microchart` | 🧪 · Zielwerkzeug ⚠ |
+| Action `startTeamRegressionRun` (Parameter `ProcessTeam` Pflicht, `ProcessID`, `RunReason`, `IncludeDependents`; Lauf mit `Trigger = TEAM_RUN`, Team und Anlass); abhängige Testfälle anderer Teams über `PredecessorTestCase` | gebundene RAP-Action mit Parameterstruktur (abstrakte Entität); Auslöser real eher nach dem Transportimport bzw. aus der CI; Ausführung wie der Regressionslauf | 🧪 / ⚠ (P-20) |
+| Navigation `TestCase/_ProcessStep` (Schritte des Prozesses für das Prozessbild) | Assoziation im Testfall-BO auf die Prozessschritte | 🧪 |
+| Regel R13 (mögliche Dublette: gleicher Abschnitt, gleicher Weg, gleiches Gerät bzw. gleicher Vertrag; INFO) | RAP-Validation mit Hinweis-Meldung (`%msg` mit Severity Information) | 🧪 |
+| Generierte Messdienst-Stammdaten (`tools/seed/generate-masterdata.js`) und generierter Testfallbestand (`tools/seed/generate-seed.js`, Testdesign des Agenten) | echte Stammdaten des Testsystems; echte Testfälle aus dem Altwerkzeug über die Importvorlage | 🧪 (fiktiv) |
 | Prozessteam „New End to End Prozess“ (`PT-E2E`) für Fakturierung und FI | Team im Responsibility Management (wie die anderen Prozessteams) | Zuordnung laut Fachbereich (06.10.2026) · Abbildung ⚠ |

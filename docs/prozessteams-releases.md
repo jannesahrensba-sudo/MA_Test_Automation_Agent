@@ -1,6 +1,6 @@
 # Prozessteams, Prozesse und Releases im Testassistenten
 
-Stand: 06.10.2026 · gehört zu [prompt.md](../prompt.md) · Belegstufen wie in [Phase 1, Abschnitt 1.2](phase-1-architektur-und-mock-vertrag.md) · Umsetzung in [`zstc-testautomation/`](../zstc-testautomation/README.md)
+Stand: 09.10.2026 · gehört zu [prompt.md](../prompt.md) · Belegstufen wie in [Phase 1, Abschnitt 1.2](phase-1-architektur-und-mock-vertrag.md) · Umsetzung in [`zstc-testautomation/`](../zstc-testautomation/README.md)
 
 Dieses Dokument beschreibt die Erweiterung des SAP-Testassistenten um den **Prozess- und Prozessteam-Bezug**. Ziel: Jedes Prozessteam kann seine verantworteten Prozesse gezielt vorbereiten, testen und die Ergebnisse nachvollziehen. Tests laufen zu jedem Release automatisch durch – im DevOps-Takt der Prozessteams und im Takt der SAP-Releases.
 
@@ -23,7 +23,11 @@ Alle Daten im Mockup sind **fiktiv**. Der fachliche Bezug zu BRUNATA-METRONA ste
 | Wählbarer Startpunkt je nach Start des Prozessteams, z. B. direkt ab dem Angebot | Feld „Start from“ (`StartObject`), vorbelegt mit dem Einstieg des Teams; Start mitten im Prozess übernimmt Belege und Testdaten eines Vorgänger-Testfalls (Abschnitt 6.3) | 🧪 umgesetzt |
 | Pilot: Service-Reparaturprozess mit drei Wegen | Weg 1 ohne Angebot, Weg 2 Angebot angenommen/abgelehnt, Weg 3 Vertragsfindung und Rechnungsplan | 🧪 umgesetzt |
 | Garantie, Requote, In-House Repair als spätere API-Erweiterung | Als Varianten und Schritte mit Status „Later“ erfasst, nicht ausführbar, in der Abdeckung ausgewiesen | 🧪 umgesetzt |
-| Bestehende BRUNATA-Testfälle (als Excel) übernehmen | **Noch keine Testfälle mitgeliefert.** Excel-Importvorlage mit Auswahllisten und Zuordnungsregeln liegt bereit (Abschnitt 13); nichts erfunden | wartet auf die Excel-Datei |
+| Bestehende BRUNATA-Testfälle (als Excel) übernehmen | Die Excel-Datei kommt nicht; stattdessen **selbst generierte Testfälle und Stammdaten** (Aussage vom 09.10.2026, Abschnitt 14). Die Importvorlage bleibt für spätere echte Testfälle (Abschnitt 13) | 🧪 umgesetzt (generiert) |
+| Mehrere Testfälle aus dem Agenten anlegen, z. B. „zum nächsten Release jeden Prozess durchtesten“ | **Testpaket:** je Pilot-Weg ein End-to-End-Testfall und je weiterem Prozessteam ein Teilprozess-Testfall aus der Prozessbeschreibung, mit Testdaten aus den Stammdaten, jeder validiert; Speichern nach Bestätigung (Abschnitt 16) | 🧪 umgesetzt |
+| Prozessbilder bei der Anlage neuer Testfälle: sehen, welche Schritte durchlaufen werden | **Prozessbild** mit Bahnen je Prozessteam am Testfall (Anlage und Bearbeitung), am Geschäftsprozess und im Service-Assistenten (Abschnitt 15) | 🧪 umgesetzt |
+| Testfälle sinnvoll validieren | Neue Regel R13 (mögliche Dublette) und Prüfung des Pakets als Ganzes: Abdeckung der Prozessschritte, Wege, Teams, Überschneidungen (Abschnitt 18) | 🧪 umgesetzt |
+| „Standardreparaturprozess testen, habe im Coding etwas angepasst – nimm alle Testfälle des Prozessteams vor“ | **Teamlauf:** Vorschau aller Testfälle des Teams (läuft, übersprungen mit Grund, wartet), Start nach Bestätigung als Regressionslauf des Teams mit Anlass, Ergebnis mit Absprung zum Besprechen (Abschnitt 17) | 🧪 umgesetzt |
 | Fachliche Verantwortung und Ausführungsberechtigung getrennt | Rollen `PROCESS_OWNER` (freigeben) und `TEST_EXECUTOR` (ausführen) je Prozessteam | 🧪 umgesetzt |
 | Berechtigung und Freigabe serverseitig vor jedem Lauf prüfen | Prüfung in den Actions `approve`, `startExecution` und im Regressionslauf (Meldungen 202–210, 302, 303) | 🧪 umgesetzt |
 | Änderung an freigegebenem Testfall braucht neue Freigabe | Neue Version widerruft die Freigabe; Start nur mit freigegebener Version (Meldung 206) | 🧪 umgesetzt |
@@ -277,6 +281,8 @@ Die Step Coverage zählt nur messbare Schritte. Manuelle Schritte und spätere E
 | Absprung zum Assistenten | Eigene Kopfaktion der Object Page (Manifest `content.header.actions`), Sichtbarkeit per Ausdrucksbindung | In Ausdrucksbindungen auf OData-V4-Eigenschaften Rohwerte `%{…}` verwenden; `${…}` formatiert mit dem Typ der Eigenschaft und scheitert am Zieltyp boolean (im Mockup geprüft) |
 | Ergebnisanalyse am Testfall | Abschnitt „Result Analysis“ als Tabelle mit Zeilen-Hervorhebung, Kernaussage im Abschnitt „Execution“ | annotationsgetrieben |
 | Auswertungsdashboard | FPM-Seite mit `sap.m` (GenericTile, Table, List) und `sap.suite.ui.microchart` (RadialMicroChart, StackedBarMicroChart, InteractiveDonutChart, InteractiveLineChart) | kein `sap.viz`; InteractiveLineChart braucht einen Container mit fester Höhe (mindestens 106 px) |
+| Prozessbild | Eigene Unterabschnitte (FPM custom section) mit einem **App-Control** (SVG), Daten über Aggregation-Bindings an `ProcessStepVH`/`ProcessStep` und die Schritte des letzten Laufs | kein SAP-Standard-Control: `sap.suite.ui.commons.networkgraph` mit `SwimLaneChainLayout` stapelt die Schritte je Bahn ohne gemeinsame Zeitachse, `LayeredLayout` braucht `klay.js` (nicht im Hosted-Build); Alternative prüfen ⚠ |
+| Teamlauf in der App | Bound Action `startTeamRegressionRun` mit Parametern (`Common.ValueList`, `Common.FieldControl` Mandatory) – FE zeigt den Parameterdialog | Prozessteam Pflicht, Prozess optional, Anlass, abhängige Testfälle |
 
 Alles außer den drei FPM-Seiten, der Kopfaktion und kleinen Controller-Erweiterungen ist **annotationsgetrieben**. Im echten System entstehen die Annotationen in den CDS-Metadata-Extensions des RAP-Service.
 
@@ -401,11 +407,117 @@ Regeln bei der Übernahme:
 
 ---
 
-## 14. Offene Punkte und Annahmen
+## 14. Generierte Stammdaten und Testfälle
+
+Aussage vom 09.10.2026: „Bitte nimm einfach selbst generierte Testfälle und Stammdaten.“ Beides ist **fiktiv** und deterministisch erzeugt.
+
+**Stammdaten** (`zstc-testautomation/tools/seed/generate-masterdata.js`, `npm run masterdata`):
+
+| Was | Umfang |
+|---|---|
+| Kunden (Hausverwaltungen, Genossenschaften, WEG) | 6 in Bremen, Berlin, Frankfurt am Main, Stuttgart, Hannover und Dresden; Namen mit „Beispiel“, „Probe“, „Exempla“, „Test“ |
+| Ansprechpartner | 2 je Kunde |
+| Liegenschaften / Nutzeinheiten | 8 Liegenschaften mit je 3 Nutzeinheiten (Lage, Bewohner) |
+| Geräte | 144: Heizkostenverteiler je Raum, Rauchwarnmelder in Schlafzimmer, Flur, Kinderzimmer, Warmwasserzähler im Bad |
+| Monteurteams | 6 regionale Teams (das Serviceteam einer Meldung folgt der Stadt des Kunden), neue Serviceorganisation Nord |
+| Serviceverträge | 9: RWM-Service mit Jahrespauschale, Gerätemiete HKV monatlich; für Negativtests einer abgelaufen, einer noch nicht freigegeben |
+
+Die handgeschriebenen Stammdaten (Musterstraße 12, Lindenallee 5, Parkweg 7), die Beispiele und Tests verwenden, bleiben unverändert; Straßen und Namen der generierten Daten kollidieren nicht mit ihnen. Ein erneuter Lauf ersetzt nur die generierten Zeilen.
+
+**Testfälle** (`npm run seed`): Das Testdesign des Service-Assistenten (Abschnitt 16) wird auf den Reparaturprozess angewendet. Ergebnis ist der generierte Bestand `STC-2026-000015` bis `STC-2026-000021`:
+
+| Case ID | Team | Weg | Abschnitt | Testdaten (fiktiv) |
+|---|---|---|---|---|
+| STC-2026-000015 | Reparatur | Weg 1 | Service Request → FI-Beleg | Heizkostenverteiler, Bremen |
+| STC-2026-000016 | Reparatur | Weg 2 angenommen | Service Request → FI-Beleg | Rauchwarnmelder, Berlin |
+| STC-2026-000017 | Reparatur | Weg 2 abgelehnt | Service Request → Angebot | Warmwasserzähler, Frankfurt am Main (Ersatzteil nach R10 korrigiert) |
+| STC-2026-000018 | Reparatur | Weg 3 Vertrag | Vertragsfindung → FI-Beleg | Rauchwarnmelder, RWM-Servicevertrag Stuttgart |
+| STC-2026-000019 | Reparatur | Weg 3 Rechnungsplan | Vertragsfindung → FI-Beleg | RWM-Servicevertrag Hannover |
+| STC-2026-000020 | Angebot | Weg 2 angenommen | Angebot | Heizkostenverteiler, Dresden |
+| STC-2026-000021 | New End to End Prozess | Weg 3 Rechnungsplan | Fakturaanforderung → FI-Beleg | RWM-Servicevertrag Bremen |
+
+Alle sind validiert und von der Prozessverantwortung ihres Teams freigegeben (`REP_LEAD`, `ANG_LEAD`, `E2E_LEAD`), aber noch nicht ausgeführt. Neue Testfälle beginnen mit `STC-2026-000022`.
+
+---
+
+## 15. Prozessbild
+
+Das Prozessbild zeigt, **welche Schritte ein Testfall durchläuft**:
+
+- **Bahnen je Prozessteam**; eine angenommene Zuordnung ist als „Zuordnung angenommen“ gekennzeichnet, eine offene hat eine eigene Bahn „Team offen“.
+- **Schritte in Prozessreihenfolge** mit Beleg (SR, QT, SO, SC, BDR, BD, FI). Entscheidungen tragen eine Raute, manuelle Schritte sind gestrichelt, spätere Schritte gepunktet.
+- **Abschnitt des Testfalls** (Start … Ende) hervorgehoben, mit den Marken „Start“ und „Ende“. Steps davor und danach sind „nicht im Lauf“. Startet der Testfall mitten im Weg, sind die Schritte davor „vom Vorgänger übernommen“.
+- **Übergaben** zwischen Teams als Punkt auf der Verbindung.
+- **Nach einem Lauf:** Ergebnis je Schritt – bestanden, fehlgeschlagen (auch wenn der Beleg entstand, aber eine Prüfung abweicht) oder nicht erreicht.
+- **Gesamter Prozess:** alle Pilot-Schritte mit den Verbindungen aller Wege; Alternativen (Angebot angenommen/abgelehnt, Faktura aus Rückmeldung oder Rechnungsplan) stehen in eigenen Zeilen.
+- Ein Klick auf einen Schritt zeigt Team, Automatisierung, Beleg, Wege, Stand im Testfall und Ergebnis.
+
+Wo es erscheint:
+
+| Ort | Inhalt |
+|---|---|
+| Testfall, Abschnitt *Process Reference → Prozessbild* | Weg des Testfalls, umschaltbar auf den gesamten Prozess; aktualisiert sich beim Bearbeiten sofort (z. B. „Run up to“ auf Serviceauftrag: 3 von 8 Schritten) |
+| Geschäftsprozess, Abschnitt *Prozessbild* | gesamter Prozess, Weg hervorheben, Schritte außerhalb des Pilots zeigen; im Entwurf des Prozesses die geänderten Schritte |
+| Service-Assistent | im Entwurf (senkrecht, passend zur Spalte), je Entwurf eines Testpakets als Dialog und als Abdeckung des Pakets |
+
+Den Abschnitt eines Testfalls berechnet das Bild nach derselben Regel wie das Backend; ein Unit-Test vergleicht alle Kombinationen aus Weg, Start und Ende. Quelle ist das Prozessmodell der App – das Bild erfindet keine Schritte oder Verzweigungsbedingungen. **Technik:** App-Control (SVG), kein SAP-Standard-Control (Begründung in Abschnitt 9) ⚠.
+
+---
+
+## 16. Testpaket aus dem Service-Assistenten
+
+Beispiel: „Zum nächsten Release möchte ich jeden Prozess durchtesten. Leg mir dafür Testfälle an, welche auf die Prozessbeschreibung passen.“
+
+1. **Release:** das nächste geplante Release (`S4-2025-FPS02`); genannt werden können auch eine Release-ID, „FPS03“, ein Monat eines internen Release oder „das Release in Test“.
+2. **Prozesse:** die Prozesse im Scope des Release; ist er leer, der Scope des Vorgängers (er wird beim Speichern übernommen); nennt die Anfrage einen Prozess, nur dieser.
+3. **Testdesign** (`webapp/ext/agent/core/testDesign.js`):
+   - je **Pilot-Weg** ein End-to-End-Testfall vom ersten automatisierten Schritt bis zum letzten Beleg, Team des ersten Schritts;
+   - je **weiterem Prozessteam** ein Teilprozess-Testfall von seinem Einstieg bis zum letzten eigenen Beleg; bevorzugt ein Weg, dessen Einstieg keinen Vorgänger braucht (Team Angebot: Angebot; Team New End to End Prozess: Fakturaanforderung im Rechnungsplan);
+   - **Testdaten** aus den Stammdaten: Geräte, die noch kein Testfall nutzt, verteilt auf Kunden (Regionen) und Gerätetypen; Meldender ist ein Ansprechpartner des Kunden, das Serviceteam das der Stadt; Wege mit Vertrag nehmen einen freigegebenen, gültigen Vertrag;
+   - **nicht angelegt:** Prozesse ohne Prozessschritte (Montage, Angebotsprozess, Ablesung) und Wege außerhalb des Pilots – mit Begründung, nichts erfunden.
+4. **Jeder Entwurf** entsteht über den OData-Service (Anlegen, Prozessbezug, Testdaten); das Backend ermittelt Start, Testschritte, Vorbelegungen und den erwarteten Nettowert und validiert (R1–R13). Eindeutige Korrekturen (Gerätetyp R5/R10, Vorgänger R12: erster Vorschlag) übernimmt der Assistent und nennt sie.
+5. **Prüfung des Pakets** (Abschnitt 18) und Anzeige rechts: Entwürfe mit Auswahl, Status, Hinweisen, **Prozessbild** und **Im Formular öffnen**, darunter die Abdeckung des Prozesses als Bild.
+6. **Paket speichern** (Bestätigung des Nutzers): gespeichert wird, was ausgewählt ist; abgewählte Entwürfe werden verworfen. Freigegeben wird nur, wo der Benutzer Prozessverantwortung hat (Prüfung im Server); der Scope des Release wird bei Bedarf vom Vorgänger übernommen.
+
+Ergebnis im Mockup für `S4-2025-FPS02`: 7 gültige Entwürfe, **11 von 11 automatisierten Schritten** abgedeckt, alle 5 Pilot-Wege, jedes Team mit eigenem Testfall; Montage, Angebotsprozess und Ablesung als „noch nicht modelliert“ gemeldet. Die Testfälle des Teams Reparatur gibt `DEMO_USER` frei, die der Teams Angebot und New End to End Prozess warten auf deren Prozessverantwortung.
+
+**Claude-Modus:** Tools `prozessmodell_lesen` (Wege, Schritte, Teams, Testfälle je Weg) und `testpaket_entwerfen` (Release, Prozesse, Teilprozesse ja/nein); Speichern bleibt beim Knopf.
+
+---
+
+## 17. Teamlauf nach einer Code-Änderung
+
+Beispiel: „Möchte den Standardreparaturprozess testen, habe dort was im Coding angepasst. Nimm alle Testfälle vor, die dem Prozessteam zugeordnet sind.“
+
+1. **Erkennen:** Prozess „Reparaturprozess“ → `SRV-REP`; ohne genanntes Team gilt das Team, dem der Prozess gehört (`PT-REPARATUR`). Anlass: der Satz mit der Änderung („Code-Änderung: habe dort was im Coding angepasst“).
+2. **Release:** das Release in Test, dessen Regressions-Scope Team und Prozess enthält (`INT-2026.10`).
+3. **Vorschau** je Testfall des Teams: wird ausgeführt, wird übersprungen (Testdaten nicht gültig, nicht freigegeben, Version nicht freigegeben, Zuordnung offen) oder wartet auf seinen Vorgänger. Abhängige Testfälle **anderer Teams**, die mit Belegen eines Testfalls des Teams weiterarbeiten (z. B. `STC-2026-000014` nach `STC-2026-000013`), laufen nur auf Wunsch mit („mit abhängigen Testfällen“ oder Auswahl rechts) – dann wird auch die Übergabe geprüft.
+4. **Start nur mit dem Knopf „Teamlauf starten“:** Release-Action `startTeamRegressionRun` mit Prozessteam, Prozess, Anlass und abhängigen Testfällen. Der Server prüft jeden Testfall wie im Regressionslauf (auch die Berechtigung zur Testausführung im Team) und speichert den Lauf mit Team und Anlass.
+5. **Fortschritt** alle zwei Sekunden; am Ende eine Zusammenfassung (bestanden, fehlgeschlagen, übersprungen mit deutschem Grund). Bei fehlgeschlagenen Testfällen öffnet **Besprechen** genau diesen Lauf in der Ergebnisanalyse (Abschnitt 11); **Auswertung** zeigt das Release.
+
+Im Mockup: 16 Testfälle des Teams Reparatur, 11 laufen, 5 werden übersprungen; `STC-2026-000007` scheitert wieder (Erwartung nicht an 2 Stunden angepasst). In der App gibt es dieselbe Action auf der Release-Seite: **Start Team Run** mit Parameterdialog (Wertehilfen für Team und Prozess).
+
+**Claude-Modus:** Tool `teamlauf_vorbereiten` (Team oder Prozess, Release, Anlass, abhängige Testfälle); gestartet wird über den Knopf.
+
+---
+
+## 18. Validierung der Testfälle
+
+| Ebene | Prüfung |
+|---|---|
+| Testfall | R1–R12 wie bisher (Pflichtfelder aus dem Customizing, Stammdaten und ihre Beziehungen, Gerätetyp, Vertrag, Vorgänger) |
+| Testfall, neu | **R13 mögliche Dublette** (Hinweis, sperrt nicht): ein anderer Testfall prüft denselben Abschnitt desselben Weges mit demselben Gerät bzw. – beim Rechnungsplan – demselben Vertrag; die Meldung nennt die Case IDs |
+| Testpaket | Abdeckung der automatisierten Prozessschritte (Lücken mit Schritt), jeder Pilot-Weg enthalten, jedes Prozessteam mit eigenem Testfall, Überschneidungen mit vorhandenen Testfällen, Dubletten, ungültige Entwürfe |
+| Teamlauf (Vorschau) | dieselben Gründe wie der Server: gültig, freigegeben, freigegebene Version, Zuordnung, Vorgänger; Berechtigung und Übergabe prüft der Server beim Start |
+| Testdaten des Pakets | aus zusammengehörigen Stammdaten: Liegenschaft → Nutzeinheit → Gerät, Ansprechpartner des Kunden, Serviceteam der Region, gültiger Vertrag der Liegenschaft |
+
+---
+
+## 19. Offene Punkte und Annahmen
 
 | Nr. | Punkt | Status |
 |---|---|---|
-| P-1 | Bestehende BRUNATA-Testfälle als Excel bereitstellen (unverändert oder in der Vorlage aus Abschnitt 13) | offen – wartet auf die Datei |
+| P-1 | Bestehende BRUNATA-Testfälle als Excel bereitstellen | geklärt (09.10.2026): stattdessen generierte Testfälle und Stammdaten (Abschnitt 14); Vorlage aus Abschnitt 13 bleibt für spätere echte Testfälle |
 | P-2 | Teamzuordnung der Schritte Angebot (REP-030/040/041) und Vertragsfindung (REP-050) bestätigen | Annahme |
 | P-3 | Verantwortliches Team für Fakturierung und FI-Beleg (REP-090 bis REP-110) | geklärt: Prozessteam „New End to End Prozess“ (06.10.2026) |
 | P-4 | Prozessschritte für Montage, Angebot (eigenständig) und Ablesung modellieren; Abbildung der Ablesung im SAP-System klären | offen |
@@ -422,10 +534,14 @@ Regeln bei der Übernahme:
 | P-15 | Ergebnisanalyse im echten System: Zugriff auf Belege, Application Log und Protokolle des Testwerkzeugs; Freigabe der Regeln durch die Fachbereiche | ⚠ |
 | P-16 | Dashboard im echten System: analytische CDS-Views, Fiori-Analyseseite oder SAP Analytics Cloud | ⚠ |
 | P-17 | Agent im echten System: Joule mit denselben Werkzeugen; Datenschutz der Besprechungsinhalte | ⚠ |
+| P-18 | Prozessbild im echten System: SAP-Standard-Control (NetworkGraph mit eigenem Layout) oder Prozessmodelle aus SAP Signavio bzw. SAP Cloud ALM als Quelle | ⚠ |
+| P-19 | Testdesign-Regeln (ein Testfall je Weg und je Team) mit den Prozessteams abstimmen; Datenvarianten (weitere Gerätetypen, Negativfälle) ergänzen | Annahme |
+| P-20 | Teamlauf im echten System: Auslöser nach dem Import eines Transports oder aus der CI statt aus dem Chat; Cloud-ALM-Testplan | ⚠ |
+| P-21 | Freigabe von Paket-Testfällen anderer Teams durch deren Prozessverantwortliche (Workflow bzw. Inbox) | ⚠ |
 
 ---
 
-## 15. Klickpfad im Mockup
+## 20. Klickpfad im Mockup
 
 1. **Übersicht → Process Teams → Prozessteam Reparatur.** Mitglieder und Rollen, verantwortete Prozessschritte, eigene Prozesse.
 2. **Übersicht → Processes → Service-Reparaturprozess.**
@@ -446,3 +562,8 @@ Regeln bei der Übernahme:
 9. **Service-Assistent → Beispiele → „Rauchmelder piept“**, im Text „Bitte direkt ab dem Angebot testen.“ ergänzen → Senden: Start ab Angebot, Weg 2, ohne Vorgänger-Testfall.
 10. **Testfall `STC-2026-000007` → Ergebnis besprechen** → im Assistenten **Fragen → Wer ist zuständig?** → **Senden**; danach „Was hat sich seit dem letzten Lauf geändert?“.
 11. **Auswertung** (im Ergebnis-Panel oder Übersicht → **Analytics**): Release `INT-2026.10`, Fehlerbild „Nettowert weicht von der Erwartung ab“ → **Besprechen**.
+12. **Testfall `STC-2026-000014` → Process Reference → Prozessbild:** Schritte bis zur Rückmeldung „vom Vorgänger übernommen“, Start ab Fakturaanforderung, Übergabe; **Gesamter Prozess** umschalten.
+13. **Processes → Service-Reparaturprozess → Prozessbild:** Weg hervorheben „Weg 3 – Vertragsabrechnung über Rechnungsplan“, „Schritte außerhalb des Pilots zeigen“.
+14. **Service-Assistent → Beispiele → „Testpaket für das nächste Release“** → Senden → **Prozessbild** eines Entwurfs → einen Entwurf abwählen → **Paket speichern**.
+15. **Service-Assistent → Beispiele → „Teamlauf nach Code-Änderung“** → Senden → „Abhängige Testfälle anderer Teams mitnehmen“ → **Teamlauf starten** → bei `STC-2026-000007` **Besprechen**.
+16. **Release `INT-2026.10` → Start Team Run:** Prozessteam wählen (z. B. Angebot: beide Testfälle übersprungen, weil `DEMO_USER` dort keine Testausführung hat).

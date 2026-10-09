@@ -13,6 +13,7 @@
     "build": "ui5 build --config ui5.yaml --clean-dest",
     "test": "node --test \"mock-backend/test/*.test.js\" \"test/agent/*.test.js\" \"test/process/*.test.js\"",
     "build:hosted": "ui5 build --config ui5-hosted.yaml --dest dist-hosted/build --clean-dest --include-dependency sap.ui.core sap.m sap.f sap.fe.base sap.fe.controls sap.fe.core sap.fe.macros sap.fe.navigation sap.fe.placeholder sap.fe.templates sap.suite.ui.commons sap.suite.ui.microchart sap.ui.fl sap.ui.layout sap.ui.mdc sap.ui.table sap.ui.unified sap.uxap sap.ui.export themelib_sap_horizon && node tools/hosted/build-hosted.js",
+    "masterdata": "node tools/seed/generate-masterdata.js",
     "seed": "node tools/seed/generate-seed.js",
     "metadata": "node tools/metadata/generate.js"
   },
