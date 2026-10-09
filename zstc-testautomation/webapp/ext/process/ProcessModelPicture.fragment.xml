@@ -1,0 +1,38 @@
+<core:FragmentDefinition xmlns:core="sap.ui.core" xmlns="sap.m" xmlns:pp="zstc.testautomation.ext.process">
+    <!-- Custom section "Process Picture" of a business process: all pilot steps with the connections of all ways, one swim
+         lane per process team; a way can be highlighted, the steps outside the pilot can be shown -->
+    <VBox id="processModelPictureBox" core:require="{handler: 'zstc/testautomation/ext/process/ProcessPictureHandler'}">
+        <OverflowToolbar id="processModelToolbar" style="Clear">
+            <Label id="processModelWayLabel" text="{i18n>ppHighlightWay}" labelFor="processModelWay" />
+            <ComboBox
+                id="processModelWay"
+                width="22rem"
+                showClearIcon="true"
+                selectionChange="handler.onVariantChange"
+                items="{path: '_Variant', templateShareable: false}">
+                <core:Item key="{Variant}" text="{VariantName}" />
+            </ComboBox>
+            <CheckBox id="processModelLater" text="{i18n>ppShowLater}" select="handler.onLaterChange" />
+        </OverflowToolbar>
+        <pp:ProcessPicture
+            id="processModelPicture"
+            mode="PROCESS"
+            showSection="false"
+            stepPress="handler.onStepPress"
+            steps="{path: '_Step', templateShareable: false}">
+            <pp:steps>
+                <pp:ProcessPictureStep
+                    stepId="{StepID}"
+                    name="{StepName}"
+                    sequence="{Sequence}"
+                    businessObject="{BusinessObjectType}"
+                    team="{ResponsibleTeam}"
+                    teamName="{_ResponsibleTeam/ProcessTeamName}"
+                    assignment="{TeamAssignment}"
+                    variants="{Variants}"
+                    pilot="{PilotScope}"
+                    automation="{Automation}" />
+            </pp:steps>
+        </pp:ProcessPicture>
+    </VBox>
+</core:FragmentDefinition>

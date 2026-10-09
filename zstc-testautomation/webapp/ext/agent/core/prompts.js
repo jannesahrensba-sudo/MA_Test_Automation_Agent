@@ -160,6 +160,12 @@ sap.ui.define([], function () {
             "6. Du gibst nichts frei und startest nichts. Wenn der Entwurf gültig ist, bitte den Nutzer, ihn rechts zu prüfen und mit „Übernehmen & starten“ zu bestätigen.",
             "7. Fragt der Nutzer nach dem Ergebnis eines gespeicherten Testfalls (Case ID), lies es mit ergebnis_lesen und nenne nur, was die Befunde der Ergebnisanalyse belegen.",
             "",
+            "Mehrere Testfälle (Testpaket) und Teamläufe:",
+            "- Wünscht der Nutzer Testfälle für ein Release oder für jeden Prozess (z. B. „Leg mir für das nächste Release Testfälle an, die zur Prozessbeschreibung passen“), rufe testpaket_entwerfen auf. Das Tool legt je Pilot-Weg einen End-to-End-Testfall und je weiterem Prozessteam einen Teilprozess-Testfall an, mit Testdaten aus den Stammdaten, lässt jeden Entwurf vom Backend validieren und prüft das Paket (Abdeckung der Prozessschritte, Wege, Teams, Überschneidungen, Dubletten R13). Nenne danach kurz das Ergebnis der Prüfung. Gespeichert wird erst, wenn der Nutzer „Paket speichern“ wählt.",
+            "- Prozesse ohne Prozessschritte (z. B. Montage, Ablesung) bekommen keine Testfälle: Sag, dass sie zuerst im Prozessmodell modelliert werden müssen. Erfinde keine Prozessschritte, Wege oder Teams.",
+            "- Fragen zum Prozess (Wege, Schritte, zuständige Teams, vorhandene Testfälle je Weg) beantwortest du mit prozessmodell_lesen.",
+            "- Will der Nutzer die Testfälle eines Prozessteams oder Prozesses ausführen, z. B. nach einer Code-Änderung („Nimm alle Testfälle des Prozessteams vor“), rufe teamlauf_vorbereiten auf: Team oder Prozess, Anlass, abhängige Testfälle anderer Teams nur auf Wunsch. Du startest nichts – der Nutzer bestätigt mit „Teamlauf starten“. Danach besprichst du fehlgeschlagene Läufe mit ergebnis_lesen.",
+            "",
             "Fachlogik Messdienst:",
             "- Kunde (SoldToParty) ist der Auftraggeber, meist die Hausverwaltung. Die Liegenschaft (Adresse) hat Nutzeinheiten (Wohnungen); die Geräte sind in Nutzeinheiten eingebaut (ServiceRefFunctionalLocation = Nutzeinheit).",
             "- Meldender (ServiceRequestReporter) muss ein Ansprechpartner des Kunden sein. Bewohner (Nutzer) sind keine Ansprechpartner – nennt die Meldung nur den Bewohner, frag nach dem Meldenden der Hausverwaltung.",
@@ -254,9 +260,46 @@ sap.ui.define([], function () {
      * @param {Function} describe (field, id) → readable text
      * @returns {string} context block
      */
-    function contextBlock(draft, describe) {
+    /** lines about an open test package or team run (they take precedence in the panel of the page) */
+    function workContext(work) {
+        const lines = [];
+        const pkg = work && work.package;
+        if (pkg && pkg.items) {
+            lines.push(
+                "Offenes Testpaket für " +
+                    (pkg.release ? pkg.release.ReleaseID : "-") +
+                    ": " +
+                    pkg.items.length +
+                    " Entwürfe (" +
+                    pkg.items
+                        .map(function (item) {
+                            return item.proposal.scenarioId + " " + (item.caseId || item.status) + (item.selected ? "" : " abgewählt");
+                        })
+                        .join(", ") +
+                    ")" +
+                    (pkg.saved ? ", gespeichert" : ", noch nicht gespeichert")
+            );
+        }
+        const run = work && work.run;
+        if (run && run.release) {
+            lines.push(
+                "Teamlauf " +
+                    (run.phase === "PREVIEW" ? "vorbereitet" : run.phase === "RUNNING" ? "läuft" : "beendet") +
+                    ": Team " +
+                    run.team +
+                    (run.processId ? ", Prozess " + run.processId : "") +
+                    ", Release " +
+                    run.release.ReleaseID +
+                    (run.run ? ", " + run.run.RunID + ": " + run.run.PassedCount + " bestanden, " + run.run.FailedCount + " fehlgeschlagen, " + run.run.SkippedCount + " übersprungen" : "")
+            );
+        }
+        return lines;
+    }
+
+    function contextBlock(draft, describe, work) {
+        const extra = workContext(work);
         if (!draft) {
-            return "[Kontext der App]\nEs gibt noch keinen Testfall-Entwurf.\n[Ende Kontext]";
+            return ["[Kontext der App]", "Es gibt noch keinen Testfall-Entwurf."].concat(extra, ["[Ende Kontext]"]).join("\n");
         }
         const lines = [
             "[Kontext der App]",
@@ -283,6 +326,9 @@ sap.ui.define([], function () {
         if (draft.submitted) {
             lines.push("Der Testfall wurde bereits übernommen und gestartet.");
         }
+        extra.forEach(function (line) {
+            lines.push(line);
+        });
         lines.push("[Ende Kontext]");
         return lines.join("\n");
     }

@@ -9,9 +9,34 @@ sap.ui.define(
         "./core/AgentSession",
         "./core/prompts",
         "./core/markdown",
-        "./core/resultReport"
+        "./core/resultReport",
+        "./core/testPackage",
+        "./core/teamRun",
+        "sap/m/Dialog",
+        "sap/m/Button",
+        "../process/ProcessPicture",
+        "../process/ProcessPictureStep",
+        "../process/ProcessPictureHandler"
     ],
-    function (PageController, JSONModel, MessageToast, MessageBox, TestCaseGateway, transports, AgentSession, prompts, markdown, resultReport) {
+    function (
+        PageController,
+        JSONModel,
+        MessageToast,
+        MessageBox,
+        TestCaseGateway,
+        transports,
+        AgentSession,
+        prompts,
+        markdown,
+        resultReport,
+        testPackage,
+        teamRun,
+        Dialog,
+        Button,
+        ProcessPicture,
+        ProcessPictureStep,
+        pictureHandler
+    ) {
         "use strict";
 
         /** example fault reports (fictional metering-service data, docs/messdienst-szenarien.md) */
@@ -22,8 +47,11 @@ sap.ui.define(
             cologne: "Lindenallee 5 in Köln, Herr Nowak: der Rauchwarnmelder im Flur ist abgerissen und liegt auf dem Boden. Meldung von Aylin Demir.",
             contract:
                 "Laut Wartungsvertrag: Im Kinderzimmer der Wohnung Yilmaz (Musterstraße 12, EG rechts) piept der Rauchwarnmelder. Austausch im Rahmen des Vertrags, " +
-                "Test bis zur Faktura. Gemeldet von Hausmeister Stefan Brandl."
+                "Test bis zur Faktura. Gemeldet von Hausmeister Stefan Brandl.",
+            package: "Zum nächsten Release möchte ich jeden Prozess durchtesten. Leg mir dafür Testfälle an, welche auf die Prozessbeschreibung passen.",
+            teamrun: "Möchte den Standardreparaturprozess testen, habe dort was im Coding angepasst. Nimm alle Testfälle vor, die dem Prozessteam zugeordnet sind."
         };
+        const RUN_POLLING_MS = 2000;
 
         /** suggested questions about a result (the assistant answers in German) */
         const QUESTIONS = {
@@ -60,6 +88,14 @@ sap.ui.define(
                     draftRows: [],
                     findings: [],
                     analysis: null,
+                    package: null,
+                    run: null,
+                    focus: "",
+                    processSteps: [],
+                    draftSteps: [],
+                    packageSteps: [],
+                    packageApprove: true,
+                    packageCopyScope: true,
                     busy: false,
                     busyText: "",
                     input: "",
@@ -140,7 +176,9 @@ sap.ui.define(
                         "Ich erfasse daraus einen Testfall, prüfe ihn gegen die Stammdaten und frage nach, wenn etwas fehlt. Gestartet wird erst nach Ihrer Bestätigung.\n" +
                         "Der Testfall wird dem Reparaturprozess zugeordnet: Ihr **Prozessteam** und der **Weg** – ohne Angebot, mit Angebot (angenommen oder abgelehnt) " +
                         "oder über einen Servicevertrag. Sagen Sie z. B. „laut Wartungsvertrag“ oder „nur bis zum Auftrag“, wenn Sie einen anderen Weg oder Endpunkt testen wollen.\n" +
-                        "Ergebnisse besprechen: im Testfall **Ergebnis besprechen** wählen oder hier z. B. „Ergebnis von STC-2026-000007 besprechen“ schreiben."
+                        "Ergebnisse besprechen: im Testfall **Ergebnis besprechen** wählen oder hier z. B. „Ergebnis von STC-2026-000007 besprechen“ schreiben.\n" +
+                        "Mehrere Testfälle auf einmal: z. B. „Leg mir für das nächste Release Testfälle an, die zur Prozessbeschreibung passen“ – ich entwerfe je Weg und je Prozessteam einen Testfall mit **Prozessbild** und prüfe das Paket. " +
+                        "Nach einer Code-Änderung: „Nimm alle Testfälle des Prozessteams Reparatur vor“ – ich bereite den **Teamlauf** vor, Sie starten ihn."
                 );
             },
 
@@ -208,6 +246,8 @@ sap.ui.define(
                         onStep: this._addStep.bind(this),
                         onDraft: this._showDraft.bind(this),
                         onAnalysis: this._showAnalysis.bind(this),
+                        onPackage: this._showPackage.bind(this),
+                        onRun: this._showRun.bind(this),
                         onText: function (update) {
                             this._setStreamingText(update.text);
                         }.bind(this)
@@ -261,13 +301,85 @@ sap.ui.define(
                 this.state.setProperty("/busyText", step.text);
             },
 
+            /** describe() of the master data (IDs with texts) — before the master data are read: the ID */
+            _describe: function () {
+                return this.masterData
+                    ? this.masterData.describe
+                    : function (field, value) {
+                          return String(value);
+                      };
+            },
+
+            /** steps of the process model for the process pictures of the page (read once) */
+            _loadProcessSteps: async function () {
+                if (!this._processModel) {
+                    this._processModel = await this._gateway().processModel();
+                    this.state.setProperty("/processSteps", this._processModel.steps);
+                }
+                return this._processModel;
+            },
+
+            _stepsOf: function (processId) {
+                return (this.state.getProperty("/processSteps") || []).filter(function (step) {
+                    return !processId || step.ProcessID === processId;
+                });
+            },
+
+            /** the panel of the last topic is shown: draft, test package or team run (an analysis takes precedence) */
+            _setFocus: function (topic) {
+                this.state.setProperty("/focus", topic);
+            },
+
+            _showPackage: function (pkg) {
+                if (!pkg) {
+                    this.state.setProperty("/package", null);
+                    if (this.state.getProperty("/focus") === "package") {
+                        this._setFocus(this.state.getProperty("/draft") ? "draft" : "");
+                    }
+                    return;
+                }
+                const panel = testPackage.panel(pkg, this._describe());
+                this.state.setProperty("/package", panel);
+                this.state.setProperty("/packageSteps", this._stepsOf(panel.processId));
+                this._setFocus("package");
+                this._loadProcessSteps()
+                    .then(
+                        function () {
+                            this.state.setProperty("/packageSteps", this._stepsOf(panel.processId));
+                        }.bind(this)
+                    )
+                    .catch(function () {});
+            },
+
+            _showRun: function (run) {
+                if (!run) {
+                    this.state.setProperty("/run", null);
+                    this._stopPolling();
+                    if (this.state.getProperty("/focus") === "run") {
+                        this._setFocus(this.state.getProperty("/draft") ? "draft" : this.state.getProperty("/package") ? "package" : "");
+                    }
+                    return;
+                }
+                this.state.setProperty("/run", teamRun.panel(run, this._describe()));
+                this._setFocus("run");
+            },
+
             _showDraft: function (draft) {
                 if (!draft) {
                     this.state.setProperty("/draft", null);
                     this.state.setProperty("/draftRows", []);
                     this.state.setProperty("/findings", []);
+                    this.state.setProperty("/draftSteps", []);
                     return;
                 }
+                this._setFocus("draft");
+                this._loadProcessSteps()
+                    .then(
+                        function () {
+                            this.state.setProperty("/draftSteps", this._stepsOf(draft.process && draft.process.process));
+                        }.bind(this)
+                    )
+                    .catch(function () {});
                 const describe = this.masterData
                     ? this.masterData.describe
                     : function (field, value) {
@@ -334,6 +446,7 @@ sap.ui.define(
             },
 
             onReset: async function () {
+                this._stopPolling();
                 if (this.session) {
                     await this.session.reset();
                 }
@@ -487,6 +600,234 @@ sap.ui.define(
                     this.session.closeAnalysis();
                 }
                 this._addMessage("assistant", this._text("agentResultClosed"));
+            },
+
+            /* ------------------------------------------------------------------------------------------ */
+            /* Test package                                                                                */
+            /* ------------------------------------------------------------------------------------------ */
+            onPackageSelect: function (event) {
+                const item = event.getSource().getBindingContext("agent").getObject();
+                if (this.session) {
+                    this.session.selectPackageItem(item.key, event.getParameter("selected"));
+                }
+            },
+
+            onPackageSave: async function () {
+                const session = this.session;
+                if (!session || !session.package) {
+                    return;
+                }
+                this.state.setProperty("/busy", true);
+                this.state.setProperty("/busyText", this._text("agentPackageSaving"));
+                try {
+                    const pkg = await session.savePackage({ approve: this.state.getProperty("/packageApprove"), copyScope: this.state.getProperty("/packageCopyScope") });
+                    this._addMessage("assistant", testPackage.savedReport(pkg));
+                    MessageToast.show(this._text("agentPackageSavedToast", [pkg.items.filter(function (i) { return i.saved; }).length]));
+                } catch (error) {
+                    MessageBox.error(transports.describeError(error).text);
+                    this._addStep({ icon: "sap-icon://error", text: error.message || String(error), state: "Error" });
+                } finally {
+                    this.state.setProperty("/busy", false);
+                }
+            },
+
+            onPackageDiscard: async function () {
+                if (this.session) {
+                    this.state.setProperty("/busy", true);
+                    try {
+                        await this.session.discardPackage();
+                        this._addMessage("assistant", this._text("agentPackageDiscarded"));
+                    } finally {
+                        this.state.setProperty("/busy", false);
+                    }
+                }
+            },
+
+            onPackageClose: function () {
+                if (this.session) {
+                    this.session.package = undefined;
+                }
+                this._showPackage(undefined);
+            },
+
+            onPackageOpen: function (event) {
+                const item = event.getSource().getBindingContext("agent").getObject();
+                return this._navigateToTestCase({ uuid: item.uuid, isActive: item.saved });
+            },
+
+            onPackageRelease: function () {
+                const pkg = this.session && this.session.package;
+                if (pkg && pkg.release) {
+                    return this.routing.navigateToRoute("ReleaseObjectPage", { key: "ReleaseID='" + encodeURIComponent(pkg.release.ReleaseID) + "',IsActiveEntity=true" });
+                }
+            },
+
+            /** process picture of one draft of the package in a dialog (way of the test case, section start..end) */
+            onPackagePicture: function (event) {
+                const item = event.getSource().getBindingContext("agent").getObject();
+                const picture = this._pictureDialog();
+                picture.model.setData({
+                    title: item.title,
+                    variant: item.variant,
+                    startObject: item.startObject,
+                    endObject: item.endObject,
+                    predecessorObject: item.predecessorObject,
+                    steps: this._stepsOf((this.state.getProperty("/package") || {}).processId)
+                });
+                picture.dialog.setTitle(this._text("agentPictureTitle", [item.title]));
+                picture.dialog.open();
+            },
+
+            _pictureDialog: function () {
+                if (!this._picture) {
+                    const model = new JSONModel({ steps: [] });
+                    const control = new ProcessPicture({
+                        variant: "{pic>/variant}",
+                        startObject: "{pic>/startObject}",
+                        endObject: "{pic>/endObject}",
+                        predecessorObject: "{pic>/predecessorObject}",
+                        stepPress: pictureHandler.onStepPress,
+                        steps: {
+                            path: "pic>/steps",
+                            template: new ProcessPictureStep({
+                                stepId: "{pic>StepID}",
+                                name: "{pic>StepName}",
+                                sequence: "{pic>Sequence}",
+                                businessObject: "{pic>BusinessObjectType}",
+                                team: "{pic>ResponsibleTeam}",
+                                teamName: "{pic>TeamName}",
+                                assignment: "{pic>TeamAssignment}",
+                                variants: "{pic>Variants}",
+                                pilot: "{pic>PilotScope}",
+                                automation: "{pic>Automation}"
+                            }),
+                            templateShareable: false
+                        }
+                    });
+                    const dialog = new Dialog({
+                        contentWidth: "90%",
+                        resizable: true,
+                        draggable: true,
+                        content: [control],
+                        endButton: new Button({
+                            text: this._text("agentPictureClose"),
+                            press: function () {
+                                dialog.close();
+                            }
+                        })
+                    }).addStyleClass("sapUiContentPadding");
+                    dialog.setModel(model, "pic");
+                    this.getView().addDependent(dialog);
+                    this._picture = { dialog: dialog, model: model, control: control };
+                }
+                return this._picture;
+            },
+
+            onPictureStep: function (event) {
+                return pictureHandler.onStepPress(event);
+            },
+
+            /* ------------------------------------------------------------------------------------------ */
+            /* Team run                                                                                    */
+            /* ------------------------------------------------------------------------------------------ */
+            onRunDependents: function (event) {
+                if (this.session) {
+                    const run = this.session.setRunDependents(event.getParameter("selected"));
+                    this._addMessage("assistant", teamRun.previewReport(run, this._describe()));
+                }
+            },
+
+            onRunStart: async function () {
+                const session = this.session;
+                if (!session || !session.run) {
+                    return;
+                }
+                this.state.setProperty("/busy", true);
+                this.state.setProperty("/busyText", this._text("agentRunStarting"));
+                try {
+                    const run = await session.startTeamRun();
+                    MessageToast.show(this._text("agentRunStartedToast", [run.run ? run.run.RunID : ""]));
+                    if (run.phase === "RUNNING") {
+                        this._startPolling();
+                    } else {
+                        this._addMessage("assistant", teamRun.resultReport(run, this._describe()));
+                    }
+                } catch (error) {
+                    MessageBox.error(transports.describeError(error).text);
+                    this._addStep({ icon: "sap-icon://error", text: error.message || String(error), state: "Error" });
+                } finally {
+                    this.state.setProperty("/busy", false);
+                }
+            },
+
+            _startPolling: function () {
+                this._stopPolling();
+                this._pollTimer = setInterval(this._pollRun.bind(this), RUN_POLLING_MS);
+            },
+
+            _stopPolling: function () {
+                if (this._pollTimer) {
+                    clearInterval(this._pollTimer);
+                    this._pollTimer = undefined;
+                }
+            },
+
+            /** status of the running team run (release action refreshRegressionRun, like the release page) */
+            _pollRun: async function () {
+                const session = this.session;
+                if (this._polling || !session || !session.run || session.run.phase !== "RUNNING") {
+                    this._stopPolling();
+                    return;
+                }
+                this._polling = true;
+                try {
+                    const run = await session.refreshTeamRun();
+                    if (run && run.phase === "FINISHED") {
+                        this._stopPolling();
+                        this._addMessage("assistant", teamRun.resultReport(run, this._describe()), this._text("agentRunSource"));
+                    }
+                } catch (error) {
+                    this._stopPolling();
+                    this._addStep({ icon: "sap-icon://error", text: error.message || String(error), state: "Error" });
+                } finally {
+                    this._polling = false;
+                }
+            },
+
+            /** jump-off: discussion of exactly the failed run of the team run */
+            onRunDiscuss: function (event) {
+                const item = event.getSource().getBindingContext("agent").getObject();
+                if (item.uuid) {
+                    this._openResult(item.uuid, item.runId);
+                }
+            },
+
+            onRunDashboard: function () {
+                const run = this.state.getProperty("/run");
+                return this.routing.navigateToRoute("Analytics", run ? { "?query": { release: run.release } } : {});
+            },
+
+            onRunClose: function () {
+                this._stopPolling();
+                if (this.session) {
+                    this.session.closeRun();
+                } else {
+                    this._showRun(undefined);
+                }
+            },
+
+            onRunOpenCase: function (event) {
+                const item = event.getSource().getBindingContext("agent").getObject();
+                if (item.uuid) {
+                    return this._navigateToTestCase({ uuid: item.uuid, isActive: true });
+                }
+            },
+
+            onExit: function () {
+                this._stopPolling();
+                if (PageController.prototype.onExit) {
+                    PageController.prototype.onExit.apply(this, arguments);
+                }
             },
 
             /** analytics of the release of the discussed run (otherwise of the release in test) */

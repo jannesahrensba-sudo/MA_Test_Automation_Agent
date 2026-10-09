@@ -300,7 +300,7 @@ test('Messages API loop: tools run in the page, the history is append-only with 
     assert.equal(capture.validierung, 'VALID');
     assert.match(capture.werte.ExpectedNetAmount, /108,00 EUR/);
     assert.match(last.system, /Messdienst/);
-    assert.deepEqual(last.tools.map((tool) => tool.name), ['stammdaten_suchen', 'testfall_entwurf_erfassen', 'ergebnis_lesen']);
+    assert.deepEqual(last.tools.map((tool) => tool.name), ['stammdaten_suchen', 'testfall_entwurf_erfassen', 'ergebnis_lesen', 'prozessmodell_lesen', 'testpaket_entwerfen', 'teamlauf_vorbereiten']);
     assert.match(last.messages[0].content, /^\[Kontext der App\]/);
     assert.equal(session.apiMessages.length, 6);
 });

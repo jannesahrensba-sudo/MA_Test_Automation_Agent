@@ -1,4 +1,4 @@
-sap.ui.define(["./prompts", "./textMatching", "./resultReport"], function (prompts, textMatching, resultReport) {
+sap.ui.define(["./prompts", "./textMatching", "./resultReport", "./testPackage", "./teamRun"], function (prompts, textMatching, resultReport, testPackage, teamRun) {
     "use strict";
 
     /**
@@ -13,6 +13,10 @@ sap.ui.define(["./prompts", "./textMatching", "./resultReport"], function (promp
      *      report; answers such as "mit Angebot", "über den Wartungsvertrag" or "nur bis zum Auftrag" change them
      *   6. discussion of a result ("Ergebnis besprechen"): answers from the deterministic result analysis of the backend
      *      (resultReport) — cause, responsible team, comparison with the previous run, confidence, recommendation
+     *   7. test package ("Leg mir für das nächste Release Testfälle an, die zur Prozessbeschreibung passen"): the test design
+     *      of the session creates and validates the drafts (testPackage)
+     *   8. team run ("Ich habe im Coding etwas angepasst – nimm alle Testfälle des Prozessteams vor"): preview of the run
+     *      of the team's test cases; started only with the button (teamRun)
      */
 
     const LABEL = prompts.FIELD_LABELS;
@@ -123,6 +127,18 @@ sap.ui.define(["./prompts", "./textMatching", "./resultReport"], function (promp
             if (this.session.analysis || (requested && (!draft || draft.submitted))) {
                 return this.discussResult(text, requested);
             }
+            if (testPackage.isRequest(text)) {
+                return this.createPackage(text);
+            }
+            if (teamRun.isRequest(text)) {
+                return this.prepareTeamRun(text);
+            }
+            if (this.session.run && this.session.run.phase === "PREVIEW") {
+                return this.runFollowUp(text);
+            }
+            if (this.session.package && !this.session.package.saved && (!draft || draft.submitted)) {
+                return this.packageFollowUp(text);
+            }
             if (!draft) {
                 return this.firstTurn(text);
             }
@@ -130,6 +146,49 @@ sap.ui.define(["./prompts", "./textMatching", "./resultReport"], function (promp
                 return "Der Testfall **" + (draft.caseId || "") + "** ist bereits übernommen. Für eine neue Störungsmeldung wählen Sie **Neu beginnen**.";
             }
             return this.followUp(text);
+        }
+
+        /** test package from the process description for a release */
+        async createPackage(text) {
+            const masterData = await this.gateway.masterData();
+            this.session.step({ icon: "sap-icon://decision", text: "Anfrage erkannt: Testpaket aus der Prozessbeschreibung" });
+            const pkg = await this.session.createPackage({ text: text });
+            return testPackage.report(pkg, masterData.describe);
+        }
+
+        async packageFollowUp(text) {
+            const n = textMatching.normalize(text);
+            if (/speicher|uebernehm|freigeb|passt|ok\b|ja\b/.test(n)) {
+                return "Bitte bestätigen Sie rechts mit **Paket speichern** – gespeichert und freigegeben wird nur, was ausgewählt ist.";
+            }
+            return (
+                "Das Testpaket ist noch offen. Wählen Sie rechts ab, was Sie nicht brauchen, öffnen Sie einen Entwurf im Formular oder speichern Sie das Paket. " +
+                "Für ein anderes Release schreiben Sie z. B. „Testfälle für S4-2025-FPS03 anlegen“."
+            );
+        }
+
+        /** team run: preview of all test cases of a process team (or of a process); the start needs the button */
+        async prepareTeamRun(text) {
+            const masterData = await this.gateway.masterData();
+            this.session.step({ icon: "sap-icon://decision", text: "Anfrage erkannt: Teamlauf (alle Testfälle eines Prozessteams)" });
+            try {
+                const run = await this.session.prepareTeamRun({ text: text });
+                return teamRun.previewReport(run, masterData.describe);
+            } catch (error) {
+                return error.message || String(error);
+            }
+        }
+
+        async runFollowUp(text) {
+            const masterData = await this.gateway.masterData();
+            const n = textMatching.normalize(text);
+            if (/ohne abhaengig|keine abhaengig|nur (die )?eigenen/.test(n)) {
+                return teamRun.previewReport(this.session.setRunDependents(false), masterData.describe);
+            }
+            if (teamRun.DEPENDENT_WORDS.test(n)) {
+                return teamRun.previewReport(this.session.setRunDependents(true), masterData.describe);
+            }
+            return "Der Teamlauf ist vorbereitet. Bestätigen Sie rechts mit **Teamlauf starten** – oder schreiben Sie „mit abhängigen Testfällen“, wenn die Übergaben an andere Teams mitlaufen sollen.";
         }
 
         /** discussion of a result: another Case ID opens that result, otherwise the question is answered from the analysis */

@@ -28,6 +28,8 @@ sap.ui.define(["sap/ui/model/Sorter", "sap/ui/model/Filter", "sap/ui/model/Filte
 
     /** header fields of the process reference: key of the tool/session → property of TestCase */
     const HEADER_FIELDS = {
+        description: "Description",
+        scenarioId: "ScenarioID",
         processTeam: "ProcessTeam",
         processVariant: "ProcessVariant",
         endObject: "EndObject",
@@ -76,6 +78,15 @@ sap.ui.define(["sap/ui/model/Sorter", "sap/ui/model/Filter", "sap/ui/model/Filte
         history: "ExecutionUUID,IsActiveEntity,ExternalExecutionID,Status,FunctionalResult,ReleaseID,TestCaseVersion,StartedAt,RunType"
     };
 
+    /** test package and team run: test cases with their test object, releases, scope, regression runs */
+    const TEST_CASE_SELECT =
+        "TestCaseUUID,IsActiveEntity,CaseID,Title,ScenarioID,ProcessProfile,ProcessTeam,BusinessProcess,ProcessVariant,StartObject,EndObject,PredecessorTestCase," +
+        "ValidationStatus,ApprovalStatus,Version,ApprovedVersion,AssignmentStatus,ExecutionStatus,FinalResult";
+    const RELEASE_SELECT = "ReleaseID,IsActiveEntity,ReleaseName,ReleaseType,ReleaseStatus,PredecessorRelease,TestStartDate,TestEndDate,LatestRunUUID,LatestRunID,LatestRunStatus";
+    const RUN_SELECT = "RunUUID,RunID,ReleaseID,Status,Trigger,ProcessTeam,ProcessID,RunReason,IncludesDependents,StartedAt,FinishedAt,CandidateCount,StartedCount,SkippedCount,RunningCount,PassedCount,FailedCount,PassRate";
+    const RUN_ITEM_SELECT = "RunItemUUID,RunUUID,Sequence,TestCaseUUID,CaseID,Title,ProcessTeam,ProcessVariant,TestCaseVersion,Decision,Reason,ExecutionUUID,ExternalExecutionID,ExecutionStatus,FinalResult";
+    const PROCESS_STEP_SELECT = "ProcessID,StepID,StepName,Sequence,BusinessObjectType,ResponsibleTeam,TeamAssignment,Variants,PilotScope,Automation";
+
     /** Edm.Decimal values are strings in the OData V4 model */
     const DECIMAL_FIELDS = ["ServiceDuration", "ServicePartQuantity", "ExpectedNetAmount", "NetAmountTolerance"];
 
@@ -104,8 +115,12 @@ sap.ui.define(["sap/ui/model/Sorter", "sap/ui/model/Filter", "sap/ui/model/Filte
             return "/TestCase(TestCaseUUID=" + uuid + ",IsActiveEntity=true)";
         }
 
-        async readList(path, select, sorters, filters) {
-            const binding = this.model.bindList(path, undefined, sorters, filters, { $$groupId: "$direct", $select: select });
+        async readList(path, select, sorters, filters, expand) {
+            const parameters = { $$groupId: "$direct", $select: select };
+            if (expand) {
+                parameters.$expand = expand;
+            }
+            const binding = this.model.bindList(path, undefined, sorters, filters, parameters);
             try {
                 return (await binding.requestContexts(0, 1000)).map(function (context) {
                     return context.getObject();
@@ -124,10 +139,13 @@ sap.ui.define(["sap/ui/model/Sorter", "sap/ui/model/Filter", "sap/ui/model/Filte
             }
         }
 
-        async invoke(action, path) {
+        async invoke(action, path, parameters) {
             const target = this.model.bindContext(path);
             const operation = this.model.bindContext(NS + "." + action + "(...)", target.getBoundContext(), { $$groupId: "$direct" });
             try {
+                Object.keys(parameters || {}).forEach(function (name) {
+                    operation.setParameter(name, parameters[name]);
+                });
                 await operation.invoke();
             } catch (error) {
                 throw odataError(error);
@@ -351,6 +369,103 @@ sap.ui.define(["sap/ui/model/Sorter", "sap/ui/model/Filter", "sap/ui/model/Filte
             await this.invoke("startExecution", this.activePath(uuid));
             const started = await this.readObject(this.activePath(uuid), "TestCaseUUID,IsActiveEntity,ExternalExecutionID,ExecutionStatus");
             return { externalExecutionId: started.ExternalExecutionID };
+        }
+
+        /* ---------------------------------------------------------------------------------------------- */
+        /* Test package and team run                                                                       */
+        /* ---------------------------------------------------------------------------------------------- */
+        releasePath(releaseId) {
+            return "/Release(ReleaseID='" + encodeURIComponent(String(releaseId).replace(/'/g, "''")) + "',IsActiveEntity=true)";
+        }
+
+        /** process model of the test design and the process picture, read once: steps of all processes, ways, processes, teams */
+        processModel() {
+            if (!this.processModelPromise) {
+                this.processModelPromise = Promise.all([
+                    this.readList("/ProcessStepVH", PROCESS_STEP_SELECT),
+                    this.readList("/ProcessVariant", "VariantUUID,IsActiveEntity,ProcessID,Variant,VariantName,Description,PilotScope,IsDefault,Sequence", undefined, [
+                        new Filter("IsActiveEntity", FilterOperator.EQ, true)
+                    ]),
+                    this.masterData()
+                ])
+                    .then(function (results) {
+                        const pools = results[2].pools;
+                        const names = new Map(
+                            (pools.processTeams || []).map(function (t) {
+                                return [t.ProcessTeam, t.ProcessTeamName];
+                            })
+                        );
+                        return {
+                            steps: results[0].map(function (step) {
+                                return Object.assign({}, step, { TeamName: names.get(step.ResponsibleTeam) || "" });
+                            }),
+                            variants: results[1],
+                            processes: pools.processes || [],
+                            teams: pools.processTeams || []
+                        };
+                    })
+                    .catch(
+                        function (error) {
+                            this.processModelPromise = undefined;
+                            throw odataError(error);
+                        }.bind(this)
+                    );
+            }
+            return this.processModelPromise;
+        }
+
+        /** active test cases with the test object of their test data (device, contract, customer) */
+        async testCases() {
+            const rows = await this.readList(
+                "/TestCase",
+                TEST_CASE_SELECT,
+                [new Sorter("CaseID")],
+                [new Filter("IsActiveEntity", FilterOperator.EQ, true)],
+                "_TestCaseData($select=TestCaseUUID,IsActiveEntity,ServiceReferenceEquipment,ServiceContract,SoldToParty)"
+            );
+            return rows.map(function (row) {
+                const data = row._TestCaseData || {};
+                return Object.assign({}, row, { equipment: data.ServiceReferenceEquipment || "", contract: data.ServiceContract || "", customer: data.SoldToParty || "", LatestResult: row.FinalResult || "" });
+            });
+        }
+
+        releases() {
+            return this.readList("/Release", RELEASE_SELECT, [new Sorter("TestStartDate")], [new Filter("IsActiveEntity", FilterOperator.EQ, true)]);
+        }
+
+        scopes() {
+            return this.readList("/ReleaseScope", "ScopeUUID,IsActiveEntity,ReleaseID,ProcessTeam,ProcessID,IsRegressionRelevant", undefined, [new Filter("IsActiveEntity", FilterOperator.EQ, true)]);
+        }
+
+        /** test steps of a test case (the section of its way), draft or saved */
+        draftSteps(uuid, active) {
+            return this.readList((active ? this.activePath(uuid) : this.draftPath(uuid)) + "/_Step", "TestCaseStepUUID,IsActiveEntity,StepNo,ProcessStepID,ResponsibleTeam,IsHandover", [new Sorter("StepNo")]);
+        }
+
+        /** scope of a release from its predecessor release (action copyScopeFromPredecessor) */
+        copyScope(releaseId) {
+            return this.invoke("copyScopeFromPredecessor", this.releasePath(releaseId));
+        }
+
+        /** team run: regression run of one process team (action startTeamRegressionRun) */
+        startTeamRun(releaseId, parameters) {
+            return this.invoke("startTeamRegressionRun", this.releasePath(releaseId), parameters);
+        }
+
+        /** advances the running regression run of a release (action refreshRegressionRun) */
+        refreshRun(releaseId) {
+            return this.invoke("refreshRegressionRun", this.releasePath(releaseId));
+        }
+
+        /** latest regression run of a release with its items */
+        async readRun(releaseId) {
+            const release = await this.readObject(this.releasePath(releaseId), RELEASE_SELECT);
+            if (!release.LatestRunUUID) {
+                return { release: release, run: null, items: [] };
+            }
+            const runPath = "/RegressionRun(RunUUID=" + release.LatestRunUUID + ")";
+            const [run, items] = await Promise.all([this.readObject(runPath, RUN_SELECT), this.readList(runPath + "/_Item", RUN_ITEM_SELECT, [new Sorter("Sequence")])]);
+            return { release: release, run: run, items: items };
         }
 
         /** Discard (DELETE of the draft) */

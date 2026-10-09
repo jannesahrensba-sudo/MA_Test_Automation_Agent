@@ -1,0 +1,47 @@
+<core:FragmentDefinition xmlns:core="sap.ui.core" xmlns="sap.m" xmlns:pp="zstc.testautomation.ext.process">
+    <!-- Custom subsection "Process Picture": the way of the test case through the process model, one swim lane per process team;
+         the section start..end of the run is highlighted (the same rule as the backend), after a run the result per step -->
+    <VBox id="processPictureBox" core:require="{handler: 'zstc/testautomation/ext/process/ProcessPictureHandler'}">
+        <OverflowToolbar id="processPictureToolbar" style="Clear">
+            <SegmentedButton id="processPictureMode" selectedKey="WAY" selectionChange="handler.onModeChange">
+                <items>
+                    <SegmentedButtonItem id="processPictureModeWay" key="WAY" text="{i18n>ppModeWay}" />
+                    <SegmentedButtonItem id="processPictureModeProcess" key="PROCESS" text="{i18n>ppModeProcess}" />
+                </items>
+            </SegmentedButton>
+            <ToolbarSpacer id="processPictureSpacer" />
+            <Text id="processPictureHint" text="{i18n>ppHint}" />
+        </OverflowToolbar>
+        <pp:ProcessPicture
+            id="processPicture"
+            variant="{ProcessVariant}"
+            startObject="{StartObject}"
+            endObject="{EndObject}"
+            predecessorObject="{PredecessorObject}"
+            showResults="{= %{IsActiveEntity} === true }"
+            stepPress="handler.onStepPress"
+            steps="{path: '_ProcessStep', templateShareable: false}"
+            results="{path: '_LatestExecutionStep', templateShareable: false}"
+            checks="{path: '_LatestTestAssertion', templateShareable: false}">
+            <pp:steps>
+                <pp:ProcessPictureStep
+                    stepId="{StepID}"
+                    name="{StepName}"
+                    sequence="{Sequence}"
+                    businessObject="{BusinessObjectType}"
+                    team="{ResponsibleTeam}"
+                    teamName="{_ResponsibleTeam/ProcessTeamName}"
+                    assignment="{TeamAssignment}"
+                    variants="{Variants}"
+                    pilot="{PilotScope}"
+                    automation="{Automation}" />
+            </pp:steps>
+            <pp:results>
+                <pp:ProcessPictureResult stepId="{ProcessStepID}" status="{ExecutionStatus}" />
+            </pp:results>
+            <pp:checks>
+                <pp:ProcessPictureResult stepId="{ProcessStepID}" status="{Result}" />
+            </pp:checks>
+        </pp:ProcessPicture>
+    </VBox>
+</core:FragmentDefinition>

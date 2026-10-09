@@ -5,6 +5,7 @@
  */
 const path = require('path');
 const service = require('../../mock-backend/services/TestCaseService');
+const releaseService = require('../../mock-backend/services/ReleaseService');
 const backendHelpers = require('../../mock-backend/test/helpers');
 const { loadUi5Module } = require('../../tools/common/loadUi5Module');
 
@@ -28,6 +29,8 @@ function createMemoryGateway(repo) {
     const masterData = createMasterData(pools);
     /** header fields of the process reference (TestCaseGateway.HEADER_FIELDS) */
     const HEADER_FIELDS = {
+        description: 'Description',
+        scenarioId: 'ScenarioID',
         processTeam: 'ProcessTeam',
         processVariant: 'ProcessVariant',
         endObject: 'EndObject',
@@ -144,6 +147,53 @@ function createMemoryGateway(repo) {
         async findTestCase(caseId) {
             const found = await repo.find('TestCase', { CaseID: caseId, IsActiveEntity: true });
             return found.length ? found[0].TestCaseUUID : undefined;
+        },
+        async processModel() {
+            const names = new Map(repo.data.ProcessTeamVH.map((t) => [t.ProcessTeam, t.ProcessTeamName]));
+            return {
+                steps: repo.data.ProcessStepVH.map((s) => ({ ...s, TeamName: names.get(s.ResponsibleTeam) || '' })),
+                variants: repo.data.ProcessVariant.filter((v) => v.IsActiveEntity),
+                processes: repo.data.BusinessProcessVH,
+                teams: repo.data.ProcessTeamVH
+            };
+        },
+        async testCases() {
+            const rows = [];
+            for (const tc of (await repo.find('TestCase', { IsActiveEntity: true })).sort((a, b) => String(a.CaseID).localeCompare(String(b.CaseID)))) {
+                const data = (await repo.findOne('TestCaseData', activeKeys(tc.TestCaseUUID))) || {};
+                rows.push({ ...tc, equipment: data.ServiceReferenceEquipment || '', contract: data.ServiceContract || '', customer: data.SoldToParty || '', LatestResult: tc.FinalResult || '' });
+            }
+            return rows;
+        },
+        async releases() {
+            return (await repo.find('Release', { IsActiveEntity: true })).sort((a, b) => String(a.TestStartDate).localeCompare(String(b.TestStartDate)));
+        },
+        async scopes() {
+            return repo.find('ReleaseScope', { IsActiveEntity: true });
+        },
+        async draftSteps(uuid, active) {
+            return (await repo.find('TestCaseStep', active ? activeKeys(uuid) : draftKeys(uuid))).sort((a, b) => a.StepNo - b.StepNo);
+        },
+        async copyScope(releaseId) {
+            calls.push(['copyScope', releaseId]);
+            await releaseService.copyScopeFromPredecessor(repo, { ReleaseID: releaseId, IsActiveEntity: true });
+        },
+        async startTeamRun(releaseId, parameters) {
+            calls.push(['startTeamRun', releaseId, parameters]);
+            await releaseService.startTeamRegressionRun(repo, { ReleaseID: releaseId, IsActiveEntity: true }, parameters);
+        },
+        async refreshRun(releaseId) {
+            calls.push(['refreshRun', releaseId]);
+            await releaseService.refreshRegressionRun(repo, { ReleaseID: releaseId, IsActiveEntity: true });
+        },
+        async readRun(releaseId) {
+            const release = await repo.findOne('Release', { ReleaseID: releaseId, IsActiveEntity: true });
+            if (!release.LatestRunUUID) {
+                return { release, run: null, items: [] };
+            }
+            const run = await repo.findOne('RegressionRun', { RunUUID: release.LatestRunUUID });
+            const items = (await repo.find('RegressionRunItem', { RunUUID: release.LatestRunUUID })).sort((a, b) => a.Sequence - b.Sequence);
+            return { release, run, items };
         },
         async discardDraft(uuid) {
             calls.push(['discard']);

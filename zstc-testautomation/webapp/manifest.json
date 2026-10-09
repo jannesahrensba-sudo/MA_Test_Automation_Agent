@@ -337,6 +337,19 @@
                                                 "placement": "After",
                                                 "anchor": "SAPObjects"
                                             }
+                                        },
+                                        "ProcessSection": {
+                                            "subSections": {
+                                                "ProcessPicture": {
+                                                    "type": "XMLFragment",
+                                                    "template": "zstc.testautomation.ext.process.TestCaseProcessPicture",
+                                                    "title": "{i18n>processPictureTitle}",
+                                                    "position": {
+                                                        "placement": "Before",
+                                                        "anchor": "TestStepsGroup"
+                                                    }
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -522,6 +535,20 @@
                                 "_Version/@com.sap.vocabularies.UI.v1.LineItem": {
                                     "tableSettings": {
                                         "type": "ResponsiveTable"
+                                    }
+                                }
+                            },
+                            "content": {
+                                "body": {
+                                    "sections": {
+                                        "ProcessPicture": {
+                                            "template": "zstc.testautomation.ext.process.ProcessModelPicture",
+                                            "title": "{i18n>processPictureTitle}",
+                                            "position": {
+                                                "placement": "After",
+                                                "anchor": "ProcessGeneral"
+                                            }
+                                        }
                                     }
                                 }
                             }

@@ -1,4 +1,4 @@
-sap.ui.define(["./prompts", "./resultReport"], function (prompts, resultReport) {
+sap.ui.define(["./prompts", "./resultReport", "./testDesign", "./testPackage", "./teamRun"], function (prompts, resultReport, testDesign, testPackage, teamRun) {
     "use strict";
 
     /**
@@ -9,6 +9,9 @@ sap.ui.define(["./prompts", "./resultReport"], function (prompts, resultReport) 
      *
      * Approve and start execution are deliberately NOT tools: they need the confirmation of the user.
      * ergebnis_lesen reads the result of a run with its deterministic analysis (discussion of a result, read-only).
+     * prozessmodell_lesen describes the process (ways, steps, teams, test cases per way); testpaket_entwerfen creates and
+     * validates the drafts of a test package (saving needs the confirmation); teamlauf_vorbereiten prepares the run of all
+     * test cases of a process team (starting needs the confirmation).
      */
 
     const MAX_DESCRIPTION = 40;
@@ -99,6 +102,52 @@ sap.ui.define(["./prompts", "./resultReport"], function (prompts, resultReport) 
             fields[name] = text === "" ? null : text;
         });
         return { fields: fields, ignored: ignored, notes: notes };
+    }
+
+    /**
+     * Process description for the language model: ways with their steps (team, automation, document), the teams and the
+     * test cases per way; processes without steps are marked as not modeled.
+     */
+    function processSummary(model, testCases, processId, describe) {
+        const processes = model.processes.filter(function (p) {
+            return !processId || p.ProcessID === processId;
+        });
+        return processes.map(function (process) {
+            const steps = model.steps.filter(function (s) {
+                return s.ProcessID === process.ProcessID;
+            });
+            const variants = model.variants
+                .filter(function (v) {
+                    return v.ProcessID === process.ProcessID;
+                })
+                .sort(function (a, b) {
+                    return (Number(a.Sequence) || 0) - (Number(b.Sequence) || 0);
+                });
+            return {
+                prozess: process.ProcessID,
+                name: process.ProcessName,
+                verantwortlich: describe("ProcessTeam", process.OwnerTeam),
+                modelliert: steps.length > 0,
+                hinweis: steps.length ? "" : "keine Prozessschritte modelliert – keine Testfälle ableitbar",
+                wege: variants.map(function (v) {
+                    const path = testDesign.wayPath(steps, v.Variant);
+                    const cases = testCases.filter(function (tc) {
+                        return tc.BusinessProcess === process.ProcessID && tc.ProcessVariant === v.Variant;
+                    });
+                    return {
+                        weg: v.Variant,
+                        name: v.VariantName,
+                        pilot: v.PilotScope === "PILOT",
+                        schritte: path.map(function (s) {
+                            return s.StepID + " " + s.StepName + " [" + (s.ResponsibleTeam || "Team offen") + ", " + s.Automation + (s.BusinessObjectType ? ", " + s.BusinessObjectType : "") + "]";
+                        }),
+                        testfaelle: cases.map(function (tc) {
+                            return tc.CaseID + " (" + tc.ProcessTeam + ", " + (tc.StartObject || "-") + "→" + (tc.EndObject || "-") + ", " + tc.ApprovalStatus + (tc.FinalResult ? ", " + tc.FinalResult : "") + ")";
+                        })
+                    };
+                })
+            };
+        });
     }
 
     /** Compact German summary of a draft for tool results and the context block */
@@ -366,7 +415,84 @@ sap.ui.define(["./prompts", "./resultReport"], function (prompts, resultReport) 
             }
         };
 
-        return [search, capture, result];
+        const processRead = {
+            name: "prozessmodell_lesen",
+            description:
+                "Liest die Prozessbeschreibung: Prozesse mit ihren Wegen (Pilot oder später), den Schritten je Weg (Prozessteam, Automatisierung, Beleg) und den vorhandenen Testfällen je Weg. " +
+                "Prozesse ohne Schritte sind als nicht modelliert gekennzeichnet. Ändert nichts.",
+            inputSchema: {
+                type: "object",
+                properties: {
+                    prozess: { type: "string", description: "optional: Prozess-ID, z. B. SRV-REP; leer = alle Prozesse" }
+                }
+            },
+            execute: async function (input) {
+                const model = await gateway.processModel();
+                const testCases = await gateway.testCases();
+                const masterData = await gateway.masterData();
+                const processId = asString(input && input.prozess).toUpperCase();
+                session.step({ icon: "sap-icon://process", text: "Prozessbeschreibung gelesen" + (processId ? ": " + processId : "") });
+                return { prozesse: processSummary(model, testCases, processId, masterData.describe) };
+            }
+        };
+
+        const packageTool = {
+            name: "testpaket_entwerfen",
+            description:
+                "Entwirft ein Testpaket aus der Prozessbeschreibung für ein Release: je Pilot-Weg ein End-to-End-Testfall und je weiterem Prozessteam ein Teilprozess-Testfall, " +
+                "mit Testdaten aus den Stammdaten. Jeder Entwurf wird im Backend angelegt und validiert (R1–R13, eindeutige Korrekturen übernommen); das Paket wird geprüft " +
+                "(Abdeckung der Prozessschritte, Wege, Teams, Überschneidungen, Dubletten). Prozesse ohne Prozessschritte werden gemeldet, nicht erfunden. " +
+                "Speichern und Freigabe sind nicht Teil dieses Tools (Knopf „Paket speichern“).",
+            inputSchema: {
+                type: "object",
+                properties: {
+                    release: { type: "string", description: "Release-ID, z. B. S4-2025-FPS02; leer = das nächste geplante Release" },
+                    prozesse: { type: "array", items: { type: "string" }, description: "optional: Prozess-IDs; leer = Prozesse im Scope des Release" },
+                    teilprozesse: { type: "boolean", description: "Teilprozess-Testfälle der weiteren Prozessteams (Standard: ja)" }
+                }
+            },
+            execute: function (input) {
+                return serialized(async function () {
+                    const masterData = await gateway.masterData();
+                    const pkg = await session.createPackage({
+                        releaseId: asString(input && input.release) || undefined,
+                        processIds: Array.isArray(input && input.prozesse) ? input.prozesse.map(asString).filter(Boolean) : undefined,
+                        teamSections: !(input && input.teilprozesse === false)
+                    });
+                    return testPackage.summarize(pkg, masterData.describe);
+                });
+            }
+        };
+
+        const runTool = {
+            name: "teamlauf_vorbereiten",
+            description:
+                "Bereitet den Lauf aller Testfälle eines Prozessteams (oder eines Prozesses) im Release in Test vor, z. B. nach einer Code-Änderung: welche Testfälle laufen, " +
+                "welche übersprungen werden (mit Grund) und welche auf einen Vorgänger warten; abhängige Testfälle anderer Teams nur auf Wunsch. Startet nichts – der Nutzer bestätigt mit „Teamlauf starten“.",
+            inputSchema: {
+                type: "object",
+                properties: {
+                    prozessteam: { type: "string", description: "Prozessteam, z. B. PT-REPARATUR; leer = Team, dem der Prozess gehört" },
+                    prozess: { type: "string", description: "Prozess-ID, z. B. SRV-REP; leer = alle Prozesse des Teams" },
+                    release: { type: "string", description: "optional: Release in Test" },
+                    anlass: { type: "string", description: "Anlass des Laufs, z. B. „Code-Änderung im Reparaturprozess“" },
+                    abhaengige: { type: "boolean", description: "abhängige Testfälle anderer Teams (Übergaben) mitnehmen" }
+                }
+            },
+            execute: async function (input) {
+                const masterData = await gateway.masterData();
+                const run = await session.prepareTeamRun({
+                    team: asString(input && input.prozessteam) || undefined,
+                    processId: asString(input && input.prozess) || undefined,
+                    releaseId: asString(input && input.release) || undefined,
+                    reason: asString(input && input.anlass) || undefined,
+                    includeDependents: !!(input && input.abhaengige)
+                });
+                return teamRun.summarize(run, masterData.describe);
+            }
+        };
+
+        return [search, capture, result, processRead, packageTool, runTool];
     }
 
     return {
@@ -374,6 +500,7 @@ sap.ui.define(["./prompts", "./resultReport"], function (prompts, resultReport) 
         normalizeFields: normalizeFields,
         normalizeProcess: normalizeProcess,
         summarizeDraft: summarizeDraft,
+        processSummary: processSummary,
         VARIANTS: VARIANTS,
         END_OBJECTS: END_OBJECTS,
         START_OBJECTS: START_OBJECTS

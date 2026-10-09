@@ -4,6 +4,7 @@
     xmlns:core="sap.ui.core"
     xmlns:l="sap.ui.layout"
     xmlns:macros="sap.fe.macros"
+    xmlns:pp="zstc.testautomation.ext.process"
     controllerName="zstc.testautomation.ext.agent.AgentPage">
     <!-- Service assistant (FPM custom page, start page of the app): German fault report → validated test case → start in the app -->
     <!-- the Page building block evaluates title/description once when it is created: literal texts, not i18n bindings -->
@@ -75,6 +76,8 @@
                                 <MenuItem id="exampleAmbiguous" key="ambiguous" text="{i18n>agentExampleAmbiguous}" icon="sap-icon://question-mark" />
                                 <MenuItem id="exampleCologne" key="cologne" text="{i18n>agentExampleCologne}" icon="sap-icon://alert" />
                                 <MenuItem id="exampleContract" key="contract" text="{i18n>agentExampleContract}" icon="sap-icon://document-text" />
+                                <MenuItem id="examplePackage" key="package" text="{i18n>agentExamplePackage}" icon="sap-icon://add-process" startsSection="true" />
+                                <MenuItem id="exampleTeamRun" key="teamrun" text="{i18n>agentExampleTeamRun}" icon="sap-icon://group" />
                             </Menu>
                         </menu>
                     </MenuButton>
@@ -115,7 +118,104 @@
                         </FlexBox>
                     </VBox>
                 </Panel>
-                <Panel id="agentDraftPanel" headerText="{i18n>agentDraftTitle}" visible="{= !${agent>/analysis} }" class="sapUiNoContentPadding">
+                <!-- team run: all test cases of a process team (preview, start on confirmation, results with the jump-off to the discussion) -->
+                <Panel id="agentRunPanel" headerText="{i18n>agentRunTitle}" visible="{= !${agent>/analysis} &amp;&amp; ${agent>/focus} === 'run' &amp;&amp; !!${agent>/run} }" class="sapUiNoContentPadding">
+                    <VBox id="agentRunBox" class="sapUiSmallMargin">
+                        <Title id="agentRunHeading" text="{agent>/run/heading}" wrapping="true" />
+                        <HBox id="agentRunStatus" wrap="Wrap" alignItems="Center" class="sapUiTinyMarginTop">
+                            <ObjectStatus id="agentRunRelease" title="{i18n>agentRunRelease}" text="{agent>/run/release}" class="sapUiSmallMarginEnd" />
+                            <ObjectStatus id="agentRunCounts" title="{i18n>agentRunStatus}" text="{agent>/run/counts}" state="{agent>/run/state}" />
+                        </HBox>
+                        <Text id="agentRunReason" text="{agent>/run/reason}" class="sapUiTinyMarginTop" />
+                        <CheckBox
+                            id="agentRunDependents"
+                            text="{agent>/run/dependentsText}"
+                            selected="{agent>/run/includeDependents}"
+                            select=".onRunDependents"
+                            enabled="{= !${agent>/busy} }"
+                            visible="{= !${agent>/run/started} &amp;&amp; !!${agent>/run/dependentsText} }" />
+                        <List id="agentRunItems" items="{agent>/run/items}" growing="true" growingThreshold="25" showSeparators="Inner" class="sapUiTinyMarginTop">
+                            <CustomListItem highlight="{agent>state}" type="Active" press=".onRunOpenCase">
+                                <HBox justifyContent="SpaceBetween" alignItems="Center" class="sapUiTinyMargin">
+                                    <VBox>
+                                        <Text text="{agent>caseId} · {agent>title}" />
+                                        <Text text="{agent>info}" visible="{= !!${agent>info} }" class="sapUiTinyMarginTop" />
+                                    </VBox>
+                                    <VBox alignItems="End" class="sapUiTinyMarginBegin">
+                                        <ObjectStatus text="{agent>status}" state="{agent>state}" />
+                                        <Button text="{i18n>agentRunDiscuss}" icon="sap-icon://discussion" type="Transparent" press=".onRunDiscuss" visible="{agent>failed}" />
+                                    </VBox>
+                                </HBox>
+                            </CustomListItem>
+                        </List>
+                        <FlexBox id="agentRunActions" wrap="Wrap" alignItems="Center" class="sapUiSmallMarginTop">
+                            <Button id="agentRunStart" class="sapUiTinyMarginEnd sapUiTinyMarginBottom" text="{i18n>agentRunStart}" icon="sap-icon://media-play" type="Emphasized" press=".onRunStart" visible="{= !${agent>/run/started} }" enabled="{= !${agent>/busy} }" />
+                            <Button id="agentRunDashboard" class="sapUiTinyMarginEnd sapUiTinyMarginBottom" text="{i18n>agentRunDashboard}" icon="sap-icon://business-objects-experience" press=".onRunDashboard" visible="{agent>/run/started}" />
+                            <Button id="agentRunClose" class="sapUiTinyMarginBottom" text="{i18n>agentRunClose}" icon="sap-icon://decline" press=".onRunClose" enabled="{= !${agent>/busy} }" />
+                        </FlexBox>
+                    </VBox>
+                </Panel>
+                <!-- test package: several test cases from the process description, each with its process picture and validation -->
+                <Panel id="agentPackagePanel" headerText="{i18n>agentPackageTitle}" visible="{= !${agent>/analysis} &amp;&amp; ${agent>/focus} === 'package' &amp;&amp; !!${agent>/package} }" class="sapUiNoContentPadding">
+                    <VBox id="agentPackageBox" class="sapUiSmallMargin">
+                        <Title id="agentPackageHeading" text="{agent>/package/heading}" wrapping="true" />
+                        <Text id="agentPackageCounts" text="{agent>/package/counts}" class="sapUiTinyMarginTop" />
+                        <VBox id="agentPackageMessages" items="{agent>/package/messages}" class="sapUiTinyMarginTop">
+                            <MessageStrip text="{agent>text}" type="{agent>type}" showIcon="true" class="sapUiTinyMarginBottom" />
+                        </VBox>
+                        <List id="agentPackageItems" items="{agent>/package/items}" headerText="{i18n>agentPackageItems}" showSeparators="Inner">
+                            <CustomListItem highlight="{agent>statusState}">
+                                <HBox alignItems="Start" class="sapUiTinyMarginTopBottom">
+                                    <CheckBox selected="{agent>selected}" select=".onPackageSelect" enabled="{= !${agent>/package/saved} &amp;&amp; !${agent>/busy} }" />
+                                    <VBox class="sapUiTinyMarginTop">
+                                        <Text text="{= ${agent>caseId} ? ${agent>caseId} + ' · ' + ${agent>title} : ${agent>title} }" />
+                                        <Text text="{agent>team} · {agent>way}" class="sapUiTinyMarginTop" />
+                                        <Text text="{agent>data}" visible="{= !!${agent>data} }" />
+                                        <ObjectStatus text="{agent>statusText}" state="{agent>statusState}" class="sapUiTinyMarginTop" />
+                                        <Text text="{agent>info}" visible="{= !!${agent>info} }" class="sapUiTinyMarginTop" />
+                                        <HBox>
+                                            <Button text="{i18n>agentPackagePicture}" icon="sap-icon://process" type="Transparent" press=".onPackagePicture" />
+                                            <Button text="{i18n>agentPackageOpen}" icon="sap-icon://edit" type="Transparent" press=".onPackageOpen" enabled="{= !!${agent>uuid} &amp;&amp; !${agent>/busy} }" />
+                                        </HBox>
+                                    </VBox>
+                                </HBox>
+                            </CustomListItem>
+                        </List>
+                        <Title id="agentPackageCoverageTitle" text="{i18n>agentPackageCoverage}" level="H5" class="sapUiSmallMarginTop sapUiTinyMarginBottom" />
+                        <pp:ProcessPicture
+                            id="agentPackagePicture"
+                            mode="PROCESS"
+                            orientation="vertical"
+                            showSection="false"
+                            coverage="{agent>/package/coverage}"
+                            minScale="0.75"
+                            stepPress=".onPictureStep"
+                            steps="{path: 'agent>/packageSteps', templateShareable: false}">
+                            <pp:steps>
+                                <pp:ProcessPictureStep
+                                    stepId="{agent>StepID}"
+                                    name="{agent>StepName}"
+                                    sequence="{agent>Sequence}"
+                                    businessObject="{agent>BusinessObjectType}"
+                                    team="{agent>ResponsibleTeam}"
+                                    teamName="{agent>TeamName}"
+                                    assignment="{agent>TeamAssignment}"
+                                    variants="{agent>Variants}"
+                                    pilot="{agent>PilotScope}"
+                                    automation="{agent>Automation}" />
+                            </pp:steps>
+                        </pp:ProcessPicture>
+                        <CheckBox id="agentPackageCopyScope" text="{agent>/package/copyText}" selected="{agent>/packageCopyScope}" visible="{= !!${agent>/package/copyFrom} &amp;&amp; !${agent>/package/saved} }" />
+                        <CheckBox id="agentPackageApprove" text="{i18n>agentPackageApprove}" selected="{agent>/packageApprove}" visible="{= !${agent>/package/saved} }" />
+                        <FlexBox id="agentPackageActions" wrap="Wrap" alignItems="Center" class="sapUiSmallMarginTop">
+                            <Button id="agentPackageSave" class="sapUiTinyMarginEnd sapUiTinyMarginBottom" text="{i18n>agentPackageSave}" icon="sap-icon://save" type="Emphasized" press=".onPackageSave" visible="{= !${agent>/package/saved} }" enabled="{= !${agent>/busy} }" />
+                            <Button id="agentPackageDiscard" class="sapUiTinyMarginEnd sapUiTinyMarginBottom" text="{i18n>agentPackageDiscard}" icon="sap-icon://delete" press=".onPackageDiscard" visible="{= !${agent>/package/saved} }" enabled="{= !${agent>/busy} }" />
+                            <Button id="agentPackageRelease" class="sapUiTinyMarginEnd sapUiTinyMarginBottom" text="{i18n>agentPackageRelease}" icon="sap-icon://business-objects-experience" press=".onPackageRelease" visible="{agent>/package/saved}" />
+                            <Button id="agentPackageDone" class="sapUiTinyMarginBottom" text="{i18n>agentPackageDone}" icon="sap-icon://accept" press=".onPackageClose" visible="{agent>/package/saved}" />
+                        </FlexBox>
+                    </VBox>
+                </Panel>
+                <Panel id="agentDraftPanel" headerText="{i18n>agentDraftTitle}" visible="{= !${agent>/analysis} &amp;&amp; ${agent>/focus} !== 'run' &amp;&amp; ${agent>/focus} !== 'package' }" class="sapUiNoContentPadding">
                     <VBox id="agentDraftBox" class="sapUiSmallMargin">
                         <Title id="agentDraftHeading" text="{= ${agent>/draft/title} || ${i18n>agentNoDraft} }" wrapping="true" />
                         <HBox id="agentDraftStatus" wrap="Wrap" alignItems="Center" visible="{= !!${agent>/draft} }" class="sapUiTinyMarginTop">
@@ -129,6 +229,33 @@
                         <List id="agentFindings" items="{agent>/findings}" visible="{= ${agent>/findings}.length > 0 }" headerText="{i18n>agentFindings}" class="sapUiTinyMarginTop">
                             <StandardListItem title="{agent>title}" description="{agent>description}" icon="{agent>icon}" highlight="{agent>state}" wrapping="true" />
                         </List>
+                        <!-- process picture of the draft: the way through the process, the section of the run, handovers between teams -->
+                        <Title id="agentDraftPictureTitle" text="{i18n>agentDraftPicture}" level="H5" visible="{= !!${agent>/draft/process/variant} }" class="sapUiSmallMarginTop sapUiTinyMarginBottom" />
+                        <pp:ProcessPicture
+                            id="agentDraftPicture"
+                            orientation="vertical"
+                            visible="{= !!${agent>/draft/process/variant} }"
+                            variant="{agent>/draft/process/variant}"
+                            startObject="{agent>/draft/process/start}"
+                            endObject="{agent>/draft/process/endObject}"
+                            predecessorObject="{agent>/draft/process/takesOver}"
+                            minScale="0.9"
+                            stepPress=".onPictureStep"
+                            steps="{path: 'agent>/draftSteps', templateShareable: false}">
+                            <pp:steps>
+                                <pp:ProcessPictureStep
+                                    stepId="{agent>StepID}"
+                                    name="{agent>StepName}"
+                                    sequence="{agent>Sequence}"
+                                    businessObject="{agent>BusinessObjectType}"
+                                    team="{agent>ResponsibleTeam}"
+                                    teamName="{agent>TeamName}"
+                                    assignment="{agent>TeamAssignment}"
+                                    variants="{agent>Variants}"
+                                    pilot="{agent>PilotScope}"
+                                    automation="{agent>Automation}" />
+                            </pp:steps>
+                        </pp:ProcessPicture>
                         <MessageStrip id="agentSubmitted" visible="{= !!${agent>/draft/submitted} }" text="{agent>/draft/submittedText}" type="Success" showIcon="true" class="sapUiTinyMarginTop" />
                         <FlexBox id="agentDraftActions" wrap="Wrap" alignItems="Center" visible="{= !!${agent>/draft} }" class="sapUiSmallMarginTop">
                             <Button
