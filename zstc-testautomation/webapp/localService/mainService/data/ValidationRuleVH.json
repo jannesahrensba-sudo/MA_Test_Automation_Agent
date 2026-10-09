@@ -46,5 +46,13 @@
     {
         "Code": "R11_CONTRACT",
         "Text": "R11 · Service contract is valid and covers the reference object"
+    },
+    {
+        "Code": "R12_PREDECESSOR",
+        "Text": "R12 · Start has a predecessor test case that delivers the document"
+    },
+    {
+        "Code": "R13_DUPLICATE",
+        "Text": "R13 · No duplicate of another test case (information)"
     }
 ]

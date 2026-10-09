@@ -5,8 +5,8 @@
         "ReleaseStatus": "RELEASED",
         "AutoRegression": true,
         "ScopeCount": 1,
-        "TestCaseCount": 11,
-        "ApprovedCount": 6,
+        "TestCaseCount": 16,
+        "ApprovedCount": 11,
         "ExecutedCount": 0,
         "PassedCount": 0,
         "FailedCount": 0,
@@ -23,6 +23,7 @@
         "ReleaseStatusCriticality": 3,
         "__OperationControl": {
             "startRegressionRun": false,
+            "startTeamRegressionRun": false,
             "refreshRegressionRun": false,
             "copyScopeFromPredecessor": false
         },
@@ -51,8 +52,8 @@
         "ReleaseStatus": "IN_TEST",
         "AutoRegression": true,
         "ScopeCount": 6,
-        "TestCaseCount": 13,
-        "ApprovedCount": 8,
+        "TestCaseCount": 20,
+        "ApprovedCount": 15,
         "ExecutedCount": 6,
         "PassedCount": 5,
         "FailedCount": 1,
@@ -69,6 +70,7 @@
         "ReleaseStatusCriticality": 5,
         "__OperationControl": {
             "startRegressionRun": true,
+            "startTeamRegressionRun": true,
             "refreshRegressionRun": false,
             "copyScopeFromPredecessor": true
         },
@@ -115,6 +117,7 @@
         "ReleaseStatusCriticality": 0,
         "__OperationControl": {
             "startRegressionRun": false,
+            "startTeamRegressionRun": false,
             "refreshRegressionRun": false,
             "copyScopeFromPredecessor": true
         },
@@ -161,6 +164,7 @@
         "ReleaseStatusCriticality": 0,
         "__OperationControl": {
             "startRegressionRun": false,
+            "startTeamRegressionRun": false,
             "refreshRegressionRun": false,
             "copyScopeFromPredecessor": true
         },
@@ -207,6 +211,7 @@
         "ReleaseStatusCriticality": 0,
         "__OperationControl": {
             "startRegressionRun": false,
+            "startTeamRegressionRun": false,
             "refreshRegressionRun": false,
             "copyScopeFromPredecessor": true
         },
@@ -253,6 +258,7 @@
         "ReleaseStatusCriticality": 0,
         "__OperationControl": {
             "startRegressionRun": false,
+            "startTeamRegressionRun": false,
             "refreshRegressionRun": false,
             "copyScopeFromPredecessor": true
         },

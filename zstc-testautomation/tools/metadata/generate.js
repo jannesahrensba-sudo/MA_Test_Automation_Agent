@@ -60,7 +60,7 @@ function prepareEntities() {
         all.push({ ...entity, props, navs, keys, kind: 'bo' });
     }
     for (const vh of [...contract.valueHelps, ...contract.codeLists]) {
-        all.push({ ...vh, navs: [], kind: vh.codeList ? 'codeList' : 'valueHelp' });
+        all.push({ ...vh, navs: vh.navs || [], kind: vh.codeList ? 'codeList' : 'valueHelp' });
     }
     all.push({
         name: 'I_DraftAdministrativeData',

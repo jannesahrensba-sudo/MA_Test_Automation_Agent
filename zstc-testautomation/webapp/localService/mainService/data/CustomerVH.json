@@ -40,5 +40,41 @@
         "CustomerName": "WEG Parkweg 7",
         "CityName": "Leipzig",
         "Country": "DE"
+    },
+    {
+        "Customer": "MD-200010",
+        "CustomerName": "Hausverwaltung Beispielhof GmbH",
+        "CityName": "Bremen",
+        "Country": "DE"
+    },
+    {
+        "Customer": "MD-200020",
+        "CustomerName": "Wohnungsgenossenschaft Probestadt eG",
+        "CityName": "Berlin",
+        "Country": "DE"
+    },
+    {
+        "Customer": "MD-200030",
+        "CustomerName": "Immobilienverwaltung Beispielgarten GmbH",
+        "CityName": "Frankfurt am Main",
+        "Country": "DE"
+    },
+    {
+        "Customer": "MD-200040",
+        "CustomerName": "WEG Am Testpark 4",
+        "CityName": "Stuttgart",
+        "Country": "DE"
+    },
+    {
+        "Customer": "MD-200050",
+        "CustomerName": "Hausverwaltung Exempla KG",
+        "CityName": "Hannover",
+        "Country": "DE"
+    },
+    {
+        "Customer": "MD-200060",
+        "CustomerName": "Siedlungswerk Beispieltal eG",
+        "CityName": "Dresden",
+        "Country": "DE"
     }
 ]

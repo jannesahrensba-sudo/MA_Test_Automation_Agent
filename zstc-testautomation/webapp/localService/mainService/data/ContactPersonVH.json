@@ -68,5 +68,89 @@
         "FirstName": "Jens",
         "LastName": "Richter",
         "Customer": "MD-100030"
+    },
+    {
+        "BusinessPartner": "MD-CP-4011",
+        "BusinessPartnerFullName": "Sabine Krämer",
+        "FirstName": "Sabine",
+        "LastName": "Krämer",
+        "Customer": "MD-200010"
+    },
+    {
+        "BusinessPartner": "MD-CP-4012",
+        "BusinessPartnerFullName": "Oliver Seidel",
+        "FirstName": "Oliver",
+        "LastName": "Seidel",
+        "Customer": "MD-200010"
+    },
+    {
+        "BusinessPartner": "MD-CP-4021",
+        "BusinessPartnerFullName": "Katrin Ebert",
+        "FirstName": "Katrin",
+        "LastName": "Ebert",
+        "Customer": "MD-200020"
+    },
+    {
+        "BusinessPartner": "MD-CP-4022",
+        "BusinessPartnerFullName": "Dennis Albrecht",
+        "FirstName": "Dennis",
+        "LastName": "Albrecht",
+        "Customer": "MD-200020"
+    },
+    {
+        "BusinessPartner": "MD-CP-4031",
+        "BusinessPartnerFullName": "Monika Fuchs",
+        "FirstName": "Monika",
+        "LastName": "Fuchs",
+        "Customer": "MD-200030"
+    },
+    {
+        "BusinessPartner": "MD-CP-4032",
+        "BusinessPartnerFullName": "Tobias Hensel",
+        "FirstName": "Tobias",
+        "LastName": "Hensel",
+        "Customer": "MD-200030"
+    },
+    {
+        "BusinessPartner": "MD-CP-4041",
+        "BusinessPartnerFullName": "Elif Kaya",
+        "FirstName": "Elif",
+        "LastName": "Kaya",
+        "Customer": "MD-200040"
+    },
+    {
+        "BusinessPartner": "MD-CP-4042",
+        "BusinessPartnerFullName": "Martin Pohl",
+        "FirstName": "Martin",
+        "LastName": "Pohl",
+        "Customer": "MD-200040"
+    },
+    {
+        "BusinessPartner": "MD-CP-4051",
+        "BusinessPartnerFullName": "Julia Wiegand",
+        "FirstName": "Julia",
+        "LastName": "Wiegand",
+        "Customer": "MD-200050"
+    },
+    {
+        "BusinessPartner": "MD-CP-4052",
+        "BusinessPartnerFullName": "Frank Ludwig",
+        "FirstName": "Frank",
+        "LastName": "Ludwig",
+        "Customer": "MD-200050"
+    },
+    {
+        "BusinessPartner": "MD-CP-4061",
+        "BusinessPartnerFullName": "Birgit Lehnert",
+        "FirstName": "Birgit",
+        "LastName": "Lehnert",
+        "Customer": "MD-200060"
+    },
+    {
+        "BusinessPartner": "MD-CP-4062",
+        "BusinessPartnerFullName": "Ralf Winkler",
+        "FirstName": "Ralf",
+        "LastName": "Winkler",
+        "Customer": "MD-200060"
     }
 ]

@@ -12,7 +12,7 @@
         "ProcessOwnerCount": 3,
         "TestExecutorCount": 2,
         "ResponsibleStepCount": 8,
-        "TestCaseCount": 11,
+        "TestCaseCount": 16,
         "OpenAssignmentCount": 8,
         "SAP__Messages": [],
         "__EntityControl": {
@@ -33,7 +33,7 @@
         "ProcessOwnerCount": 1,
         "TestExecutorCount": 1,
         "ResponsibleStepCount": 5,
-        "TestCaseCount": 1,
+        "TestCaseCount": 2,
         "OpenAssignmentCount": 0,
         "SAP__Messages": [],
         "__EntityControl": {
@@ -96,7 +96,7 @@
         "ProcessOwnerCount": 1,
         "TestExecutorCount": 2,
         "ResponsibleStepCount": 4,
-        "TestCaseCount": 1,
+        "TestCaseCount": 2,
         "OpenAssignmentCount": 0,
         "SAP__Messages": [],
         "__EntityControl": {

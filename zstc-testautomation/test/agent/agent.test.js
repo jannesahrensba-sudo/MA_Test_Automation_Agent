@@ -5,7 +5,7 @@
  */
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { core, createMemoryGateway, setup, teardown } = require('./helpers');
+const { core, createMemoryGateway, setup, teardown, NEXT_CASE_ID } = require('./helpers');
 
 const AgentSession = core('AgentSession');
 const messagesLoop = core('messagesLoop');
@@ -67,7 +67,7 @@ test('rule-based agent: German heat cost allocator report → valid draft → sa
         ['Prozessteam', 'Weg', 'Start ab', 'Lauf bis', 'Teststufe', 'Zuordnung']
     );
     const submitted = await session.submit();
-    assert.equal(submitted.caseId, 'STC-2026-000015');
+    assert.equal(submitted.caseId, NEXT_CASE_ID);
     assert.match(submitted.externalExecutionId, /^MOCK-\d{8}-0008$/);
     assert.deepEqual(gateway.calls.map((c) => c[0]).slice(-3), ['save', 'approve', 'start']);
     assert.match((await session.send('Noch etwas?')).text, /bereits übernommen/);
@@ -161,7 +161,7 @@ test('rule-based agent: maintenance contract → way 3 with contract determinati
     assert.equal(session.draft.validation.status, 'VALID', answer.text);
     assert.match(answer.text, /Servicevertrag: 4100000001 · RWM-Service Musterstraße 12/);
     const submitted = await session.submit();
-    assert.equal(submitted.caseId, 'STC-2026-000015');
+    assert.equal(submitted.caseId, NEXT_CASE_ID);
     assert.deepEqual(gateway.calls.map((c) => c[0]).slice(-3), ['save', 'approve', 'start']);
     const execution = (await repo.find('Execution', { IsActiveEntity: true })).find((e) => e.ExternalExecutionID === submitted.externalExecutionId);
     assert.equal(execution.ProcessVariant, 'W3_CONTRACT');

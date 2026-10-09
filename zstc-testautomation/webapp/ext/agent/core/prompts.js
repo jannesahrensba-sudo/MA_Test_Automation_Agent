@@ -52,7 +52,8 @@ sap.ui.define([], function () {
         R9_DATE_RANGE: "Zeitraum inkonsistent",
         R10_DEVICE_TYPE: "passt nicht zum Gerätetyp",
         R11_CONTRACT: "Servicevertrag ungültig oder deckt das Gerät nicht ab",
-        R12_PREDECESSOR: "Start braucht einen Vorgänger-Testfall, der den Vorgängerbeleg liefert"
+        R12_PREDECESSOR: "Start braucht einen Vorgänger-Testfall, der den Vorgängerbeleg liefert",
+        R13_DUPLICATE: "mögliche Dublette: ein anderer Testfall prüft denselben Abschnitt mit demselben Gerät oder Vertrag"
     };
     const ASSIGNMENT = { ASSIGNED: "zugeordnet", ASSUMED: "Annahme – zu bestätigen", OPEN: "offen" };
     const TEST_LEVEL = { SUB_PROCESS: "Teilprozess (ein Team)", E2E: "End-to-End (teamübergreifend)" };

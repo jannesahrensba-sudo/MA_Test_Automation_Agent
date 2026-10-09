@@ -9,7 +9,7 @@ const service = require('../services/TestCaseService');
 const { MockTestCaseExtractionService } = require('../extraction/MockTestCaseExtractionService');
 const { parseFloor, normalize } = require('../extraction/germanMetering');
 const pricing = require('../common/pricing');
-const { setup, teardown, pools, createDraft, activate } = require('./helpers');
+const { setup, teardown, pools, createDraft, activate, NEXT_CASE_ID } = require('./helpers');
 
 const TEXT_HKV =
     'Frau Müller aus der Musterstraße 12 in München (1. OG links) meldet über Petra Wagner von der Hausverwaltung, dass der Heizkostenverteiler im Wohnzimmer nichts mehr anzeigt – das Display ist komplett dunkel.';
@@ -123,7 +123,7 @@ test('metering golden path: German report → analyze → validate → save → 
     assert.equal(result.overall, 'VALID', JSON.stringify(result.items.filter((i) => i.ValidationStatus !== 'SUCCESS')));
 
     const active = await activate(repo, draft);
-    assert.equal((await repo.findOne('TestCase', active)).CaseID, 'STC-2026-000015');
+    assert.equal((await repo.findOne('TestCase', active)).CaseID, NEXT_CASE_ID);
     await service.approve(repo, active);
     await service.startExecution(repo, active);
     tick(15000);

@@ -6,6 +6,8 @@
  *   - copyScopeFromPredecessor: the regression scope travels from release to release,
  *   - startRegressionRun: runs all approved test cases of the regression-relevant scope with the same server-side
  *     checks as a single run; test cases that may not run are skipped with the reason,
+ *   - startTeamRegressionRun ("team run"): the same run restricted to one process team (optionally one process), with
+ *     the reason (e.g. a code change in the process) and optionally the dependent test cases of other teams,
  *   - refreshRegressionRun: advances the runs (mock provider) and aggregates the results,
  *   - automatic regression run when a release with "Regression at Test Start" changes to IN_TEST (stand-in for a
  *     scheduled job, ⚠ target: application job or SAP Cloud ALM test plan scheduling, to verify).
@@ -43,6 +45,7 @@ function deriveRelease(release) {
         ReleaseStatusCriticality: criticalityOf(release.ReleaseStatus),
         __OperationControl: {
             startRegressionRun: !isDraft && !lockedByDraft && !running && release.ReleaseStatus === RELEASE_STATUS.IN_TEST,
+            startTeamRegressionRun: !isDraft && !lockedByDraft && !running && release.ReleaseStatus === RELEASE_STATUS.IN_TEST,
             refreshRegressionRun: !isDraft && running,
             copyScopeFromPredecessor:
                 !isDraft &&
@@ -261,14 +264,22 @@ async function nextRunId(repo, releaseId) {
  * that continues with the documents of a predecessor test case of the same run waits until the predecessor passed
  * (handover between process teams within the run) and is started by refreshRegressionRun.
  *
+ * A team run restricts the candidates to the scope entries of one process team (and process); with includeDependents the
+ * test cases of other teams in the scope that continue with the documents of a candidate (predecessor test case) join
+ * the run and wait for their predecessor.
+ *
  * @param {object} repo repository
  * @param {object} keys release keys (active)
  * @param {object} [options] options
  * @param {string} [options.user] user
- * @param {string} [options.trigger] MANUAL | TEST_START (automatic at test start)
+ * @param {string} [options.trigger] MANUAL | TEST_START (automatic at test start) | TEAM_RUN
+ * @param {string} [options.team] process team of a team run
+ * @param {string} [options.processId] process of a team run (default: all processes of the team in the scope)
+ * @param {string} [options.reason] reason of the run, e.g. "code change in the repair process"
+ * @param {boolean} [options.includeDependents] dependent test cases of other teams join the team run
  * @returns {Promise<{release: object, messages: object[], run: object}>} result
  */
-async function startRegressionRun(repo, keys, { user = CURRENT_USER, trigger = 'MANUAL' } = {}) {
+async function startRegressionRun(repo, keys, { user = CURRENT_USER, trigger = 'MANUAL', team = '', processId = '', reason = '', includeDependents = false } = {}) {
     const release = await getRelease(repo, keys);
     if (release.ReleaseStatus !== RELEASE_STATUS.IN_TEST) {
         throw new MockServiceError(CATEGORY.BUSINESS_ERROR, 251, `Regression runs are started for releases in test; ${release.ReleaseID} is ${release.ReleaseStatus}.`);
@@ -276,13 +287,36 @@ async function startRegressionRun(repo, keys, { user = CURRENT_USER, trigger = '
     if (release.LatestRunStatus === EXECUTION.RUNNING) {
         throw new MockServiceError(CATEGORY.EXECUTION_ERROR, 406, `Regression run ${release.LatestRunID} of ${release.ReleaseID} is still running.`);
     }
-    const scopes = (await repo.find('ReleaseScope', { ReleaseID: release.ReleaseID, IsActiveEntity: true })).filter((sc) => sc.IsRegressionRelevant !== false);
-    if (!scopes.length) {
+    const releaseScopes = (await repo.find('ReleaseScope', { ReleaseID: release.ReleaseID, IsActiveEntity: true })).filter((sc) => sc.IsRegressionRelevant !== false);
+    if (!releaseScopes.length) {
         throw new MockServiceError(CATEGORY.BUSINESS_ERROR, 252, `Release ${release.ReleaseID} has no regression-relevant scope. Maintain the scope or copy it from the predecessor release.`);
     }
-    const candidates = (await repo.find('TestCase', { IsActiveEntity: true }))
-        .filter((tc) => scopes.some((sc) => sc.ProcessTeam === tc.ProcessTeam && sc.ProcessID === tc.BusinessProcess))
-        .sort((a, b) => String(a.ProcessTeam).localeCompare(String(b.ProcessTeam)) || String(a.CaseID).localeCompare(String(b.CaseID)));
+    const scopes = team ? releaseScopes.filter((sc) => sc.ProcessTeam === team && (!processId || sc.ProcessID === processId)) : releaseScopes;
+    if (!scopes.length) {
+        throw new MockServiceError(
+            CATEGORY.BUSINESS_ERROR,
+            254,
+            `Process team ${team}${processId ? ` with process ${processId}` : ''} is not in the regression-relevant scope of release ${release.ReleaseID}.`
+        );
+    }
+    const active = await repo.find('TestCase', { IsActiveEntity: true });
+    const inScope = (tc, entries) => entries.some((sc) => sc.ProcessTeam === tc.ProcessTeam && sc.ProcessID === tc.BusinessProcess);
+    const selected = active.filter((tc) => inScope(tc, scopes));
+    if (team && includeDependents) {
+        // test cases of other teams that continue with the documents of a selected test case (transitively)
+        let added = true;
+        while (added) {
+            added = false;
+            const ids = new Set(selected.map((tc) => tc.CaseID));
+            for (const tc of active) {
+                if (!ids.has(tc.CaseID) && tc.PredecessorTestCase && ids.has(tc.PredecessorTestCase) && inScope(tc, releaseScopes)) {
+                    selected.push(tc);
+                    added = true;
+                }
+            }
+        }
+    }
+    const candidates = selected.sort((a, b) => String(a.ProcessTeam).localeCompare(String(b.ProcessTeam)) || String(a.CaseID).localeCompare(String(b.CaseID)));
     const runUUID = uuid();
     const runId = await nextRunId(repo, release.ReleaseID);
     const now = clock.nowIso();
@@ -368,7 +402,11 @@ async function startRegressionRun(repo, keys, { user = CURRENT_USER, trigger = '
         ReleaseID: release.ReleaseID,
         Status: status,
         StatusCriticality: criticalityOf(status),
-        Trigger: trigger,
+        Trigger: team ? 'TEAM_RUN' : trigger,
+        ProcessTeam: team || '',
+        ProcessID: processId || '',
+        RunReason: String(reason || '').slice(0, 120),
+        IncludesDependents: !!(team && includeDependents),
         StartedAt: now,
         StartedBy: user,
         FinishedAt: started || waiting ? null : now,
@@ -390,11 +428,38 @@ async function startRegressionRun(repo, keys, { user = CURRENT_USER, trigger = '
         messages: [
             sapMessage(
                 911,
-                `Regression run ${runId} for ${release.ReleaseID}: ${started} of ${candidates.length} test cases started${waiting ? `, ${waiting} waiting for their predecessor` : ''}, ${skipped} skipped (reasons in the run items). Results refresh automatically.`,
+                `${team ? `Team run ${runId} of ${team}${processId ? ` (${processId})` : ''}` : `Regression run ${runId}`} for ${release.ReleaseID}: ${started} of ${candidates.length} test cases started${
+                    waiting ? `, ${waiting} waiting for their predecessor` : ''
+                }, ${skipped} skipped (reasons in the run items). Results refresh automatically.`,
                 { severity: started || waiting ? SEVERITY.SUCCESS : SEVERITY.WARNING }
             )
         ]
     };
+}
+
+/**
+ * Team run: regression run of one process team (action startTeamRegressionRun with parameters).
+ *
+ * @param {object} repo repository
+ * @param {object} keys release keys (active)
+ * @param {object} parameters action parameters {ProcessTeam, ProcessID, RunReason, IncludeDependents}
+ * @param {object} [options] options {user}
+ * @returns {Promise<{release: object, messages: object[], run: object}>} result
+ */
+async function startTeamRegressionRun(repo, keys, parameters = {}, { user = CURRENT_USER } = {}) {
+    const team = String(parameters.ProcessTeam || '').trim().toUpperCase();
+    const processId = String(parameters.ProcessID || '').trim().toUpperCase();
+    if (!team) {
+        throw new MockServiceError(CATEGORY.VALIDATION_ERROR, 255, 'Enter the process team whose test cases run.', 'ProcessTeam');
+    }
+    if (!(await repo.findOne('ProcessTeamVH', { ProcessTeam: team }))) {
+        throw new MockServiceError(CATEGORY.VALIDATION_ERROR, 256, `Process team ${team} does not exist.`, 'ProcessTeam');
+    }
+    if (processId && !(await repo.findOne('BusinessProcessVH', { ProcessID: processId }))) {
+        throw new MockServiceError(CATEGORY.VALIDATION_ERROR, 257, `Process ${processId} does not exist.`, 'ProcessID');
+    }
+    const includeDependents = parameters.IncludeDependents === true || parameters.IncludeDependents === 'true';
+    return startRegressionRun(repo, keys, { user, team, processId, reason: parameters.RunReason, includeDependents });
 }
 
 /**
@@ -437,7 +502,7 @@ async function refreshRegressionRun(repo, keys) {
         messages.push(
             sapMessage(
                 912,
-                `Regression run ${run.RunID} finished: ${run.PassedCount} passed, ${run.FailedCount} failed, ${run.SkippedCount} skipped (pass rate ${run.PassRate} %).`,
+                `${run.ProcessTeam ? 'Team run' : 'Regression run'} ${run.RunID} finished: ${run.PassedCount} passed, ${run.FailedCount} failed, ${run.SkippedCount} skipped (pass rate ${run.PassRate} %).`,
                 { severity: run.FailedCount ? SEVERITY.WARNING : SEVERITY.SUCCESS }
             )
         );
@@ -546,6 +611,7 @@ module.exports = {
     syncReleaseValueHelp,
     copyScopeFromPredecessor,
     startRegressionRun,
+    startTeamRegressionRun,
     refreshRegressionRun,
     onReleaseActivated
 };

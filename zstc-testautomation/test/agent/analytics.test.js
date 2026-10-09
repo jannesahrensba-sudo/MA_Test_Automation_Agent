@@ -34,16 +34,19 @@ test('release in test: key figures, distribution, teams and the pass rate over t
     const data = dashboardModel.build(input(repo, 'INT-2026.10', true));
     assert.deepEqual(
         { inScope: data.kpis.inScope, executed: data.kpis.executed, passed: data.kpis.passed, failed: data.kpis.failed, passRate: data.kpis.passRate, open: data.kpis.openFindings },
-        { inScope: 13, executed: 6, passed: 5, failed: 1, passRate: 83, open: 2 }
+        { inScope: 20, executed: 6, passed: 5, failed: 1, passRate: 83, open: 2 }
     );
     assert.equal(data.kpis.stepCoverage, 75);
-    assert.deepEqual(data.distribution.map((s) => s.value), [5, 1, 7]);
+    // 20 test cases in scope: 13 hand-written seed cases and the generated portfolio STC-2026-000015 … 000021 (not executed yet)
+    assert.deepEqual(data.distribution.map((s) => s.value), [5, 1, 14]);
 
     const repair = data.teams.find((team) => team.team === 'PT-REPARATUR');
-    assert.deepEqual({ total: repair.total, passed: repair.passed, failed: repair.failed, open: repair.notExecuted, state: repair.state }, { total: 11, passed: 4, failed: 1, open: 6, state: 'Error' });
+    assert.deepEqual({ total: repair.total, passed: repair.passed, failed: repair.failed, open: repair.notExecuted, state: repair.state }, { total: 16, passed: 4, failed: 1, open: 11, state: 'Error' });
     const e2e = data.teams.find((team) => team.team === 'PT-E2E');
     assert.equal(e2e.name, 'Prozessteam New End to End Prozess');
-    assert.equal(e2e.state, 'Success');
+    // STC-2026-000014 passed, the generated STC-2026-000021 is not executed yet
+    assert.equal(e2e.state, 'Information');
+    assert.equal(e2e.status, 'analyticsTeamOpen:1');
     const montage = data.teams.find((team) => team.team === 'PT-MONTAGE');
     assert.equal(montage.status, 'analyticsTeamNoCases:MON');
     assert.deepEqual(montage.bars, []);
@@ -98,7 +101,7 @@ test('coverage along the process: only the failing step is red, a planned releas
     const failed = data.steps.filter((s) => s.status === 'FAILED').map((s) => s.stepId);
     assert.deepEqual(failed, ['REP-100'], 'a deviation in billing is not a failure of the decision before it');
     assert.equal(data.steps.find((s) => s.stepId === 'REP-020').status, 'PASSED');
-    assert.equal(data.steps.find((s) => s.stepId === 'REP-100').counts, 'analyticsStepCounts:3|1|10');
+    assert.equal(data.steps.find((s) => s.stepId === 'REP-100').counts, 'analyticsStepCounts:3|1|15');
     assert.equal(data.steps.find((s) => s.stepId === 'REP-200').state, 'None');
 
     const planned = dashboardModel.build(input(repo, 'S4-2025-FPS02', true));

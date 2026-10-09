@@ -33,5 +33,40 @@
         "RespyMgmtServiceTeam": "MD-TEAM-LEJ",
         "RespyMgmtServiceTeamName": "Monteurteam Leipzig",
         "ServiceOrganization": "SO-MD-OST"
+    },
+    {
+        "RespyMgmtServiceTeam": "MD-TEAM-HAM",
+        "RespyMgmtServiceTeamName": "Monteurteam Hamburg",
+        "ServiceOrganization": "SO-MD-NORD"
+    },
+    {
+        "RespyMgmtServiceTeam": "MD-TEAM-BRE",
+        "RespyMgmtServiceTeamName": "Monteurteam Bremen",
+        "ServiceOrganization": "SO-MD-NORD"
+    },
+    {
+        "RespyMgmtServiceTeam": "MD-TEAM-BER",
+        "RespyMgmtServiceTeamName": "Monteurteam Berlin",
+        "ServiceOrganization": "SO-MD-OST"
+    },
+    {
+        "RespyMgmtServiceTeam": "MD-TEAM-FRA",
+        "RespyMgmtServiceTeamName": "Monteurteam Frankfurt am Main",
+        "ServiceOrganization": "SO-MD-WEST"
+    },
+    {
+        "RespyMgmtServiceTeam": "MD-TEAM-STR",
+        "RespyMgmtServiceTeamName": "Monteurteam Stuttgart",
+        "ServiceOrganization": "SO-MD-SUED"
+    },
+    {
+        "RespyMgmtServiceTeam": "MD-TEAM-HAJ",
+        "RespyMgmtServiceTeamName": "Monteurteam Hannover",
+        "ServiceOrganization": "SO-MD-NORD"
+    },
+    {
+        "RespyMgmtServiceTeam": "MD-TEAM-DRS",
+        "RespyMgmtServiceTeamName": "Monteurteam Dresden",
+        "ServiceOrganization": "SO-MD-OST"
     }
 ]

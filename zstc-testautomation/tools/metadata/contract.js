@@ -295,7 +295,9 @@ const valueHelps = [
             str('Variants', 120, 'Variants'),
             str('PilotScope', 10, 'Pilot Scope'),
             str('Automation', 10, 'Automation')
-        ]
+        ],
+        // team name for the lanes of the process picture
+        navs: [textNav('_ResponsibleTeam', 'ProcessTeamVH', 'ResponsibleTeam', 'ProcessTeam')]
     },
     {
         name: 'ReleaseVH',
@@ -395,7 +397,7 @@ const testCaseActions = [
 ];
 
 /** Actions of the release: regression run over the release scope and scope takeover from the predecessor release */
-const releaseActions = ['startRegressionRun', 'refreshRegressionRun', 'copyScopeFromPredecessor'];
+const releaseActions = ['startRegressionRun', 'startTeamRegressionRun', 'refreshRegressionRun', 'copyScopeFromPredecessor'];
 
 const entities = [
     /* ------------------------------ BO 1: Test case (draft root) ------------------------------ */
@@ -499,6 +501,8 @@ const entities = [
             { name: '_Version', target: 'TestCaseVersion', collection: true, constraints: [['TestCaseUUID', 'TestCaseUUID']] },
             textNav('_ProcessTeam', 'ProcessTeamVH', 'ProcessTeam', 'ProcessTeam'),
             textNav('_BusinessProcess', 'BusinessProcessVH', 'BusinessProcess', 'ProcessID'),
+            // process picture: all steps of the process (the test case's way and section are highlighted in the UI)
+            { name: '_ProcessStep', target: 'ProcessStepVH', collection: true, constraints: [['BusinessProcess', 'ProcessID']] },
             {
                 name: '_ProcessVariant',
                 target: 'ProcessVariantVH',
@@ -1388,6 +1392,10 @@ const entities = [
             code('Status', 20, 'Status', 'ExecutionStatusVH', { computed: true }),
             crit('StatusCriticality'),
             str('Trigger', 30, 'Trigger', { computed: true }),
+            str('ProcessTeam', 20, 'Process Team', { computed: true, text: '_ProcessTeam/ProcessTeamName', textArrangement: 'TextFirst' }),
+            str('ProcessID', 20, 'Process', { computed: true }),
+            str('RunReason', 120, 'Reason', { computed: true }),
+            bool('IncludesDependents', 'Dependent Test Cases Included', { computed: true }),
             dto('StartedAt', 'Started At', { computed: true }),
             str('StartedBy', 12, 'Started By', { computed: true }),
             dto('FinishedAt', 'Finished At', { computed: true }),
@@ -1402,6 +1410,7 @@ const entities = [
         ],
         navs: [
             { name: '_Item', target: 'RegressionRunItem', collection: true, constraints: [['RunUUID', 'RunUUID']] },
+            textNav('_ProcessTeam', 'ProcessTeamVH', 'ProcessTeam', 'ProcessTeam'),
             codeNav('Status', 'ExecutionStatusVH')
         ]
     },
@@ -1439,9 +1448,23 @@ const entities = [
 /* ------------------------------------------------------------------------------------------------ */
 /* Actions                                                                                           */
 /* ------------------------------------------------------------------------------------------------ */
+/**
+ * Team run ("run all test cases of a process team"): the regression run of the release restricted to one process team
+ * (optionally one process), with the reason (e.g. a code change) and optionally the dependent test cases of other teams
+ * that continue with the documents of the team's test cases (handover).
+ */
+const RELEASE_ACTION_PARAMS = {
+    startTeamRegressionRun: [
+        { name: 'ProcessTeam', type: 'Edm.String', maxLength: 20, label: 'Process Team' },
+        { name: 'ProcessID', type: 'Edm.String', maxLength: 20, label: 'Process' },
+        { name: 'RunReason', type: 'Edm.String', maxLength: 120, label: 'Reason' },
+        { name: 'IncludeDependents', type: 'Edm.Boolean', label: 'Include Dependent Test Cases' }
+    ]
+};
+
 const actions = [
     ...testCaseActions.map((name) => ({ name, boundTo: 'TestCase', returns: 'TestCase' })),
-    ...releaseActions.map((name) => ({ name, boundTo: 'Release', returns: 'Release' })),
+    ...releaseActions.map((name) => ({ name, boundTo: 'Release', returns: 'Release', params: RELEASE_ACTION_PARAMS[name] })),
     {
         name: 'applySuggestion',
         boundTo: 'ValidationResult',
@@ -1761,7 +1784,7 @@ const annotations = {
                         '__OperationControl'
                     ].map(V.str)
                 ),
-                TargetEntities: V.coll(['_Step', '_TestCaseData', '_ProcessTeam', '_BusinessProcess', '_ProcessVariant', '_BusinessOwner'].map(V.navPath))
+                TargetEntities: V.coll(['_Step', '_TestCaseData', '_ProcessTeam', '_BusinessProcess', '_ProcessVariant', '_BusinessOwner', '_ProcessStep'].map(V.navPath))
             }),
             'ProcessChanged'
         ],
@@ -2230,6 +2253,7 @@ const annotations = {
             'SAP__UI.Identification',
             V.coll([
                 dfAction('startRegressionRun', 'Start Regression Run', {}, [hiddenInEditMode]),
+                dfAction('startTeamRegressionRun', 'Start Team Run', {}, [hiddenInEditMode]),
                 dfAction('refreshRegressionRun', 'Refresh Regression Run', {}, [hiddenInEditMode]),
                 dfAction('copyScopeFromPredecessor', 'Copy Scope from Predecessor', {}, [hiddenInEditMode])
             ])
@@ -2368,6 +2392,8 @@ const annotations = {
                 df('RunID', undefined, {}, 'High'),
                 dfCrit('Status', 'StatusCriticality', 'Status', 'High'),
                 df('Trigger', undefined, {}, 'Low'),
+                df('ProcessTeam', undefined, {}, 'Medium'),
+                df('RunReason', undefined, {}, 'Low'),
                 df('StartedAt', undefined, {}, 'Medium'),
                 df('StartedBy', undefined, {}, 'Low'),
                 df('CandidateCount', undefined, {}, 'Low'),
@@ -2451,6 +2477,31 @@ annotations[`${NS}.applySuggestion(${T('ValidationResult')})/SelectedValue`] = [
     ['SAP__common.Label', V.str('Value to Apply')],
     ['SAP__UI.ParameterDefaultValue', V.path('_it/SuggestedValue')]
 ];
+/* Team run: parameters with value helps; the process team is mandatory, the process optional (default: all processes of the team) */
+const parameterValueList = (parameter, label, collection, key, display) => [
+    'SAP__common.ValueList',
+    V.rec('SAP__common.ValueListType', {
+        Label: V.str(label),
+        CollectionPath: V.str(collection),
+        SearchSupported: V.bool(true),
+        Parameters: V.coll([
+            V.rec('SAP__common.ValueListParameterInOut', { LocalDataProperty: V.propPath(parameter), ValueListProperty: V.str(key) }),
+            ...display.map((property) => V.rec('SAP__common.ValueListParameterDisplayOnly', { ValueListProperty: V.str(property) }))
+        ])
+    })
+];
+const teamRun = `${NS}.startTeamRegressionRun(${T('Release')})`;
+annotations[`${teamRun}/ProcessTeam`] = [
+    ['SAP__common.Label', V.str('Process Team')],
+    ['SAP__common.FieldControl', V.enum('SAP__common.FieldControlType/Mandatory')],
+    parameterValueList('ProcessTeam', 'Process Team', 'ProcessTeamVH', 'ProcessTeam', ['ProcessTeamName', 'ProcessArea'])
+];
+annotations[`${teamRun}/ProcessID`] = [
+    ['SAP__common.Label', V.str('Process')],
+    parameterValueList('ProcessID', 'Process', 'BusinessProcessVH', 'ProcessID', ['ProcessName', 'OwnerTeam', 'ProcessVersion'])
+];
+annotations[`${teamRun}/RunReason`] = [['SAP__common.Label', V.str('Reason')]];
+annotations[`${teamRun}/IncludeDependents`] = [['SAP__common.Label', V.str('Include Dependent Test Cases')]];
 
 module.exports = {
     NS,

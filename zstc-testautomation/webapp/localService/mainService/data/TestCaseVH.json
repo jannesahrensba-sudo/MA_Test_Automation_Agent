@@ -152,5 +152,82 @@
         "EndObject": "ACCOUNTING_DOCUMENT",
         "ApprovalStatus": "APPROVED",
         "LatestResult": "PASSED"
+    },
+    {
+        "CaseID": "STC-2026-000015",
+        "Title": "Weg 1 – Service Request ohne Angebot: Heizkostenverteiler Wohnzimmer (Bremen)",
+        "ProcessTeam": "PT-REPARATUR",
+        "BusinessProcess": "SRV-REP",
+        "ProcessVariant": "W1_REQUEST",
+        "StartObject": "SERVICE_REQUEST",
+        "EndObject": "ACCOUNTING_DOCUMENT",
+        "ApprovalStatus": "APPROVED",
+        "LatestResult": ""
+    },
+    {
+        "CaseID": "STC-2026-000016",
+        "Title": "Weg 2 – Angebot, Kunde akzeptiert: Rauchwarnmelder Schlafzimmer (Berlin)",
+        "ProcessTeam": "PT-REPARATUR",
+        "BusinessProcess": "SRV-REP",
+        "ProcessVariant": "W2_QUOTATION",
+        "StartObject": "SERVICE_REQUEST",
+        "EndObject": "ACCOUNTING_DOCUMENT",
+        "ApprovalStatus": "APPROVED",
+        "LatestResult": ""
+    },
+    {
+        "CaseID": "STC-2026-000017",
+        "Title": "Weg 2 – Angebot, Kunde lehnt ab: Warmwasserzähler Bad (Frankfurt am Main)",
+        "ProcessTeam": "PT-REPARATUR",
+        "BusinessProcess": "SRV-REP",
+        "ProcessVariant": "W2_REJECTED",
+        "StartObject": "SERVICE_REQUEST",
+        "EndObject": "SERVICE_QUOTATION",
+        "ApprovalStatus": "APPROVED",
+        "LatestResult": ""
+    },
+    {
+        "CaseID": "STC-2026-000018",
+        "Title": "Weg 3 – Serviceleistung aus Vertrag: Rauchwarnmelder Schlafzimmer (Stuttgart)",
+        "ProcessTeam": "PT-REPARATUR",
+        "BusinessProcess": "SRV-REP",
+        "ProcessVariant": "W3_CONTRACT",
+        "StartObject": "SERVICE_CONTRACT",
+        "EndObject": "ACCOUNTING_DOCUMENT",
+        "ApprovalStatus": "APPROVED",
+        "LatestResult": ""
+    },
+    {
+        "CaseID": "STC-2026-000019",
+        "Title": "Weg 3 – Vertragsabrechnung über Rechnungsplan: RWM-Service Weidenweg 11",
+        "ProcessTeam": "PT-REPARATUR",
+        "BusinessProcess": "SRV-REP",
+        "ProcessVariant": "W3_BILLING_PLAN",
+        "StartObject": "SERVICE_CONTRACT",
+        "EndObject": "ACCOUNTING_DOCUMENT",
+        "ApprovalStatus": "APPROVED",
+        "LatestResult": ""
+    },
+    {
+        "CaseID": "STC-2026-000020",
+        "Title": "Teilprozess Angebot: Angebot – Heizkostenverteiler Wohnzimmer (Dresden)",
+        "ProcessTeam": "PT-ANGEBOT",
+        "BusinessProcess": "SRV-REP",
+        "ProcessVariant": "W2_QUOTATION",
+        "StartObject": "SERVICE_QUOTATION",
+        "EndObject": "SERVICE_QUOTATION",
+        "ApprovalStatus": "APPROVED",
+        "LatestResult": ""
+    },
+    {
+        "CaseID": "STC-2026-000021",
+        "Title": "Teilprozess E2E: Fakturaanforderung bis FI-Beleg – RWM-Service Ahornweg 3",
+        "ProcessTeam": "PT-E2E",
+        "BusinessProcess": "SRV-REP",
+        "ProcessVariant": "W3_BILLING_PLAN",
+        "StartObject": "BILLING_DOC_REQUEST",
+        "EndObject": "ACCOUNTING_DOCUMENT",
+        "ApprovalStatus": "APPROVED",
+        "LatestResult": ""
     }
 ]

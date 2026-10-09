@@ -2,7 +2,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const service = require('../services/TestCaseService');
-const { setup, teardown, GOLDEN, GOLDEN_DOCUMENTS, createDraft, activate } = require('./helpers');
+const { setup, teardown, GOLDEN, GOLDEN_DOCUMENTS, createDraft, activate, NEXT_CASE_ID } = require('./helpers');
 
 const GOLDEN_TEXT =
     'Customer C700-C00 reports "System cooling partially failed" on equipment EL-100 at functional location H2POWC00-PROD. ' +
@@ -36,7 +36,7 @@ test('golden path: describe → analyze → validate → save → approve → ex
 
     const active = await activate(repo, draft);
     const saved = await repo.findOne('TestCase', active);
-    assert.equal(saved.CaseID, 'STC-2026-000015');
+    assert.equal(saved.CaseID, NEXT_CASE_ID);
     assert.equal(saved.__OperationControl.approve, true);
     assert.equal(saved.__OperationControl.startExecution, false);
 

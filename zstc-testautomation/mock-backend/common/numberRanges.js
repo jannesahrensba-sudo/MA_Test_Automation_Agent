@@ -12,7 +12,7 @@
 const clock = require('./clock');
 
 const START = Object.freeze({
-    CASE: 15, // STC-<year>-000001..000014 are seed test cases
+    CASE: 22, // STC-<year>-000001..000021 are seed test cases (000015 ff.: generated portfolio)
     EXECUTION: 8, // MOCK-<date>-0001..0007 are used by the seed executions
     SERVICE_REQUEST: 8000000010,
     QUOTATION_ORDER: 8000000030,

@@ -96,6 +96,9 @@
                 <NavigationProperty Name="_BusinessProcess" Type="com.sap.gateway.srvd.zui_stc_test_case.v0001.BusinessProcessVHType">
                     <ReferentialConstraint Property="BusinessProcess" ReferencedProperty="ProcessID"/>
                 </NavigationProperty>
+                <NavigationProperty Name="_ProcessStep" Type="Collection(com.sap.gateway.srvd.zui_stc_test_case.v0001.ProcessStepVHType)">
+                    <ReferentialConstraint Property="BusinessProcess" ReferencedProperty="ProcessID"/>
+                </NavigationProperty>
                 <NavigationProperty Name="_ProcessVariant" Type="com.sap.gateway.srvd.zui_stc_test_case.v0001.ProcessVariantVHType">
                     <ReferentialConstraint Property="BusinessProcess" ReferencedProperty="ProcessID"/>
                     <ReferentialConstraint Property="ProcessVariant" ReferencedProperty="Variant"/>
@@ -1074,6 +1077,10 @@
                 <Property Name="Status" Type="Edm.String" MaxLength="20"/>
                 <Property Name="StatusCriticality" Type="Edm.Byte"/>
                 <Property Name="Trigger" Type="Edm.String" MaxLength="30"/>
+                <Property Name="ProcessTeam" Type="Edm.String" MaxLength="20"/>
+                <Property Name="ProcessID" Type="Edm.String" MaxLength="20"/>
+                <Property Name="RunReason" Type="Edm.String" MaxLength="120"/>
+                <Property Name="IncludesDependents" Type="Edm.Boolean"/>
                 <Property Name="StartedAt" Type="Edm.DateTimeOffset" Precision="7"/>
                 <Property Name="StartedBy" Type="Edm.String" MaxLength="12"/>
                 <Property Name="FinishedAt" Type="Edm.DateTimeOffset" Precision="7"/>
@@ -1087,6 +1094,9 @@
                 <Property Name="PassRateCriticality" Type="Edm.Byte"/>
                 <NavigationProperty Name="_Item" Type="Collection(com.sap.gateway.srvd.zui_stc_test_case.v0001.RegressionRunItemType)">
                     <ReferentialConstraint Property="RunUUID" ReferencedProperty="RunUUID"/>
+                </NavigationProperty>
+                <NavigationProperty Name="_ProcessTeam" Type="com.sap.gateway.srvd.zui_stc_test_case.v0001.ProcessTeamVHType">
+                    <ReferentialConstraint Property="ProcessTeam" ReferencedProperty="ProcessTeam"/>
                 </NavigationProperty>
                 <NavigationProperty Name="_Status" Type="com.sap.gateway.srvd.zui_stc_test_case.v0001.ExecutionStatusVHType">
                     <ReferentialConstraint Property="Status" ReferencedProperty="Code"/>
@@ -1335,6 +1345,9 @@
                 <Property Name="Variants" Type="Edm.String" MaxLength="120"/>
                 <Property Name="PilotScope" Type="Edm.String" MaxLength="10"/>
                 <Property Name="Automation" Type="Edm.String" MaxLength="10"/>
+                <NavigationProperty Name="_ResponsibleTeam" Type="com.sap.gateway.srvd.zui_stc_test_case.v0001.ProcessTeamVHType">
+                    <ReferentialConstraint Property="ResponsibleTeam" ReferencedProperty="ProcessTeam"/>
+                </NavigationProperty>
             </EntityType>
             <EntityType Name="ReleaseVHType">
                 <Key>
@@ -1612,6 +1625,7 @@
             </ComplexType>
             <ComplexType Name="ReleaseOperationControl">
                 <Property Name="startRegressionRun" Type="Edm.Boolean" Nullable="false"/>
+                <Property Name="startTeamRegressionRun" Type="Edm.Boolean" Nullable="false"/>
                 <Property Name="refreshRegressionRun" Type="Edm.Boolean" Nullable="false"/>
                 <Property Name="copyScopeFromPredecessor" Type="Edm.Boolean" Nullable="false"/>
             </ComplexType>
@@ -1727,6 +1741,14 @@
                 <Parameter Name="_it" Type="com.sap.gateway.srvd.zui_stc_test_case.v0001.ReleaseType" Nullable="false"/>
                 <ReturnType Type="com.sap.gateway.srvd.zui_stc_test_case.v0001.ReleaseType" Nullable="false"/>
             </Action>
+            <Action Name="startTeamRegressionRun" EntitySetPath="_it" IsBound="true">
+                <Parameter Name="_it" Type="com.sap.gateway.srvd.zui_stc_test_case.v0001.ReleaseType" Nullable="false"/>
+                <Parameter Name="ProcessTeam" Type="Edm.String" MaxLength="20"/>
+                <Parameter Name="ProcessID" Type="Edm.String" MaxLength="20"/>
+                <Parameter Name="RunReason" Type="Edm.String" MaxLength="120"/>
+                <Parameter Name="IncludeDependents" Type="Edm.Boolean"/>
+                <ReturnType Type="com.sap.gateway.srvd.zui_stc_test_case.v0001.ReleaseType" Nullable="false"/>
+            </Action>
             <Action Name="refreshRegressionRun" EntitySetPath="_it" IsBound="true">
                 <Parameter Name="_it" Type="com.sap.gateway.srvd.zui_stc_test_case.v0001.ReleaseType" Nullable="false"/>
                 <ReturnType Type="com.sap.gateway.srvd.zui_stc_test_case.v0001.ReleaseType" Nullable="false"/>
@@ -1747,6 +1769,7 @@
                     <NavigationPropertyBinding Path="_Version" Target="TestCaseVersion"/>
                     <NavigationPropertyBinding Path="_ProcessTeam" Target="ProcessTeamVH"/>
                     <NavigationPropertyBinding Path="_BusinessProcess" Target="BusinessProcessVH"/>
+                    <NavigationPropertyBinding Path="_ProcessStep" Target="ProcessStepVH"/>
                     <NavigationPropertyBinding Path="_ProcessVariant" Target="ProcessVariantVH"/>
                     <NavigationPropertyBinding Path="_EndObject" Target="EndObjectVH"/>
                     <NavigationPropertyBinding Path="_StartObject" Target="EndObjectVH"/>
@@ -1957,6 +1980,7 @@
                 </EntitySet>
                 <EntitySet Name="RegressionRun" EntityType="com.sap.gateway.srvd.zui_stc_test_case.v0001.RegressionRunType">
                     <NavigationPropertyBinding Path="_Item" Target="RegressionRunItem"/>
+                    <NavigationPropertyBinding Path="_ProcessTeam" Target="ProcessTeamVH"/>
                     <NavigationPropertyBinding Path="_Status" Target="ExecutionStatusVH"/>
                 </EntitySet>
                 <EntitySet Name="RegressionRunItem" EntityType="com.sap.gateway.srvd.zui_stc_test_case.v0001.RegressionRunItemType">
@@ -1986,7 +2010,9 @@
                 <EntitySet Name="TeamMemberVH" EntityType="com.sap.gateway.srvd.zui_stc_test_case.v0001.TeamMemberVHType"/>
                 <EntitySet Name="BusinessProcessVH" EntityType="com.sap.gateway.srvd.zui_stc_test_case.v0001.BusinessProcessVHType"/>
                 <EntitySet Name="ProcessVariantVH" EntityType="com.sap.gateway.srvd.zui_stc_test_case.v0001.ProcessVariantVHType"/>
-                <EntitySet Name="ProcessStepVH" EntityType="com.sap.gateway.srvd.zui_stc_test_case.v0001.ProcessStepVHType"/>
+                <EntitySet Name="ProcessStepVH" EntityType="com.sap.gateway.srvd.zui_stc_test_case.v0001.ProcessStepVHType">
+                    <NavigationPropertyBinding Path="_ResponsibleTeam" Target="ProcessTeamVH"/>
+                </EntitySet>
                 <EntitySet Name="ReleaseVH" EntityType="com.sap.gateway.srvd.zui_stc_test_case.v0001.ReleaseVHType"/>
                 <EntitySet Name="LifecycleStatusVH" EntityType="com.sap.gateway.srvd.zui_stc_test_case.v0001.LifecycleStatusVHType"/>
                 <EntitySet Name="ValidationStatusVH" EntityType="com.sap.gateway.srvd.zui_stc_test_case.v0001.ValidationStatusVHType"/>
@@ -5183,6 +5209,25 @@
             </Annotations>
             <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.RegressionRunType/Trigger">
                 <Annotation Term="SAP__common.Label" String="Trigger"/>
+                <Annotation Term="SAP__core.Computed" Bool="true"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.RegressionRunType/ProcessTeam">
+                <Annotation Term="SAP__common.Label" String="Process Team"/>
+                <Annotation Term="SAP__common.Text" Path="_ProcessTeam/ProcessTeamName">
+                    <Annotation Term="SAP__UI.TextArrangement" EnumMember="SAP__UI.TextArrangementType/TextFirst"/>
+                </Annotation>
+                <Annotation Term="SAP__core.Computed" Bool="true"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.RegressionRunType/ProcessID">
+                <Annotation Term="SAP__common.Label" String="Process"/>
+                <Annotation Term="SAP__core.Computed" Bool="true"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.RegressionRunType/RunReason">
+                <Annotation Term="SAP__common.Label" String="Reason"/>
+                <Annotation Term="SAP__core.Computed" Bool="true"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.RegressionRunType/IncludesDependents">
+                <Annotation Term="SAP__common.Label" String="Dependent Test Cases Included"/>
                 <Annotation Term="SAP__core.Computed" Bool="true"/>
             </Annotations>
             <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.RegressionRunType/StartedAt">
@@ -8993,6 +9038,7 @@
                                 <NavigationPropertyPath>_BusinessProcess</NavigationPropertyPath>
                                 <NavigationPropertyPath>_ProcessVariant</NavigationPropertyPath>
                                 <NavigationPropertyPath>_BusinessOwner</NavigationPropertyPath>
+                                <NavigationPropertyPath>_ProcessStep</NavigationPropertyPath>
                             </Collection>
                         </PropertyValue>
                     </Record>
@@ -10956,6 +11002,15 @@
                             </Annotation>
                         </Record>
                         <Record Type="SAP__UI.DataFieldForAction">
+                            <PropertyValue Property="Action" String="com.sap.gateway.srvd.zui_stc_test_case.v0001.startTeamRegressionRun"/>
+                            <PropertyValue Property="Label" String="Start Team Run"/>
+                            <Annotation Term="SAP__UI.Hidden">
+                                <Not>
+                                    <Path>IsActiveEntity</Path>
+                                </Not>
+                            </Annotation>
+                        </Record>
+                        <Record Type="SAP__UI.DataFieldForAction">
                             <PropertyValue Property="Action" String="com.sap.gateway.srvd.zui_stc_test_case.v0001.refreshRegressionRun"/>
                             <PropertyValue Property="Label" String="Refresh Regression Run"/>
                             <Annotation Term="SAP__UI.Hidden">
@@ -11478,6 +11533,14 @@
                             <Annotation Term="SAP__UI.Importance" EnumMember="SAP__UI.ImportanceType/Low"/>
                         </Record>
                         <Record Type="SAP__UI.DataField">
+                            <PropertyValue Property="Value" Path="ProcessTeam"/>
+                            <Annotation Term="SAP__UI.Importance" EnumMember="SAP__UI.ImportanceType/Medium"/>
+                        </Record>
+                        <Record Type="SAP__UI.DataField">
+                            <PropertyValue Property="Value" Path="RunReason"/>
+                            <Annotation Term="SAP__UI.Importance" EnumMember="SAP__UI.ImportanceType/Low"/>
+                        </Record>
+                        <Record Type="SAP__UI.DataField">
                             <PropertyValue Property="Value" Path="StartedAt"/>
                             <Annotation Term="SAP__UI.Importance" EnumMember="SAP__UI.ImportanceType/Medium"/>
                         </Record>
@@ -11856,6 +11919,42 @@
                     </Record>
                 </Annotation>
             </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.startTeamRegressionRun(com.sap.gateway.srvd.zui_stc_test_case.v0001.ReleaseType)">
+                <Annotation Term="SAP__core.OperationAvailable" Path="_it/__OperationControl/startTeamRegressionRun"/>
+                <Annotation Term="SAP__common.SideEffects">
+                    <Record Type="SAP__common.SideEffectsType">
+                        <PropertyValue Property="TargetProperties">
+                            <Collection>
+                                <String>_it/ScopeCount</String>
+                                <String>_it/TestCaseCount</String>
+                                <String>_it/ApprovedCount</String>
+                                <String>_it/ExecutedCount</String>
+                                <String>_it/PassedCount</String>
+                                <String>_it/FailedCount</String>
+                                <String>_it/PassRate</String>
+                                <String>_it/PassRateCriticality</String>
+                                <String>_it/StepCoverage</String>
+                                <String>_it/StepCoverageCriticality</String>
+                                <String>_it/LatestRunUUID</String>
+                                <String>_it/LatestRunID</String>
+                                <String>_it/LatestRunStatus</String>
+                                <String>_it/LatestRunCriticality</String>
+                                <String>_it/LatestRunAt</String>
+                                <String>_it/__OperationControl</String>
+                            </Collection>
+                        </PropertyValue>
+                        <PropertyValue Property="TargetEntities">
+                            <Collection>
+                                <NavigationPropertyPath>_it/_Scope</NavigationPropertyPath>
+                                <NavigationPropertyPath>_it/_TestCase</NavigationPropertyPath>
+                                <NavigationPropertyPath>_it/_StepCoverage</NavigationPropertyPath>
+                                <NavigationPropertyPath>_it/_RegressionRun</NavigationPropertyPath>
+                                <NavigationPropertyPath>_it/_LatestRunItem</NavigationPropertyPath>
+                            </Collection>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+            </Annotations>
             <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.refreshRegressionRun(com.sap.gateway.srvd.zui_stc_test_case.v0001.ReleaseType)">
                 <Annotation Term="SAP__core.OperationAvailable" Path="_it/__OperationControl/refreshRegressionRun"/>
                 <Annotation Term="SAP__common.SideEffects">
@@ -11956,6 +12055,64 @@
             <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.applySuggestion(com.sap.gateway.srvd.zui_stc_test_case.v0001.ValidationResultType)/SelectedValue">
                 <Annotation Term="SAP__common.Label" String="Value to Apply"/>
                 <Annotation Term="SAP__UI.ParameterDefaultValue" Path="_it/SuggestedValue"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.startTeamRegressionRun(com.sap.gateway.srvd.zui_stc_test_case.v0001.ReleaseType)/ProcessTeam">
+                <Annotation Term="SAP__common.Label" String="Process Team"/>
+                <Annotation Term="SAP__common.FieldControl" EnumMember="SAP__common.FieldControlType/Mandatory"/>
+                <Annotation Term="SAP__common.ValueList">
+                    <Record Type="SAP__common.ValueListType">
+                        <PropertyValue Property="Label" String="Process Team"/>
+                        <PropertyValue Property="CollectionPath" String="ProcessTeamVH"/>
+                        <PropertyValue Property="SearchSupported" Bool="true"/>
+                        <PropertyValue Property="Parameters">
+                            <Collection>
+                                <Record Type="SAP__common.ValueListParameterInOut">
+                                    <PropertyValue Property="LocalDataProperty" PropertyPath="ProcessTeam"/>
+                                    <PropertyValue Property="ValueListProperty" String="ProcessTeam"/>
+                                </Record>
+                                <Record Type="SAP__common.ValueListParameterDisplayOnly">
+                                    <PropertyValue Property="ValueListProperty" String="ProcessTeamName"/>
+                                </Record>
+                                <Record Type="SAP__common.ValueListParameterDisplayOnly">
+                                    <PropertyValue Property="ValueListProperty" String="ProcessArea"/>
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.startTeamRegressionRun(com.sap.gateway.srvd.zui_stc_test_case.v0001.ReleaseType)/ProcessID">
+                <Annotation Term="SAP__common.Label" String="Process"/>
+                <Annotation Term="SAP__common.ValueList">
+                    <Record Type="SAP__common.ValueListType">
+                        <PropertyValue Property="Label" String="Process"/>
+                        <PropertyValue Property="CollectionPath" String="BusinessProcessVH"/>
+                        <PropertyValue Property="SearchSupported" Bool="true"/>
+                        <PropertyValue Property="Parameters">
+                            <Collection>
+                                <Record Type="SAP__common.ValueListParameterInOut">
+                                    <PropertyValue Property="LocalDataProperty" PropertyPath="ProcessID"/>
+                                    <PropertyValue Property="ValueListProperty" String="ProcessID"/>
+                                </Record>
+                                <Record Type="SAP__common.ValueListParameterDisplayOnly">
+                                    <PropertyValue Property="ValueListProperty" String="ProcessName"/>
+                                </Record>
+                                <Record Type="SAP__common.ValueListParameterDisplayOnly">
+                                    <PropertyValue Property="ValueListProperty" String="OwnerTeam"/>
+                                </Record>
+                                <Record Type="SAP__common.ValueListParameterDisplayOnly">
+                                    <PropertyValue Property="ValueListProperty" String="ProcessVersion"/>
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.startTeamRegressionRun(com.sap.gateway.srvd.zui_stc_test_case.v0001.ReleaseType)/RunReason">
+                <Annotation Term="SAP__common.Label" String="Reason"/>
+            </Annotations>
+            <Annotations Target="com.sap.gateway.srvd.zui_stc_test_case.v0001.startTeamRegressionRun(com.sap.gateway.srvd.zui_stc_test_case.v0001.ReleaseType)/IncludeDependents">
+                <Annotation Term="SAP__common.Label" String="Include Dependent Test Cases"/>
             </Annotations>
         </Schema>
     </edmx:DataServices>

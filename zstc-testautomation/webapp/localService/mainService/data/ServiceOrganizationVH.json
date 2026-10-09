@@ -28,5 +28,10 @@
         "ServiceOrganization": "SO-MD-OST",
         "ServiceOrganizationName": "Serviceorganisation Messdienst Ost",
         "SalesOrganization": "2010"
+    },
+    {
+        "ServiceOrganization": "SO-MD-NORD",
+        "ServiceOrganizationName": "Serviceorganisation Messdienst Nord",
+        "SalesOrganization": "2010"
     }
 ]

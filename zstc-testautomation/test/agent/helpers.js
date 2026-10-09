@@ -3,40 +3,12 @@
  * Test helpers for the agent core (webapp/ext/agent/core): a minimal sap.ui.define loader for Node and an in-memory
  * gateway that runs the same mock backend services as the OData mock server.
  */
-const fs = require('fs');
 const path = require('path');
-const vm = require('vm');
 const service = require('../../mock-backend/services/TestCaseService');
 const backendHelpers = require('../../mock-backend/test/helpers');
+const { loadUi5Module } = require('../../tools/common/loadUi5Module');
 
 const CORE_DIR = path.join(__dirname, '../../webapp/ext/agent/core');
-const cache = new Map();
-
-/** Loads a UI5 AMD module (sap.ui.define) without UI5: dependencies are resolved relative to the module */
-function loadUi5Module(file) {
-    const absolute = path.resolve(file.endsWith('.js') ? file : `${file}.js`);
-    if (cache.has(absolute)) {
-        return cache.get(absolute);
-    }
-    let exported;
-    const sap = {
-        ui: {
-            define(deps, factory) {
-                const resolved = deps.map((dep) => {
-                    if (!dep.startsWith('.')) {
-                        throw new Error(`UI5 dependency ${dep} is not available in Node tests`);
-                    }
-                    return loadUi5Module(path.join(path.dirname(absolute), dep));
-                });
-                exported = factory(...resolved);
-            }
-        }
-    };
-    // same realm as the tests (no cross-realm arrays), only sap.ui.define is provided
-    vm.runInThisContext(`(function (sap) {${fs.readFileSync(absolute, 'utf8')}\n})`, { filename: absolute })(sap);
-    cache.set(absolute, exported);
-    return exported;
-}
 
 const core = (name) => loadUi5Module(path.join(CORE_DIR, name));
 

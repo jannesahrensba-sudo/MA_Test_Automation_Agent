@@ -899,6 +899,62 @@ async function predecessorFindings(repo, tc, context) {
     ];
 }
 
+/**
+ * Rule R13 (information, not blocking): another active test case runs the same section of the same way with the same test
+ * object — the same device, or for a billing plan without device the same contract. A duplicate costs run time in every
+ * regression but adds no coverage; other test data (another device type or property) test more.
+ *
+ * @param {object} repo repository
+ * @param {object} tc TestCase entry (draft or active)
+ * @param {object} data TestCaseData entry
+ * @returns {Promise<object[]>} validation items
+ */
+async function duplicateFindings(repo, tc, data) {
+    if (!tc.BusinessProcess || !tc.ProcessVariant) {
+        return [];
+    }
+    const field = !isEmpty(data.ServiceReferenceEquipment) ? 'ServiceReferenceEquipment' : !isEmpty(data.ServiceContract) ? 'ServiceContract' : '';
+    if (!field) {
+        return [];
+    }
+    const object = data[field];
+    const duplicates = [];
+    for (const other of await repo.find('TestCase', { IsActiveEntity: true, BusinessProcess: tc.BusinessProcess, ProcessVariant: tc.ProcessVariant })) {
+        if (other.TestCaseUUID === tc.TestCaseUUID || !other.CaseID || (other.StartObject || '') !== (tc.StartObject || '') || (other.EndObject || '') !== (tc.EndObject || '')) {
+            continue;
+        }
+        const otherData = await getData(repo, other);
+        const otherObject = field === 'ServiceReferenceEquipment' ? otherData.ServiceReferenceEquipment : isEmpty(otherData.ServiceReferenceEquipment) ? otherData.ServiceContract : '';
+        if (otherObject === object) {
+            duplicates.push(other.CaseID);
+        }
+    }
+    if (!duplicates.length) {
+        return [];
+    }
+    const what = field === 'ServiceReferenceEquipment' ? `equipment ${object}` : `contract ${object}`;
+    return [
+        {
+            BusinessObjectType: BO.TEST_CASE,
+            Category: 'CONSISTENCY',
+            FieldName: field,
+            ProposedValue: object,
+            ResolvedValue: object,
+            SuggestedValue: '',
+            SuggestedValues: '',
+            Source: 'DERIVED',
+            RuleID: 'R13_DUPLICATE',
+            ValidationStatus: ITEM_STATUS.INFO,
+            Criticality: criticalityOf(ITEM_STATUS.INFO),
+            ValidationMessage: `Possible duplicate: ${duplicates.join(', ')} already ${duplicates.length === 1 ? 'tests' : 'test'} way ${tc.ProcessVariant} from ${boLabel(
+                tc.StartObject
+            )} to ${boLabel(tc.EndObject)} with ${what}. Other test data (device type, property) cover more.`.slice(0, 255),
+            Severity: ITEM_STATUS.INFO,
+            target: `_TestCaseData/${field}`
+        }
+    ];
+}
+
 /** Content of a version: header fields, test data and test steps */
 async function versionSnapshot(repo, tc) {
     const data = await getData(repo, tc);
@@ -1064,8 +1120,9 @@ async function validateTestCase(repo, keys, { asStateMessages = true } = {}) {
         requiredByVariant: context.needsContract ? ['ServiceContract'] : [],
         referenceDate: clock.nowIso().slice(0, 10)
     });
-    // rule R12: a start without an own predecessor document needs a predecessor test case that hands it over
-    const predecessorItems = await predecessorFindings(repo, tc, context);
+    // rule R12: a start without an own predecessor document needs a predecessor test case that hands it over;
+    // rule R13: possible duplicate of another test case (information)
+    const predecessorItems = [...(await predecessorFindings(repo, tc, context)), ...(await duplicateFindings(repo, tc, data))];
     if (predecessorItems.length) {
         const rank = { ERROR: 0, WARNING: 1, INFO: 2, SUCCESS: 3 };
         result.items = [...predecessorItems, ...result.items].sort((a, b) => rank[a.ValidationStatus] - rank[b.ValidationStatus]);

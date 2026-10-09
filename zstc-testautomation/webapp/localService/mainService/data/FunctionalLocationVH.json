@@ -89,5 +89,229 @@
         "Customer": "MD-100030",
         "MaintenancePlant": "2130",
         "SuperiorFunctionalLocation": "LG-3100"
+    },
+    {
+        "FunctionalLocation": "LG-5101",
+        "FunctionalLocationName": "Ahornweg 3, 28195 Bremen",
+        "Customer": "MD-200010",
+        "MaintenancePlant": "2140",
+        "SuperiorFunctionalLocation": ""
+    },
+    {
+        "FunctionalLocation": "LG-5101-NE01",
+        "FunctionalLocationName": "NE 01 · EG links · Nutzer Kowalski",
+        "Customer": "MD-200010",
+        "MaintenancePlant": "2140",
+        "SuperiorFunctionalLocation": "LG-5101"
+    },
+    {
+        "FunctionalLocation": "LG-5101-NE02",
+        "FunctionalLocationName": "NE 02 · EG rechts · Nutzer Schulz",
+        "Customer": "MD-200010",
+        "MaintenancePlant": "2140",
+        "SuperiorFunctionalLocation": "LG-5101"
+    },
+    {
+        "FunctionalLocation": "LG-5101-NE03",
+        "FunctionalLocationName": "NE 03 · 1. OG links · Nutzer Öztürk",
+        "Customer": "MD-200010",
+        "MaintenancePlant": "2140",
+        "SuperiorFunctionalLocation": "LG-5101"
+    },
+    {
+        "FunctionalLocation": "LG-5102",
+        "FunctionalLocationName": "Birkenhof 21, 28217 Bremen",
+        "Customer": "MD-200010",
+        "MaintenancePlant": "2140",
+        "SuperiorFunctionalLocation": ""
+    },
+    {
+        "FunctionalLocation": "LG-5102-NE01",
+        "FunctionalLocationName": "NE 01 · EG · Nutzer Lorenz",
+        "Customer": "MD-200010",
+        "MaintenancePlant": "2140",
+        "SuperiorFunctionalLocation": "LG-5102"
+    },
+    {
+        "FunctionalLocation": "LG-5102-NE02",
+        "FunctionalLocationName": "NE 02 · 1. OG · Nutzer Peters",
+        "Customer": "MD-200010",
+        "MaintenancePlant": "2140",
+        "SuperiorFunctionalLocation": "LG-5102"
+    },
+    {
+        "FunctionalLocation": "LG-5102-NE03",
+        "FunctionalLocationName": "NE 03 · 2. OG · Nutzer Reuter",
+        "Customer": "MD-200010",
+        "MaintenancePlant": "2140",
+        "SuperiorFunctionalLocation": "LG-5102"
+    },
+    {
+        "FunctionalLocation": "LG-5201",
+        "FunctionalLocationName": "Kastanienstraße 8, 10115 Berlin",
+        "Customer": "MD-200020",
+        "MaintenancePlant": "2150",
+        "SuperiorFunctionalLocation": ""
+    },
+    {
+        "FunctionalLocation": "LG-5201-NE01",
+        "FunctionalLocationName": "NE 01 · EG links · Nutzer Krüger",
+        "Customer": "MD-200020",
+        "MaintenancePlant": "2150",
+        "SuperiorFunctionalLocation": "LG-5201"
+    },
+    {
+        "FunctionalLocation": "LG-5201-NE02",
+        "FunctionalLocationName": "NE 02 · EG rechts · Nutzer Neumann",
+        "Customer": "MD-200020",
+        "MaintenancePlant": "2150",
+        "SuperiorFunctionalLocation": "LG-5201"
+    },
+    {
+        "FunctionalLocation": "LG-5201-NE03",
+        "FunctionalLocationName": "NE 03 · 1. OG links · Nutzer Albers",
+        "Customer": "MD-200020",
+        "MaintenancePlant": "2150",
+        "SuperiorFunctionalLocation": "LG-5201"
+    },
+    {
+        "FunctionalLocation": "LG-5202",
+        "FunctionalLocationName": "Ulmenring 5, 12043 Berlin",
+        "Customer": "MD-200020",
+        "MaintenancePlant": "2150",
+        "SuperiorFunctionalLocation": ""
+    },
+    {
+        "FunctionalLocation": "LG-5202-NE01",
+        "FunctionalLocationName": "NE 01 · EG · Nutzer Dietrich",
+        "Customer": "MD-200020",
+        "MaintenancePlant": "2150",
+        "SuperiorFunctionalLocation": "LG-5202"
+    },
+    {
+        "FunctionalLocation": "LG-5202-NE02",
+        "FunctionalLocationName": "NE 02 · 1. OG · Nutzer Engelke",
+        "Customer": "MD-200020",
+        "MaintenancePlant": "2150",
+        "SuperiorFunctionalLocation": "LG-5202"
+    },
+    {
+        "FunctionalLocation": "LG-5202-NE03",
+        "FunctionalLocationName": "NE 03 · 2. OG · Nutzer Grabowski",
+        "Customer": "MD-200020",
+        "MaintenancePlant": "2150",
+        "SuperiorFunctionalLocation": "LG-5202"
+    },
+    {
+        "FunctionalLocation": "LG-5301",
+        "FunctionalLocationName": "Erlenstraße 30, 60311 Frankfurt am Main",
+        "Customer": "MD-200030",
+        "MaintenancePlant": "2160",
+        "SuperiorFunctionalLocation": ""
+    },
+    {
+        "FunctionalLocation": "LG-5301-NE01",
+        "FunctionalLocationName": "NE 01 · EG · Nutzer Hartmann",
+        "Customer": "MD-200030",
+        "MaintenancePlant": "2160",
+        "SuperiorFunctionalLocation": "LG-5301"
+    },
+    {
+        "FunctionalLocation": "LG-5301-NE02",
+        "FunctionalLocationName": "NE 02 · 1. OG · Nutzer Schmitt",
+        "Customer": "MD-200030",
+        "MaintenancePlant": "2160",
+        "SuperiorFunctionalLocation": "LG-5301"
+    },
+    {
+        "FunctionalLocation": "LG-5301-NE03",
+        "FunctionalLocationName": "NE 03 · 2. OG · Nutzer Heinze",
+        "Customer": "MD-200030",
+        "MaintenancePlant": "2160",
+        "SuperiorFunctionalLocation": "LG-5301"
+    },
+    {
+        "FunctionalLocation": "LG-5401",
+        "FunctionalLocationName": "Am Eichenpark 14, 70173 Stuttgart",
+        "Customer": "MD-200040",
+        "MaintenancePlant": "2170",
+        "SuperiorFunctionalLocation": ""
+    },
+    {
+        "FunctionalLocation": "LG-5401-NE01",
+        "FunctionalLocationName": "NE 01 · EG links · Nutzer Jansen",
+        "Customer": "MD-200040",
+        "MaintenancePlant": "2170",
+        "SuperiorFunctionalLocation": "LG-5401"
+    },
+    {
+        "FunctionalLocation": "LG-5401-NE02",
+        "FunctionalLocationName": "NE 02 · EG rechts · Nutzer Kühn",
+        "Customer": "MD-200040",
+        "MaintenancePlant": "2170",
+        "SuperiorFunctionalLocation": "LG-5401"
+    },
+    {
+        "FunctionalLocation": "LG-5401-NE03",
+        "FunctionalLocationName": "NE 03 · 1. OG · Nutzer Marquardt",
+        "Customer": "MD-200040",
+        "MaintenancePlant": "2170",
+        "SuperiorFunctionalLocation": "LG-5401"
+    },
+    {
+        "FunctionalLocation": "LG-5501",
+        "FunctionalLocationName": "Weidenweg 11, 30159 Hannover",
+        "Customer": "MD-200050",
+        "MaintenancePlant": "2140",
+        "SuperiorFunctionalLocation": ""
+    },
+    {
+        "FunctionalLocation": "LG-5501-NE01",
+        "FunctionalLocationName": "NE 01 · EG · Nutzer Petrović",
+        "Customer": "MD-200050",
+        "MaintenancePlant": "2140",
+        "SuperiorFunctionalLocation": "LG-5501"
+    },
+    {
+        "FunctionalLocation": "LG-5501-NE02",
+        "FunctionalLocationName": "NE 02 · 1. OG · Nutzer Quast",
+        "Customer": "MD-200050",
+        "MaintenancePlant": "2140",
+        "SuperiorFunctionalLocation": "LG-5501"
+    },
+    {
+        "FunctionalLocation": "LG-5501-NE03",
+        "FunctionalLocationName": "NE 03 · 2. OG · Nutzer Thiel",
+        "Customer": "MD-200050",
+        "MaintenancePlant": "2140",
+        "SuperiorFunctionalLocation": "LG-5501"
+    },
+    {
+        "FunctionalLocation": "LG-5601",
+        "FunctionalLocationName": "Ebereschenplatz 2, 01067 Dresden",
+        "Customer": "MD-200060",
+        "MaintenancePlant": "2150",
+        "SuperiorFunctionalLocation": ""
+    },
+    {
+        "FunctionalLocation": "LG-5601-NE01",
+        "FunctionalLocationName": "NE 01 · EG links · Nutzer Voigt",
+        "Customer": "MD-200060",
+        "MaintenancePlant": "2150",
+        "SuperiorFunctionalLocation": "LG-5601"
+    },
+    {
+        "FunctionalLocation": "LG-5601-NE02",
+        "FunctionalLocationName": "NE 02 · EG rechts · Nutzer Wendt",
+        "Customer": "MD-200060",
+        "MaintenancePlant": "2150",
+        "SuperiorFunctionalLocation": "LG-5601"
+    },
+    {
+        "FunctionalLocation": "LG-5601-NE03",
+        "FunctionalLocationName": "NE 03 · 1. OG · Nutzer Ziegler",
+        "Customer": "MD-200060",
+        "MaintenancePlant": "2150",
+        "SuperiorFunctionalLocation": "LG-5601"
     }
 ]

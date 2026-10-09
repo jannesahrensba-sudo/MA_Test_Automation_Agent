@@ -268,6 +268,10 @@ test('release: copy scope from the predecessor, regression run with skip reasons
     // handover within the run: the end-to-end team waits for the confirmation of the repair team's run
     assert.equal(byCase['STC-2026-000013'].Decision, 'STARTED');
     assert.equal(byCase['STC-2026-000014'].Decision, 'WAITING');
+    // generated portfolio: approved, the quotation team's sub-process needs a test executor of that team
+    assert.equal(byCase['STC-2026-000019'].Decision, 'STARTED', 'generated: billing plan of a generated contract');
+    assert.equal(byCase['STC-2026-000020'].Decision, 'SKIPPED');
+    assert.equal(byCase['STC-2026-000021'].Decision, 'STARTED', 'generated: end-to-end team from the billing document request');
     assert.match(byCase['STC-2026-000014'].Reason, /Waits for predecessor STC-2026-000013/);
 
     tick(60000);
@@ -277,9 +281,10 @@ test('release: copy scope from the predecessor, regression run with skip reasons
     assert.equal(dependent.Decision, 'STARTED');
     tick(60000);
     const refreshed = await releaseService.refreshRegressionRun(repo, keys);
-    // started: STC-1, 7, 8, 10, 11, 13, 14 · skipped: STC-3, 6 (not validated), 4 (version 2), 5, 9 (invalid), 12 (role)
+    // started: STC-1, 7, 8, 10, 11, 13, 14 and the generated portfolio STC-15 … 19, 21 · skipped: STC-3, 6 (not validated),
+    // 4 (version 2), 5, 9 (invalid), 12, 20 (role: no test executor in the quotation team)
     // STC-7 version 2 (2 hours, expectation not adapted) fails again
-    assert.match(refreshed.messages[0].message, /finished: 6 passed, 1 failed, 6 skipped/);
+    assert.match(refreshed.messages[0].message, /finished: 12 passed, 1 failed, 7 skipped/);
     const handover = await repo.findOne('Execution', { ExecutionUUID: dependent.ExecutionUUID, IsActiveEntity: true });
     const predecessorRun = await repo.findOne('Execution', {
         ExecutionUUID: (await repo.find('RegressionRunItem', { RunUUID: release.LatestRunUUID })).find((i) => i.CaseID === 'STC-2026-000013').ExecutionUUID,
@@ -289,7 +294,7 @@ test('release: copy scope from the predecessor, regression run with skip reasons
     assert.equal(handover.FunctionalResult, 'PASSED');
     const done = await repo.findOne('Release', keys);
     assert.equal(done.LatestRunStatus, 'FINISHED');
-    assert.equal(done.PassRate, 86);
+    assert.equal(done.PassRate, 92);
     const coverage = await repo.find('ReleaseStepCoverage', { ReleaseID: 'S4-2025-FPS02' });
     const status = Object.fromEntries(coverage.map((c) => [c.StepID, c.CoverageStatus]));
     assert.equal(status['REP-050'], 'PASSED', 'contract determination executed');

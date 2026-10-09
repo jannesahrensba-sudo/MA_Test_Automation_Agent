@@ -26,7 +26,12 @@
  * STC-4 was changed after its run: version 2 needs a new approval.
  * All metering-service master data is fictional (docs/messdienst-szenarien.md).
  *
- * Usage: node tools/seed/generate-seed.js
+ * Generated portfolio (STC-2026-000015 ff.): the test design of the service assistant (webapp/ext/agent/core/testDesign.js)
+ * applied to the process model of the repair process and the generated master data (tools/seed/generate-masterdata.js):
+ * one end-to-end test case per pilot way and one sub-process test case per further process team, validated (device type
+ * corrections R5/R10 like the assistant) and approved by the process owners of the teams — not executed yet.
+ *
+ * Usage: node tools/seed/generate-masterdata.js && node tools/seed/generate-seed.js
  */
 const fs = require('fs');
 const path = require('path');
@@ -39,6 +44,9 @@ const catalog = require('./process-catalog');
 const numberRanges = require('../../mock-backend/common/numberRanges');
 const clock = require('../../mock-backend/common/clock');
 const { resetProviders } = require('../../mock-backend/execution/MockExecutionProvider');
+const { loadUi5Module } = require('../common/loadUi5Module');
+
+const testDesign = loadUi5Module(path.join(__dirname, '../../webapp/ext/agent/core/testDesign.js'));
 
 const DATA_DIR = path.join(__dirname, '../../webapp/localService/mainService/data');
 const TENANT = 'tenant-seed';
@@ -602,6 +610,18 @@ const CASES = [
     }
 ];
 
+/** generated portfolio: created by the testers of the teams, approved by their process owners */
+const PORTFOLIO = {
+    firstCaseNo: 15,
+    createdAt: '2026-09-30T07:00:00Z',
+    referenceDate: '2026-09-30',
+    releaseId: 'INT-2026.10',
+    creators: { 'PT-REPARATUR': 'REP_TESTER', 'PT-ANGEBOT': 'ANG_TESTER', 'PT-E2E': 'E2E_TESTER' },
+    approvers: { 'PT-REPARATUR': 'REP_LEAD', 'PT-ANGEBOT': 'ANG_LEAD', 'PT-E2E': 'E2E_LEAD' }
+};
+/** device type corrections with a deterministic suggestion (like the service assistant: first suggestion) */
+const AUTO_CORRECT_RULES = new Set(['R5_EQUIPMENT_PRODUCT', 'R10_DEVICE_TYPE']);
+
 /* ------------------------------------------------------------------------------------------------ */
 function readJson(name) {
     return JSON.parse(fs.readFileSync(path.join(DATA_DIR, `${name}.json`), 'utf8'));
@@ -751,6 +771,125 @@ async function buildProcessCatalog(repo, setTime) {
     }
 }
 
+/**
+ * Generated test case portfolio: the proposals of the test design for the repair process become saved, validated and
+ * approved test cases (STC-2026-000015 ff.).
+ *
+ * @param {object} repo repository
+ * @param {Function} setTime sets the seed clock
+ * @returns {Promise<object[]>} created test cases {CaseID, title, status}
+ */
+async function seedPortfolio(repo, setTime) {
+    const existing = [];
+    for (const tc of await repo.find('TestCase', { IsActiveEntity: true })) {
+        const data = (await repo.findOne('TestCaseData', { TestCaseUUID: tc.TestCaseUUID, IsActiveEntity: true })) || {};
+        existing.push({ ...tc, LatestResult: tc.FinalResult, equipment: data.ServiceReferenceEquipment, contract: data.ServiceContract, customer: data.SoldToParty });
+    }
+    const d = repo.data;
+    const planned = testDesign.plan({
+        process: await repo.findOne('BusinessProcessVH', { ProcessID: catalog.REPAIR }),
+        steps: await repo.find('ProcessStepVH', { ProcessID: catalog.REPAIR }),
+        variants: await repo.find('ProcessVariant', { ProcessID: catalog.REPAIR, IsActiveEntity: true }),
+        teams: d.ProcessTeamVH,
+        pools: {
+            customers: d.CustomerVH,
+            contacts: d.ContactPersonVH,
+            functionalLocations: d.FunctionalLocationVH,
+            equipments: d.EquipmentVH,
+            products: d.ProductVH,
+            serviceTeams: d.ServiceTeamVH,
+            serviceContracts: d.ServiceContractVH
+        },
+        existing,
+        referenceDate: PORTFOLIO.referenceDate,
+        prefix: 'GEN',
+        releaseId: PORTFOLIO.releaseId
+    });
+    const created = [];
+    let index = 0;
+    for (const proposal of planned.proposals) {
+        const caseNo = PORTFOLIO.firstCaseNo + index;
+        index++;
+        setTime(Date.parse(PORTFOLIO.createdAt) + index * 15 * 60 * 1000);
+        const uuid = `6f1c2a10-${String(caseNo).padStart(4, '0')}-4c3e-9a51-${String(caseNo).padStart(12, '0')}`;
+        const keys = { TestCaseUUID: uuid, IsActiveEntity: true };
+        const createdBy = PORTFOLIO.creators[proposal.team] || 'DEMO_USER';
+        await repo.add('TestCase', {
+            TestCaseUUID: uuid,
+            ...activeFlags(),
+            CaseID: `STC-2026-${String(caseNo).padStart(6, '0')}`,
+            ScenarioID: proposal.scenarioId,
+            Title: proposal.title,
+            Description: proposal.description,
+            NaturalLanguageInput: '',
+            ...service.initialTestCase({
+                ProcessProfile: proposal.profile,
+                ProcessTeam: proposal.team,
+                BusinessProcess: proposal.process,
+                ProcessVariant: proposal.variant,
+                EndObject: proposal.endObject,
+                StartObject: proposal.startObject,
+                Preconditions: proposal.preconditions
+            }),
+            CreatedBy: createdBy,
+            ApprovedBy: null,
+            ApprovedAt: null,
+            ExecutionStartedAt: null,
+            ExecutionFinishedAt: null,
+            ExecutionDuration: null,
+            ExternalExecutionID: '',
+            LatestExecutionUUID: null
+        });
+        await repo.add('TestCaseData', {
+            TestCaseUUID: uuid,
+            ...activeFlags(),
+            ...Object.fromEntries(service.CONTROLLED_FIELDS.map((f) => [f, null])),
+            SalesOrganizationOrgUnitID: '',
+            ...defaultsOf(repo, proposal.profile),
+            ...proposal.data,
+            __FieldControl: {}
+        });
+        await service.determineProcessReference(repo, keys, [], createdBy);
+        const { pools } = await service.loadPools(repo);
+        const context = await service.pathContext(repo, await repo.findOne('TestCase', keys));
+        await service.determineTestData(repo, await repo.findOne('TestCaseData', keys), pools, [], context);
+        // validation and the deterministic corrections of the assistant before the first version is saved
+        await service.validateTestCase(repo, keys, { asStateMessages: false });
+        const fixes = (await repo.find('ValidationResult', keys)).filter((f) => AUTO_CORRECT_RULES.has(f.RuleID) && f.SuggestedValues);
+        if (fixes.length) {
+            const patch = { ExpectedNetAmount: null };
+            fixes.forEach((f) => {
+                patch[f.FieldName] = String(f.SuggestedValues).split(',')[0].trim();
+            });
+            await repo.update('TestCaseData', keys, patch);
+            await service.determineTestData(repo, await repo.findOne('TestCaseData', keys), pools, Object.keys(patch), context);
+        }
+        await service.onActivated(repo, keys, createdBy);
+        setTime(Date.parse(PORTFOLIO.createdAt) + index * 15 * 60 * 1000 + 5 * 60 * 1000);
+        const { result } = await service.validateTestCase(repo, keys, { asStateMessages: false });
+        if (result.overall === 'VALID') {
+            setTime(Date.parse(PORTFOLIO.createdAt) + index * 15 * 60 * 1000 + 10 * 60 * 1000);
+            await service.approve(repo, keys, PORTFOLIO.approvers[proposal.team] || 'QA_LEAD');
+        }
+        await repo.update('TestCase', keys, { SAP__Messages: [] });
+        await service.syncDerived(repo, uuid);
+        const tc = await repo.findOne('TestCase', keys);
+        created.push({ CaseID: tc.CaseID, title: tc.Title, status: `${tc.ValidationStatus}/${tc.ApprovalStatus}`, fixes: fixes.map((f) => f.RuleID) });
+    }
+    return created;
+}
+
+/** default values of a process profile (FieldRequirement.DefaultValue), like a new draft of that profile (TestCaseService.createTestData) */
+function defaultsOf(repo, profile) {
+    const defaults = {};
+    const relevant = (r) =>
+        r.ProcessProfile === profile && r.Active !== false && service.CONTROLLED_FIELDS.includes(r.FieldName) && r.DefaultValue !== '' && r.DefaultValue !== null && r.DefaultValue !== undefined;
+    for (const req of repo.data.FieldRequirement.filter(relevant)) {
+        defaults[req.FieldName] = ['ServiceDuration', 'ServicePartQuantity', 'ExpectedNetAmount', 'NetAmountTolerance'].includes(req.FieldName) ? Number(req.DefaultValue) : req.DefaultValue;
+    }
+    return defaults;
+}
+
 async function main() {
     const dataBySet = {};
     for (const set of VALUE_HELP_SETS) {
@@ -874,6 +1013,10 @@ async function main() {
             await repo.update('TestCase', keys, { SAP__Messages: [], ChangedAt: new Date(time).toISOString() });
             await service.syncDerived(repo, seed.uuid);
         }
+        const portfolio = await seedPortfolio(repo, (ms) => {
+            time = ms;
+        });
+        console.log(`generated portfolio: ${portfolio.map((c) => `${c.CaseID} ${c.status}${c.fixes.length ? ` (${c.fixes.join(', ')})` : ''} ${c.title}`).join('\n  ')}`);
         time = Date.parse('2026-10-01T16:00:00Z');
         await traceability.refreshAll(repo);
         for (const release of catalog.RELEASES) {
