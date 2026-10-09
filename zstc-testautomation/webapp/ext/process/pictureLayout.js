@@ -66,6 +66,7 @@ sap.ui.define([], function () {
         legendManual: "manuell / Entscheidung",
         legendLater: "später (nicht im Pilot)",
         picture: "Prozessbild",
+        steps: "{0} Schritte",
         stepsInRun: "{0} von {1} Schritten im Lauf",
         stepsCovered: "{0} von {1} automatisierten Schritten abgedeckt",
         inRun: "im Lauf",
@@ -718,7 +719,7 @@ sap.ui.define([], function () {
                 ? format(texts.stepsCovered, [summary.covered, summary.automated])
                 : summary.inRun
                 ? format(texts.stepsInRun, [summary.inRun, summary.total])
-                : summary.total + " Schritte") +
+                : format(texts.steps, [summary.total])) +
             ". " +
             summary.teams.join(", ");
         out.push(

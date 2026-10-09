@@ -117,6 +117,10 @@ test('whole process: alternatives in their own rows, connections of all pilot wa
     assert.equal(node('REP-095').column, node('REP-100').column - 1);
     assert.ok(model.edges.some((e) => e.from === 'REP-020' && e.to === 'REP-060'), 'way 1 skips the quotation');
     assert.ok(model.edges.every((e) => model.nodes.find((n) => n.id === e.to).column > model.nodes.find((n) => n.id === e.from).column), 'left to right');
+    // accessible name with the number of steps, also in the language of the app
+    assert.match(picture.svg(model), /aria-label="Prozessbild: 13 Schritte\. /);
+    const english = picture.layout({ steps: steps(), mode: 'PROCESS', texts: { picture: 'Process picture', steps: '{0} steps' } });
+    assert.match(picture.svg(english), /aria-label="Process picture: 13 steps\. /);
 
     const later = picture.layout({ steps: steps(), mode: 'PROCESS', showLater: true });
     assert.equal(later.nodes.length, 17);
